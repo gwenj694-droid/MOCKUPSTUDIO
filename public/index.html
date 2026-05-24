@@ -349,6 +349,8 @@ textarea.inp{min-height:68px;line-height:1.55}
 const S = window.location.origin;
 var uploadedUrl  = null;
 var currentScene = 'window';
+var resultBlobUrl = null;
+var resultFalUrl  = null;
 var history      = [];
 var generating   = false;
  
@@ -421,18 +423,29 @@ async function generate(){
     clearInterval(stI);
     if(d.error) throw new Error(d.error);
  
-    // Show result
+    // Show result — fetch as blob to prevent CDN expiry disappearing
     var img=document.getElementById('result-img');
-    img.onload=function(){
-      proc.classList.remove('show');
-      document.getElementById('out-meta').textContent='Scene: '+currentScene+' · AI-generated compositing via FAL';
-      toast('Mockup ready!','g');
-    };
-    img.onerror=function(){ proc.classList.remove('show'); toast('Image loaded — download below','g'); };
-    img.src=d.url;
+    resultFalUrl = d.url; // keep original for download fallback
+    try {
+      var resp = await fetch(d.url);
+      var blob = await resp.blob();
+      var blobUrl = URL.createObjectURL(blob);
+      img.onload = function(){
+        proc.classList.remove('show');
+        document.getElementById('out-meta').textContent='Scene: '+currentScene+' · AI compositing · FAL';
+        toast('Mockup ready!','g');
+      };
+      img.src = blobUrl;
+      resultBlobUrl = blobUrl;
+    } catch(fetchErr) {
+      // CORS fallback — just set src directly
+      img.onload = function(){ proc.classList.remove('show'); toast('Mockup ready!','g'); };
+      img.onerror = function(){ proc.classList.remove('show'); toast('Done — click Download to save','g'); };
+      img.src = d.url;
+    }
  
     // Add to history
-    history.unshift({ url:d.url, scene:currentScene });
+    mockupHistory.unshift({ url:d.url, scene:currentScene });
     renderHistory();
  
   } catch(e){
@@ -468,22 +481,15 @@ function showHistItem(i){
 }
  
 // ── DOWNLOAD ──────────────────────────────────────
-async function download(){
-  var url=document.getElementById('result-img').src;
-  if(!url){ toast('No mockup to download','e'); return; }
-  try{
-    var r=await fetch(url);
-    var blob=await r.blob();
-    var a=document.createElement('a');
-    a.href=URL.createObjectURL(blob);
-    a.download='mockup-'+currentScene+'-'+Date.now()+'.jpg';
-    a.click();
-    toast('Downloaded ✓','g');
-  } catch(e){
-    // CORS fallback — open in new tab
-    window.open(url,'_blank');
-    toast('Opened in new tab — right-click to save','g');
-  }
+function download(){
+  // Prefer blob URL (already fetched), fallback to original FAL URL
+  var blobUrl = resultBlobUrl || document.getElementById('result-img').src;
+  if(!blobUrl || blobUrl==='about:blank'){ toast('Generate a mockup first','e'); return; }
+  var a=document.createElement('a');
+  a.href=blobUrl;
+  a.download='mockup-'+currentScene+'-'+Date.now()+'.png';
+  a.click();
+  toast('Downloaded ✓','g');
 }
  
 // ── TOAST ─────────────────────────────────────────
