@@ -423,26 +423,19 @@ async function generate(){
     clearInterval(stI);
     if(d.error) throw new Error(d.error);
  
-    // Show result — fetch as blob to prevent CDN expiry disappearing
-    var img=document.getElementById('result-img');
-    resultFalUrl = d.url; // keep original for download fallback
-    try {
-      var resp = await fetch(d.url);
-      var blob = await resp.blob();
-      var blobUrl = URL.createObjectURL(blob);
-      img.onload = function(){
-        proc.classList.remove('show');
-        document.getElementById('out-meta').textContent='Scene: '+currentScene+' · AI compositing · FAL';
-        toast('Mockup ready!','g');
-      };
-      img.src = blobUrl;
-      resultBlobUrl = blobUrl;
-    } catch(fetchErr) {
-      // CORS fallback — just set src directly
-      img.onload = function(){ proc.classList.remove('show'); toast('Mockup ready!','g'); };
-      img.onerror = function(){ proc.classList.remove('show'); toast('Done — click Download to save','g'); };
-      img.src = d.url;
-    }
+    // Show result — URL is now served from our own server, no CORS/expiry issues
+    var img = document.getElementById('result-img');
+    resultFalUrl = d.url;
+    img.onload = function(){
+      proc.classList.remove('show');
+      document.getElementById('out-meta').textContent = 'Scene: ' + currentScene + ' · AI compositing · FAL';
+      toast('Mockup ready!', 'g');
+    };
+    img.onerror = function(){
+      proc.classList.remove('show');
+      toast('Generated — click Download', 'g');
+    };
+    img.src = d.url + '?t=' + Date.now(); // cache bust
  
     // Add to history
     mockupHistory.unshift({ url:d.url, scene:currentScene });
@@ -481,15 +474,21 @@ function showHistItem(i){
 }
  
 // ── DOWNLOAD ──────────────────────────────────────
-function download(){
-  // Prefer blob URL (already fetched), fallback to original FAL URL
-  var blobUrl = resultBlobUrl || document.getElementById('result-img').src;
-  if(!blobUrl || blobUrl==='about:blank'){ toast('Generate a mockup first','e'); return; }
-  var a=document.createElement('a');
-  a.href=blobUrl;
-  a.download='mockup-'+currentScene+'-'+Date.now()+'.png';
-  a.click();
-  toast('Downloaded ✓','g');
+async function download(){
+  var url = resultFalUrl || document.getElementById('result-img').src;
+  if(!url || url==='about:blank'){ toast('Generate a mockup first','e'); return; }
+  try {
+    var r = await fetch(url);
+    var blob = await r.blob();
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'mockup-' + currentScene + '-' + Date.now() + '.png';
+    a.click();
+    toast('Downloaded ✓','g');
+  } catch(e) {
+    window.open(url,'_blank');
+    toast('Opened in new tab — right-click to save','g');
+  }
 }
  
 // ── TOAST ─────────────────────────────────────────
