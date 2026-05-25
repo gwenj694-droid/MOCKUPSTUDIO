@@ -157,7 +157,7 @@ html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'D
     <div class="g-by">NG Intel Studio</div>
     <div class="g-title">Promo<br><strong>Studio</strong></div>
     <div class="g-rule"></div>
-    <div class="g-sub">Turn any image into a lifestyle promotional photo</div>
+    <div class="g-sub">Your product on a phone · in a lifestyle scene · ready to post</div>
     <button class="g-btn">Open Studio</button>
   </div>
   <div class="g-hint">Click anywhere to enter</div>
@@ -192,18 +192,18 @@ html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'D
         <div class="ph"><div class="pt">Lifestyle Scene</div></div>
         <div class="pb">
           <div class="scene-grid">
-            <div class="scene-btn on" data-s="desk" onclick="pickScene(this)"><div class="sb-ico">📚</div><div class="sb-lbl">Luxury Desk</div></div>
-            <div class="scene-btn" data-s="cafe" onclick="pickScene(this)"><div class="sb-ico">☕</div><div class="sb-lbl">Café Wall</div></div>
-            <div class="scene-btn" data-s="studio" onclick="pickScene(this)"><div class="sb-ico">📷</div><div class="sb-lbl">Studio Easel</div></div>
-            <div class="scene-btn" data-s="marble" onclick="pickScene(this)"><div class="sb-ico">🪨</div><div class="sb-lbl">Marble Flat Lay</div></div>
-            <div class="scene-btn" data-s="shelf" onclick="pickScene(this)"><div class="sb-ico">🌿</div><div class="sb-lbl">Wall Shelf</div></div>
-            <div class="scene-btn" data-s="office" onclick="pickScene(this)"><div class="sb-ico">🏢</div><div class="sb-lbl">Executive Office</div></div>
-            <div class="scene-btn" data-s="gallery" onclick="pickScene(this)"><div class="sb-ico">🖼</div><div class="sb-lbl">Art Gallery</div></div>
-            <div class="scene-btn" data-s="outdoor" onclick="pickScene(this)"><div class="sb-ico">🏙</div><div class="sb-lbl">Billboard</div></div>
-            <div class="scene-btn" data-s="bedroom" onclick="pickScene(this)"><div class="sb-ico">🛏</div><div class="sb-lbl">Bedroom Wall</div></div>
-            <div class="scene-btn" data-s="window" onclick="pickScene(this)"><div class="sb-ico">🪟</div><div class="sb-lbl">Shop Window</div></div>
-            <div class="scene-btn" data-s="linen" onclick="pickScene(this)"><div class="sb-ico">🌸</div><div class="sb-lbl">Linen Flat Lay</div></div>
-            <div class="scene-btn" data-s="laptop" onclick="pickScene(this)"><div class="sb-ico">💻</div><div class="sb-lbl">Laptop Screen</div></div>
+            <div class="scene-btn on" data-s="car" onclick="pickScene(this)"><div class="sb-ico">🚗</div><div class="sb-lbl">Woman + Car</div></div>
+            <div class="scene-btn" data-s="flatlay_bag" onclick="pickScene(this)"><div class="sb-ico">👜</div><div class="sb-lbl">Bag + Flowers</div></div>
+            <div class="scene-btn" data-s="cafe_table" onclick="pickScene(this)"><div class="sb-ico">☕</div><div class="sb-lbl">Café Table</div></div>
+            <div class="scene-btn" data-s="desk_flatlay" onclick="pickScene(this)"><div class="sb-ico">💼</div><div class="sb-lbl">Desk Flat Lay</div></div>
+            <div class="scene-btn" data-s="woman_window" onclick="pickScene(this)"><div class="sb-ico">🪟</div><div class="sb-lbl">Woman + Window</div></div>
+            <div class="scene-btn" data-s="story_model" onclick="pickScene(this)"><div class="sb-ico">📱</div><div class="sb-lbl">Story — Model</div></div>
+            <div class="scene-btn" data-s="story_lifestyle" onclick="pickScene(this)"><div class="sb-ico">🛍</div><div class="sb-lbl">Story — Street</div></div>
+            <div class="scene-btn" data-s="laptop_cafe" onclick="pickScene(this)"><div class="sb-ico">💻</div><div class="sb-lbl">Laptop Scene</div></div>
+            <div class="scene-btn" data-s="rooftop" onclick="pickScene(this)"><div class="sb-ico">🌆</div><div class="sb-lbl">Rooftop View</div></div>
+            <div class="scene-btn" data-s="minimal_studio" onclick="pickScene(this)"><div class="sb-ico">✨</div><div class="sb-lbl">Studio White</div></div>
+            <div class="scene-btn" data-s="pool_villa" onclick="pickScene(this)"><div class="sb-ico">🏖</div><div class="sb-lbl">Pool Villa</div></div>
+            <div class="scene-btn" data-s="flowers_flatlay" onclick="pickScene(this)"><div class="sb-ico">🌸</div><div class="sb-lbl">Flowers Flat Lay</div></div>
           </div>
         </div>
       </div>
@@ -278,7 +278,7 @@ html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'D
 <script>
 const S = window.location.origin;
 var uploadedUrl = null;
-var currentScene = 'desk';
+var currentScene = 'car';
 var currentFmt   = 'square';
 var resultUrl    = null;
 var generating   = false;
