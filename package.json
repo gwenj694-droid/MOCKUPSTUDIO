@@ -10,7 +10,8 @@
     "cors": "^2.8.5",
     "multer": "^1.4.5-lts.1",
     "@fal-ai/client": "^1.2.0",
-    "canvas": "^2.11.2"
+    "canvas": "^2.11.2",
+    "@anthropic-ai/sdk": "^0.20.0"
   },
   "engines": {
     "node": ">=18.0.0"
