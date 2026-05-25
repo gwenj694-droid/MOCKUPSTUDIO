@@ -423,24 +423,34 @@ async function generate(){
     clearInterval(stI);
     if(d.error) throw new Error(d.error);
  
-    // Show result
+    // Show result — hide overlay, display image
     var img = document.getElementById('result-img');
+    var procEl = document.getElementById('proc');
     resultFalUrl = d.url;
  
     function hideOverlay(){
-      proc.style.display = 'none';
-      proc.classList.remove('show');
-      document.getElementById('out-meta').textContent = 'Scene: ' + currentScene + ' · AI compositing · FAL';
+      procEl.style.display = 'none';
+      procEl.className = procEl.className.replace('show','').trim();
+      document.getElementById('out-result').style.display = 'block';
+      document.getElementById('out-empty').style.display = 'none';
+      document.getElementById('out-meta').textContent = 'Scene: ' + currentScene + ' · FAL AI · Click download to save';
       toast('Mockup ready!', 'g');
     }
  
+    // Set image src — onload hides overlay
     img.onload  = function(){ hideOverlay(); };
-    img.onerror = function(){ hideOverlay(); };
+    img.onerror = function(){
+      // Image may still be loading on server — retry once after 1s
+      setTimeout(function(){
+        img.src = d.url + '?retry=1';
+        img.onload = function(){ hideOverlay(); };
+        img.onerror = function(){ hideOverlay(); toast('Done — click download','g'); };
+      }, 1000);
+    };
  
-    // Fallback — if onload never fires (e.g. cached), hide after 2s
-    setTimeout(function(){
-      if(proc.classList.contains('show') || proc.style.display !== 'none'){ hideOverlay(); }
-    }, 2000);
+    // Nuclear fallback — always hide overlay after 4s regardless
+    var hideTimer = setTimeout(function(){ hideOverlay(); }, 4000);
+    img.onload = function(){ clearTimeout(hideTimer); hideOverlay(); };
  
     img.src = d.url;
  
@@ -508,4 +518,3 @@ function toast(msg,tp){
 </script>
 </body>
 </html>
- 
