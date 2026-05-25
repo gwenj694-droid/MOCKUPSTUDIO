@@ -58,27 +58,16 @@ app.post('/api/mockup', async (req, res) => {
  
   const scenePrompt = customPrompt || SCENE_PROMPTS[scene] || SCENE_PROMPTS.window;
  
-  // Full prompt instructs FAL to composite the design into the scene
-  const fullPrompt = `${scenePrompt}. The design/image shown is integrated naturally into the scene, perfectly perspective-warped and lit to match the environment. Photorealistic compositing, professional commercial photography.`;
+  // Prompt — preserve the source image, only change the environment around it
+  const fullPrompt = `${scenePrompt}. Keep the exact original design/product/image unchanged. Only change the background scene and environment. The subject/design must remain identical to the input image. Professional commercial photography, photorealistic.`;
  
   console.log(`[mockup] scene=${scene} url=${imageUrl.substring(0,60)}`);
  
-  // Endpoint cascade — best quality first
+  // Endpoint cascade — product placement first, img2img fallback
   const ENDPOINTS = [
     {
-      // Best: Flux img2img — composites the actual design into the scene
-      id: 'fal-ai/flux/dev/image-to-image',
-      build: () => ({
-        image_url: imageUrl,
-        prompt: fullPrompt,
-        strength: 0.85,
-        num_inference_steps: 35,
-        guidance_scale: 7,
-        negative_prompt: 'blurry, low quality, distorted, text artifacts, watermark, ugly, duplicate, bad proportions, extra elements'
-      })
-    },
-    {
-      // Fallback: Bria product shot
+      // BEST: Bria product-shot — purpose-built for placing YOUR image into a scene
+      // Preserves your design exactly, changes only the background/environment
       id: 'fal-ai/bria/product-shot',
       build: () => ({
         image_url: imageUrl,
@@ -89,12 +78,25 @@ app.post('/api/mockup', async (req, res) => {
       })
     },
     {
-      // Last resort: flux schnell (fast but lower quality)
+      // Fallback: img2img with LOW strength — preserves source image
+      // 0.4 = 60% source image preserved, 40% scene influence
+      id: 'fal-ai/flux/dev/image-to-image',
+      build: () => ({
+        image_url: imageUrl,
+        prompt: fullPrompt,
+        strength: 0.42,
+        num_inference_steps: 28,
+        guidance_scale: 5,
+        negative_prompt: 'replace design, change text, different image, blurry, distorted, watermark, low quality'
+      })
+    },
+    {
+      // Last resort: flux schnell low strength
       id: 'fal-ai/flux/schnell/image-to-image',
       build: () => ({
         image_url: imageUrl,
         prompt: fullPrompt,
-        strength: 0.8,
+        strength: 0.38,
         num_inference_steps: 4
       })
     }
