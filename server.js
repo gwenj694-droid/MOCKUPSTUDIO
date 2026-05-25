@@ -219,8 +219,27 @@ app.post('/api/mockup', async (req, res) => {
  
   const sceneConfig = SCENE_BACKGROUNDS[scene] || SCENE_BACKGROUNDS.car;
   const bgPrompt = customPrompt || sceneConfig.prompt;
-  const phonePos = sceneConfig.phone;
-  const fmt = sceneConfig.format;
+ 
+  // User-selected format overrides scene default
+  const FORMAT_MAP = {
+    square:   { w:1080, h:1080 },
+    portrait: { w:1080, h:1350 },
+    story:    { w:1080, h:1920 },
+  };
+  const fmt = FORMAT_MAP[format] || sceneConfig.format;
+ 
+  // Scale phone position to match chosen format
+  const sceneAR = sceneConfig.format.h / sceneConfig.format.w;
+  const chosenAR = fmt.h / fmt.w;
+  const scaleY = chosenAR / sceneAR;
+  const rawPos = sceneConfig.phone;
+  const phonePos = {
+    x: rawPos.x,
+    y: rawPos.y * scaleY,
+    w: rawPos.w,
+    h: rawPos.h * scaleY,
+  };
+ 
   const isLaptop = scene === 'laptop_cafe';
  
   console.log(`[promo] scene=${scene} fmt=${fmt.w}x${fmt.h} generating BG…`);
