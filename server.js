@@ -1,7 +1,8 @@
 // ═══════════════════════════════════════════════════
-// MOCKUP STUDIO — Railway server
+// PROMO STUDIO — Railway server
+// 1. FAL generates lifestyle background scene
+// 2. Server composites a phone mockup with user's design on screen
 // ENV: FAL_API_KEY
-// Approach: generate photorealistic BG → composite design onto it
 // ═══════════════════════════════════════════════════
 const express = require('express');
 const cors    = require('cors');
@@ -11,7 +12,6 @@ const fs      = require('fs');
 const https   = require('https');
 const http    = require('http');
 const { createCanvas, loadImage } = require('canvas');
-const { URL: NodeURL } = require('url');
 const { fal } = require('@fal-ai/client');
  
 const app = express();
@@ -21,9 +21,9 @@ app.use(express.static('public'));
  
 const FAL_KEY = process.env.FAL_API_KEY || '';
 fal.config({ credentials: FAL_KEY });
-console.log('Mockup Studio · FAL:', FAL_KEY ? FAL_KEY.substring(0,14)+'...' : 'MISSING ⚠');
+console.log('Promo Studio · FAL:', FAL_KEY ? FAL_KEY.substring(0,14)+'...' : 'MISSING ⚠');
  
-// ── Upload ─────────────────────────────────────────
+// ── Upload ──────────────────────────────────────────
 const storage = multer.diskStorage({
   destination: 'public/uploads/',
   filename: (_, f, cb) => cb(null, Date.now() + path.extname(f.originalname))
@@ -35,228 +35,282 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
   res.json({ url: `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`, filename: req.file.filename });
 });
  
-// ── Scene background prompts (no design — just the scene) ──
-const BG_PROMPTS = {
-  desk:     'luxury minimalist home office desk, empty clean surface, stack of books to one side, white ceramic coffee cup, warm golden hour window light, soft bokeh background, professional lifestyle photography, no people, 4K',
-  cafe:     'warm cozy cafe interior, exposed brick wall with empty blank white frames, ambient warm lighting, blurred coffee cups and people in background, professional interior photography, 4K',
-  studio:   'bright white photography studio, large windows letting in natural light, wooden easel with blank white canvas board, clean minimalist setting, professional photography, 4K',
-  marble:   'luxury white marble surface flat lay, fresh flowers at edge, gold pen, small candle, blank white card area in centre, overhead shot, editorial photography, natural light, 4K',
-  shelf:    'wooden floating shelf on white wall, small potted green plants beside an empty picture frame, minimal Scandinavian interior, soft natural light, interior design photography, 4K',
-  office:   'modern corporate office, clean executive desk in foreground, large blank white framed canvas on wall behind, dramatic directional lighting, professional commercial photography, 4K',
-  gallery:  'pristine white gallery walls, museum directional spotlights, empty large white picture frame on wall, polished concrete floor, fine art photography, 4K',
-  outdoor:  'busy city street at dusk, large outdoor billboard structure with blank white face, golden hour street lighting, urban background, advertising photography, 4K',
-  bedroom:  'luxury bedroom interior, styled bed with linen pillows, blank white picture frame on dark wall above headboard, warm evening ambient lighting, interior design photography, 4K',
-  window:   'luxury retail shop window at night, illuminated display case with blank white backing, city street reflection in glass, commercial retail photography, 4K',
-  linen:    'cream linen fabric surface flat lay, small fresh flowers at corner, blank white card space in centre, soft natural side light, editorial lifestyle photography, 4K',
-  laptop:   'open MacBook laptop on wooden desk, blank white screen, coffee cup beside it, minimalist home office, natural window light, lifestyle photography, 4K',
+// ── Scene backgrounds — lifestyle photography ───────
+// These describe the SCENE WITHOUT the product — we add the phone ourselves
+const SCENE_BACKGROUNDS = {
+  car: {
+    prompt: 'elegant confident woman in stylish outfit standing next to a sleek luxury black sports car, holding a blank white smartphone screen facing toward the camera, warm golden hour sunlight, professional fashion photography, cinematic, bokeh background, photorealistic, 8K',
+    phone: { x:0.38, y:0.22, w:0.24, h:0.44 }, // phone position on 1:1 canvas
+    format: { w:1080, h:1080 }
+  },
+  flatlay_bag: {
+    prompt: 'luxury feminine flat lay, overhead shot, cream marble surface, designer handbag, gold keys, fresh pink roses, a blank white iPhone face-up showing empty white screen, gold jewellery, editorial photography, warm natural light, 4K',
+    phone: { x:0.52, y:0.38, w:0.32, h:0.38 },
+    format: { w:1080, h:1080 }
+  },
+  cafe_table: {
+    prompt: 'stylish woman sitting at a luxury cafe table, holding a blank white smartphone screen facing camera, cappuccino and flowers on the table, warm ambient lighting, lifestyle photography, blurred background, 8K photorealistic',
+    phone: { x:0.36, y:0.18, w:0.28, h:0.50 },
+    format: { w:1080, h:1080 }
+  },
+  desk_flatlay: {
+    prompt: 'overhead luxury desk flat lay, white marble surface, open designer notebook, gold pen, small succulent plant, blank white iPhone screen face-up, macbook keyboard partially visible, editorial photography, natural window light, 4K',
+    phone: { x:0.55, y:0.40, w:0.28, h:0.36 },
+    format: { w:1080, h:1080 }
+  },
+  woman_window: {
+    prompt: 'confident elegant woman standing in front of large bright window, holding blank white smartphone screen toward camera, luxury minimal interior, white walls, natural diffused light, professional photography, 8K',
+    phone: { x:0.36, y:0.20, w:0.28, h:0.50 },
+    format: { w:1080, h:1080 }
+  },
+  story_model: {
+    prompt: 'stylish female entrepreneur in modern office, looking at camera, holding blank white smartphone showing empty screen, confident pose, professional backdrop, editorial fashion photography, 9:16 portrait, 4K',
+    phone: { x:0.36, y:0.22, w:0.28, h:0.46 },
+    format: { w:1080, h:1920 }
+  },
+  story_lifestyle: {
+    prompt: 'beautiful woman walking in luxury shopping district, holding blank white smartphone screen toward camera, golden hour sunlight, designer outfit, blurred city background, lifestyle fashion photography, 9:16 portrait, 8K',
+    phone: { x:0.36, y:0.20, w:0.28, h:0.48 },
+    format: { w:1080, h:1920 }
+  },
+  laptop_cafe: {
+    prompt: 'stylish woman working at a bright cafe, open MacBook with blank white screen visible, coffee cup, flowers, warm ambient light, work from anywhere lifestyle photography, 8K photorealistic',
+    phone: { x:0.25, y:0.25, w:0.50, h:0.38 }, // laptop screen
+    format: { w:1080, h:1080 }
+  },
+  rooftop: {
+    prompt: 'confident woman on luxury hotel rooftop terrace, city skyline behind, holding blank white smartphone toward camera, golden sunset light, editorial fashion photography, cinematic, 8K',
+    phone: { x:0.37, y:0.22, w:0.26, h:0.46 },
+    format: { w:1080, h:1080 }
+  },
+  minimal_studio: {
+    prompt: 'minimal white studio photography setup, female model in elegant outfit, holding blank white smartphone screen facing camera, clean white background, dramatic side lighting, commercial photography, 8K',
+    phone: { x:0.37, y:0.20, w:0.26, h:0.48 },
+    format: { w:1080, h:1080 }
+  },
+  pool_villa: {
+    prompt: 'luxury infinity pool villa, woman in elegant swimwear lounging, blank white smartphone on marble surface beside pool, tropical flowers, blue water, golden light, aspirational lifestyle photography, 8K',
+    phone: { x:0.50, y:0.45, w:0.28, h:0.34 },
+    format: { w:1080, h:1080 }
+  },
+  flowers_flatlay: {
+    prompt: 'luxury flat lay overhead, soft pink and white peonies, cream linen fabric, blank white iPhone face-up, pearl jewellery, gold pen, editorial feminine photography, natural light, 4K',
+    phone: { x:0.48, y:0.35, w:0.30, h:0.36 },
+    format: { w:1080, h:1080 }
+  },
 };
  
-// ── Composite positions per scene (x%, y%, w%, h% of output image) ──
-// Where to paste the design onto the generated background
-const COMPOSITE_POS = {
-  desk:    { x:0.32, y:0.38, w:0.34, h:0.50, angle: 0  },
-  cafe:    { x:0.30, y:0.15, w:0.38, h:0.60, angle: 0  },
-  studio:  { x:0.30, y:0.12, w:0.40, h:0.72, angle: 0  },
-  marble:  { x:0.25, y:0.20, w:0.50, h:0.60, angle:-4  },
-  shelf:   { x:0.28, y:0.10, w:0.44, h:0.65, angle: 0  },
-  office:  { x:0.28, y:0.08, w:0.44, h:0.60, angle: 0  },
-  gallery: { x:0.22, y:0.12, w:0.56, h:0.72, angle: 0  },
-  outdoor: { x:0.30, y:0.10, w:0.40, h:0.48, angle: 0  },
-  bedroom: { x:0.28, y:0.10, w:0.44, h:0.55, angle: 0  },
-  window:  { x:0.25, y:0.15, w:0.50, h:0.68, angle: 0  },
-  linen:   { x:0.22, y:0.22, w:0.56, h:0.56, angle:-3  },
-  laptop:  { x:0.28, y:0.12, w:0.44, h:0.52, angle: 0  },
-};
+// ── Draw phone mockup with design on screen ─────────
+function drawPhoneMockup(ctx, designImg, px, py, pw, ph, isLaptop) {
+  if (isLaptop) {
+    // Laptop screen frame
+    const r = 4;
+    // Screen back
+    const sg = ctx.createLinearGradient(px, py, px+pw, py+ph);
+    sg.addColorStop(0, '#2a2a2a'); sg.addColorStop(1, '#1a1a1a');
+    ctx.fillStyle = sg;
+    roundRectFill(ctx, px, py, pw, ph, r);
+    // Screen bezel
+    const bx=px+8, by=py+6, bw=pw-16, bh=ph-12;
+    ctx.fillStyle = '#050508';
+    roundRectFill(ctx, bx, by, bw, bh, 3);
+    // Design
+    ctx.save();
+    roundRectClip(ctx, bx, by, bw, bh, 3);
+    ctx.drawImage(designImg, bx, by, bw, bh);
+    // glare
+    const gl = ctx.createLinearGradient(bx, by, bx+bw*0.5, by+bh*0.4);
+    gl.addColorStop(0,'rgba(255,255,255,0.06)'); gl.addColorStop(1,'rgba(255,255,255,0)');
+    ctx.fillStyle=gl; ctx.fillRect(bx,by,bw,bh);
+    ctx.restore();
+    // Base
+    ctx.fillStyle = '#222'; roundRectFill(ctx, px-12, py+ph, pw+24, 10, 0,0,4,4);
+    return;
+  }
  
-// ── Fetch helper ─────────────────────────────────
-function fetchBuffer(url){
-  return new Promise((resolve, reject)=>{
+  // Phone frame
+  const r = Math.round(pw * 0.12);
+  // Shadow
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,0.65)'; ctx.shadowBlur = 28; ctx.shadowOffsetX = 4; ctx.shadowOffsetY = 10;
+  const bodyG = ctx.createLinearGradient(px, py, px+pw, py+ph);
+  bodyG.addColorStop(0, '#3a3a3a'); bodyG.addColorStop(0.4, '#242424'); bodyG.addColorStop(1, '#1a1a1a');
+  ctx.fillStyle = bodyG; roundRectFill(ctx, px, py, pw, ph, r); ctx.fill();
+  ctx.restore();
+  // Body
+  const bodyG2 = ctx.createLinearGradient(px, py, px+pw, py+ph);
+  bodyG2.addColorStop(0, '#3a3a3a'); bodyG2.addColorStop(0.4, '#242424'); bodyG2.addColorStop(1, '#1a1a1a');
+  ctx.fillStyle = bodyG2; roundRectFill(ctx, px, py, pw, ph, r); ctx.fill();
+  // Edge glint
+  ctx.strokeStyle = 'rgba(255,255,255,0.18)'; ctx.lineWidth = 1.5; roundRectPath(ctx, px, py, pw, ph, r); ctx.stroke();
+  // Screen area
+  const sx = px+5, sy = py+10, sw = pw-10, sh = ph-20, sr = r-4;
+  ctx.fillStyle = '#020209'; roundRectFill(ctx, sx, sy, sw, sh, sr); ctx.fill();
+  // Design on screen
+  ctx.save(); roundRectClip(ctx, sx, sy, sw, sh, sr);
+  ctx.drawImage(designImg, sx, sy, sw, sh);
+  // Screen glare
+  const glare = ctx.createLinearGradient(sx, sy, sx+sw*0.6, sy+sh*0.45);
+  glare.addColorStop(0,'rgba(255,255,255,0.09)'); glare.addColorStop(1,'rgba(255,255,255,0)');
+  ctx.fillStyle = glare; ctx.fillRect(sx, sy, sw, sh);
+  ctx.restore();
+  // Notch/Dynamic Island
+  ctx.fillStyle = '#020209';
+  roundRectFill(ctx, px+pw/2-pw*0.18, sy+4, pw*0.36, ph*0.034, ph*0.016); ctx.fill();
+  // Home bar
+  const hbG = ctx.createLinearGradient(px+pw/2-pw*0.22, 0, px+pw/2+pw*0.22, 0);
+  hbG.addColorStop(0,'rgba(255,255,255,0)'); hbG.addColorStop(0.5,'rgba(255,255,255,0.25)'); hbG.addColorStop(1,'rgba(255,255,255,0)');
+  ctx.fillStyle = hbG; roundRectFill(ctx, px+pw/2-pw*0.22, py+ph-ph*0.028, pw*0.44, ph*0.014, ph*0.007); ctx.fill();
+}
+ 
+// Canvas helpers
+function roundRectFill(ctx, x, y, w, h, tl, tr, br, bl) {
+  roundRectPath(ctx, x, y, w, h, tl, tr, br, bl); ctx.fill();
+}
+function roundRectClip(ctx, x, y, w, h, r) {
+  roundRectPath(ctx, x, y, w, h, r); ctx.clip();
+}
+function roundRectPath(ctx, x, y, w, h, tl, tr, br, bl) {
+  const r = typeof tl === 'number' ? tl : 6;
+  tr = tr||r; br = br||r; bl = bl||r;
+  ctx.beginPath();
+  ctx.moveTo(x+r, y);
+  ctx.lineTo(x+w-tr, y); ctx.arcTo(x+w, y, x+w, y+tr, tr);
+  ctx.lineTo(x+w, y+h-br); ctx.arcTo(x+w, y+h, x+w-br, y+h, br);
+  ctx.lineTo(x+bl, y+h); ctx.arcTo(x, y+h, x, y+h-bl, bl);
+  ctx.lineTo(x, y+r); ctx.arcTo(x, y, x+r, y, r);
+  ctx.closePath();
+}
+ 
+// Fetch helper
+function fetchBuffer(url) {
+  return new Promise((resolve, reject) => {
     const mod = url.startsWith('https') ? https : http;
-    mod.get(url, res=>{
-      const chunks=[];
-      res.on('data', c=>chunks.push(c));
-      res.on('end', ()=>resolve(Buffer.concat(chunks)));
+    mod.get(url, res => {
+      const chunks = [];
+      res.on('data', c => chunks.push(c));
+      res.on('end', () => resolve(Buffer.concat(chunks)));
       res.on('error', reject);
     }).on('error', reject);
   });
 }
  
-// ── Generate mockup ───────────────────────────────
+// ── GENERATE ───────────────────────────────────────
 app.post('/api/mockup', async (req, res) => {
-  if (!FAL_KEY) return res.status(500).json({ error: 'FAL_API_KEY not set' });
-  const { imageUrl, scene, customPrompt, format='square', headline='', subtext='', cta='' } = req.body;
+  if (!FAL_KEY) return res.status(500).json({ error: 'FAL_API_KEY not set in Railway env vars' });
  
-  // Output dimensions by format
-  const FORMATS = {
-    square:  { w:1080, h:1080 },
-    portrait:{ w:1080, h:1350 },
-    story:   { w:1080, h:1920 },
-  };
-  const fmt = FORMATS[format] || FORMATS.square;
+  const { imageUrl, scene, customPrompt, headline='', subtext='', cta='' } = req.body;
   if (!imageUrl) return res.status(400).json({ error: 'No image URL' });
  
-  const bgPrompt = customPrompt || BG_PROMPTS[scene] || BG_PROMPTS.desk;
-  const pos = COMPOSITE_POS[scene] || COMPOSITE_POS.desk;
-  const outName = `mockup-${Date.now()}.jpg`;
-  const outPath = path.join(__dirname, 'public/uploads', outName);
+  const sceneConfig = SCENE_BACKGROUNDS[scene] || SCENE_BACKGROUNDS.car;
+  const bgPrompt = customPrompt || sceneConfig.prompt;
+  const phonePos = sceneConfig.phone;
+  const fmt = sceneConfig.format;
+  const isLaptop = scene === 'laptop_cafe';
  
-  console.log(`[mockup] scene=${scene} generating background…`);
+  console.log(`[promo] scene=${scene} fmt=${fmt.w}x${fmt.h} generating BG…`);
  
   try {
-    // Step 1: Generate photorealistic background with FAL text2image
-    const bgResult = await fal.subscribe('fal-ai/flux/schnell', {
+    // Step 1: Generate background with FAL text2image
+    const bgResult = await fal.subscribe('fal-ai/flux/dev', {
       input: {
         prompt: bgPrompt,
         image_size: { width: fmt.w, height: fmt.h },
-        num_inference_steps: 4,
+        num_inference_steps: 25,
+        guidance_scale: 3.5,
         num_images: 1,
       },
       logs: false
     });
  
     const bgUrl = bgResult.data?.images?.[0]?.url || bgResult.data?.image?.url;
-    if (!bgUrl) throw new Error('Background generation failed');
-    console.log(`[mockup] bg generated: ${bgUrl.substring(0,60)}`);
+    if (!bgUrl) throw new Error('Background generation failed — no image returned');
+    console.log(`[promo] BG ready: ${bgUrl.substring(0,60)}`);
  
-    // Step 2: Download background from FAL
+    // Step 2: Load images
     const bgBuf = await fetchBuffer(bgUrl);
+    const bgImg  = await loadImage(bgBuf);
  
-    // Step 3: Load background; load design from disk or URL
-    const bgImg = await loadImage(bgBuf);
+    // Load design from disk (fastest, no CORS)
+    const designFilename = imageUrl.split('/uploads/').pop().split('?')[0];
+    const designDiskPath = path.join(__dirname, 'public/uploads', designFilename);
+    const designImg = fs.existsSync(designDiskPath)
+      ? await loadImage(designDiskPath)
+      : await loadImage(await fetchBuffer(imageUrl));
+    console.log('[promo] design loaded');
  
-    // Design: extract filename from URL and read from disk
-    let designImg;
-    try {
-      const designFilename = imageUrl.split('/uploads/').pop().split('?')[0];
-      const designDiskPath = path.join(__dirname, 'public/uploads', designFilename);
-      if (fs.existsSync(designDiskPath)) {
-        designImg = await loadImage(designDiskPath);
-        console.log('[mockup] design loaded from disk:', designDiskPath);
-      } else {
-        const designBuf = await fetchBuffer(imageUrl);
-        designImg = await loadImage(designBuf);
-        console.log('[mockup] design loaded from URL');
-      }
-    } catch(imgErr) {
-      console.error('[mockup] design load error:', imgErr.message);
-      throw new Error('Could not load your design image: ' + imgErr.message);
-    }
- 
+    // Step 3: Composite
     const W = bgImg.width  || fmt.w;
     const H = bgImg.height || fmt.h;
- 
     const canvas = createCanvas(W, H);
-    const ctx = canvas.getContext('2d');
+    const ctx    = canvas.getContext('2d');
  
     // Draw background
     ctx.drawImage(bgImg, 0, 0, W, H);
  
-    // Calculate design position
-    const dx = pos.x * W;
-    const dy = pos.y * H;
-    const dw = pos.w * W;
-    const dh = pos.h * H;
-    const cx = dx + dw/2;
-    const cy = dy + dh/2;
+    // Calculate phone position from relative coords
+    const px = Math.round(phonePos.x * W);
+    const py = Math.round(phonePos.y * H);
+    const pw = Math.round(phonePos.w * W);
+    const ph = Math.round(phonePos.h * H);
  
-    // Draw design with subtle shadow and slight angle
-    ctx.save();
-    ctx.translate(cx, cy);
-    if (pos.angle) ctx.rotate(pos.angle * Math.PI / 180);
+    // Draw phone mockup with design on screen
+    drawPhoneMockup(ctx, designImg, px, py, pw, ph, isLaptop);
  
-    // Drop shadow
-    ctx.shadowColor = 'rgba(0,0,0,0.55)';
-    ctx.shadowBlur  = 28;
-    ctx.shadowOffsetX = 6;
-    ctx.shadowOffsetY = 10;
- 
-    ctx.drawImage(designImg, -dw/2, -dh/2, dw, dh);
- 
-    // Remove shadow for glare layer
-    ctx.shadowColor = 'transparent';
-    ctx.shadowBlur  = 0;
-    ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 0;
- 
-    // Subtle glare overlay
-    const glare = ctx.createLinearGradient(-dw/2, -dh/2, dw*0.1, dh*0.2);
-    glare.addColorStop(0, 'rgba(255,255,255,0.07)');
-    glare.addColorStop(1, 'rgba(255,255,255,0)');
-    ctx.fillStyle = glare;
-    ctx.fillRect(-dw/2, -dh/2, dw, dh);
- 
-    ctx.restore();
- 
-    // Text overlay
+    // Step 4: Text overlay
     if (headline || subtext || cta) {
-      // Bottom gradient band
-      const bandH = Math.round(H * 0.28);
+      const bandH = Math.round(H * 0.26);
       const band = ctx.createLinearGradient(0, H - bandH, 0, H);
       band.addColorStop(0, 'rgba(0,0,0,0)');
-      band.addColorStop(0.4, 'rgba(0,0,0,0.72)');
+      band.addColorStop(0.35, 'rgba(0,0,0,0.7)');
       band.addColorStop(1, 'rgba(0,0,0,0.88)');
-      ctx.fillStyle = band;
-      ctx.fillRect(0, H - bandH, W, bandH);
+      ctx.fillStyle = band; ctx.fillRect(0, H - bandH, W, bandH);
  
       const pad = Math.round(W * 0.07);
-      let ty = H - bandH + Math.round(bandH * 0.22);
+      let ty = H - bandH + Math.round(bandH * 0.2);
  
       if (headline) {
-        const fsize = Math.round(W * 0.065);
-        ctx.font = `700 ${fsize}px "DM Sans", Arial, sans-serif`;
+        const fs1 = Math.round(W * 0.062);
+        ctx.font = `bold ${fs1}px Arial, sans-serif`;
         ctx.fillStyle = '#ffffff';
-        ctx.shadowColor = 'rgba(0,0,0,0.5)';
-        ctx.shadowBlur = 8;
-        // Word wrap
-        const words = headline.split(' ');
-        const maxW = W - pad * 2;
-        let line = '';
-        const lines = [];
-        words.forEach(function(w) {
-          const test = line ? line + ' ' + w : w;
-          if (ctx.measureText(test).width > maxW && line) { lines.push(line); line = w; }
-          else line = test;
-        });
-        if (line) lines.push(line);
-        lines.forEach(function(l) {
-          ctx.fillText(l, pad, ty);
-          ty += Math.round(fsize * 1.25);
-        });
-        ctx.shadowBlur = 0;
-        ty += Math.round(W * 0.012);
+        ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 8;
+        const words = headline.split(' '), maxW = W - pad*2;
+        let line = '', lines = [];
+        words.forEach(w => { const t = line ? line+' '+w : w; if(ctx.measureText(t).width>maxW && line){lines.push(line);line=w;}else line=t; });
+        if(line) lines.push(line);
+        lines.forEach(l => { ctx.fillText(l, pad, ty); ty += Math.round(fs1*1.28); });
+        ctx.shadowBlur = 0; ty += Math.round(W*0.01);
       }
- 
       if (subtext) {
-        const fsize2 = Math.round(W * 0.038);
-        ctx.font = `300 ${fsize2}px "DM Sans", Arial, sans-serif`;
-        ctx.fillStyle = 'rgba(255,255,255,0.8)';
-        ctx.fillText(subtext, pad, ty);
-        ty += Math.round(fsize2 * 1.6);
+        const fs2 = Math.round(W * 0.036);
+        ctx.font = `${fs2}px Arial, sans-serif`;
+        ctx.fillStyle = 'rgba(255,255,255,0.78)';
+        ctx.fillText(subtext, pad, ty); ty += Math.round(fs2*1.6);
       }
- 
       if (cta) {
-        const fsize3 = Math.round(W * 0.034);
-        ctx.font = `600 ${fsize3}px "DM Sans", Arial, sans-serif`;
+        const fs3 = Math.round(W * 0.032);
+        ctx.font = `bold ${fs3}px Arial, sans-serif`;
         ctx.fillStyle = '#E8B84B';
         ctx.fillText('→ ' + cta, pad, ty);
       }
     }
  
-    // Save as JPEG
-    const buf = canvas.toBuffer('image/jpeg', { quality: 0.92 });
-    fs.writeFileSync(outPath, buf);
+    // Save
+    const outName = `promo-${Date.now()}.jpg`;
+    const outPath = path.join(__dirname, 'public/uploads', outName);
+    fs.writeFileSync(outPath, canvas.toBuffer('image/jpeg', { quality: 0.93 }));
  
     const finalUrl = `${req.protocol}://${req.get('host')}/uploads/${outName}`;
-    console.log(`[mockup] done: ${finalUrl}`);
+    console.log('[promo] done:', finalUrl);
     res.json({ url: finalUrl });
  
   } catch(e) {
-    console.error('[mockup] ERROR:', e.message);
+    console.error('[promo] ERROR:', e.message);
     res.status(500).json({ error: e.message });
   }
 });
  
 app.get('/health', (_, res) => res.json({ ok: true, fal: !!FAL_KEY }));
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Mockup Studio on :${PORT}`));
+app.listen(PORT, () => console.log(`Promo Studio on :${PORT}`));
  
