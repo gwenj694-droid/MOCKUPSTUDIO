@@ -423,19 +423,26 @@ async function generate(){
     clearInterval(stI);
     if(d.error) throw new Error(d.error);
  
-    // Show result — URL is now served from our own server, no CORS/expiry issues
+    // Show result
     var img = document.getElementById('result-img');
     resultFalUrl = d.url;
-    img.onload = function(){
+ 
+    function hideOverlay(){
+      proc.style.display = 'none';
       proc.classList.remove('show');
       document.getElementById('out-meta').textContent = 'Scene: ' + currentScene + ' · AI compositing · FAL';
       toast('Mockup ready!', 'g');
-    };
-    img.onerror = function(){
-      proc.classList.remove('show');
-      toast('Generated — click Download', 'g');
-    };
-    img.src = d.url + '?t=' + Date.now(); // cache bust
+    }
+ 
+    img.onload  = function(){ hideOverlay(); };
+    img.onerror = function(){ hideOverlay(); };
+ 
+    // Fallback — if onload never fires (e.g. cached), hide after 2s
+    setTimeout(function(){
+      if(proc.classList.contains('show') || proc.style.display !== 'none'){ hideOverlay(); }
+    }, 2000);
+ 
+    img.src = d.url;
  
     // Add to history
     mockupHistory.unshift({ url:d.url, scene:currentScene });
