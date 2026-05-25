@@ -406,24 +406,27 @@ async function generate(){
     stepDone(1); stepDone(2); stepAct(3);
     setTimeout(function(){ stepDone(3); stepDone(4); },400);
  
-    resultUrl=d.url;
-    var img=document.getElementById('result-img');
-    img.onload=function(){
-      document.getElementById('loading').classList.remove('show');
-      document.getElementById('out-result').style.display='block';
-      document.getElementById('out-meta').textContent='Scene: '+currentScene+' · FAL AI · Ready to post';
-      toast('Promo image ready!','g');
-    };
-    img.onerror=function(){
-      document.getElementById('loading').classList.remove('show');
-      document.getElementById('out-result').style.display='block';
-      toast('Done — download below','g');
-    };
+    resultUrl = d.url;
+    // Show fallback result
+    var img = document.getElementById('result-img');
+    img.src = d.url + '?t=' + Date.now();
+    document.getElementById('loading').classList.remove('show');
+    document.getElementById('out-result').style.display = 'block';
+    document.getElementById('out-meta').textContent = 'Scene: '+currentScene+' · FAL AI · Ready to position';
+    toast('Generated! Opening editor…','g');
+ 
+    // Open interactive editor after short delay
     setTimeout(function(){
-      document.getElementById('loading').classList.remove('show');
-      document.getElementById('out-result').style.display='block';
-    },5000);
-    img.src=d.url+'?t='+Date.now();
+      var bgUrl     = d.bgUrl     || d.url;
+      var designUrl = d.designUrl || uploadedUrl;
+      var pos       = d.phonePos  || null;
+      openEditor(bgUrl, designUrl, pos, d.canvasW, d.canvasH);
+      // Pre-fill text from generated copy
+      if(d.headline) document.getElementById('ov-head').value = d.headline;
+      if(d.subtext)  document.getElementById('ov-sub').value  = d.subtext;
+      if(d.cta)      document.getElementById('ov-cta').value  = d.cta;
+      setTimeout(redrawText, 500);
+    }, 800);
  
   } catch(e){
     clearTimeout(stepTimer); clearTimeout(step2Timer);
@@ -484,83 +487,441 @@ function toast(msg,tp){
   clearTimeout(t._t); t._t=setTimeout(function(){ t.className=''; },3000);
 }
 </script>
-</body>
-</html>
  
-<!-- INTERACTIVE EDITOR MODAL -->
-<div id="editor-modal" style="display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.88);backdrop-filter:blur(6px);flex-direction:column;align-items:center;justify-content:flex-start;padding:16px;overflow-y:auto">
-  <div style="width:100%;max-width:1100px;margin:0 auto">
-    <!-- Editor header -->
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-      <div style="font-family:Syne,sans-serif;font-size:15px;font-weight:800;color:var(--gold2)">✦ Position Editor</div>
-      <div style="font-size:10px;color:var(--text3);letter-spacing:.12em">Drag · Resize · Rotate · then Export</div>
-      <div style="flex:1"></div>
-      <button onclick="closeEditor()" style="background:transparent;border:1px solid var(--border2);color:var(--text2);padding:7px 16px;font-family:DM Sans,sans-serif;font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;cursor:pointer">✕ Close</button>
-      <button onclick="exportEditor()" id="export-btn" style="background:var(--gold);color:#0a0800;border:none;padding:7px 18px;font-family:DM Sans,sans-serif;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;cursor:pointer">↓ Export PNG</button>
-    </div>
+<!-- ══════════════════════════════════════════
+     INTERACTIVE EDITOR — opens after generation
+     Drag phone · resize · add text · export
+══════════════════════════════════════════ -->
+<div id="editor-modal" style="display:none;position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.92);backdrop-filter:blur(8px);flex-direction:column;align-items:center;padding:14px;overflow-y:auto">
  
-    <!-- Editor layout -->
-    <div style="display:grid;grid-template-columns:200px 1fr;gap:12px;align-items:start">
-      <!-- Controls -->
-      <div style="background:var(--s1);border:1px solid var(--border);padding:14px;display:flex;flex-direction:column;gap:10px">
-        <div style="font-size:8.5px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:2px">Phone Mockup</div>
+  <!-- Header bar -->
+  <div style="width:100%;max-width:1160px;display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-shrink:0">
+    <div style="font-family:Syne,sans-serif;font-size:16px;font-weight:800;background:linear-gradient(90deg,#E8B84B,#F06BCD);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">✦ Position Editor</div>
+    <div style="font-size:9.5px;color:rgba(255,255,255,.38);letter-spacing:.12em">Drag the phone · resize from corner · add text</div>
+    <div style="flex:1"></div>
+    <button onclick="closeEditor()" style="padding:8px 16px;font-family:DM Sans,sans-serif;font-size:9px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.5);background:transparent;cursor:pointer">✕ Close</button>
+    <button onclick="exportFinal()" style="padding:8px 20px;font-family:DM Sans,sans-serif;font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;border:none;background:#E8B84B;color:#0a0800;cursor:pointer;box-shadow:0 2px 14px rgba(232,184,75,.4)">↓ Export PNG</button>
+  </div>
  
-        <div>
-          <label style="display:block;font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-bottom:4px">Width</label>
-          <input type="range" id="ed-w" min="100" max="900" value="280" oninput="updatePhone()" style="width:100%;accent-color:var(--gold)">
-          <span id="ed-w-val" style="font-size:9px;color:var(--text2)">280px</span>
-        </div>
-        <div>
-          <label style="display:block;font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-bottom:4px">Height</label>
-          <input type="range" id="ed-h" min="100" max="1200" value="500" oninput="updatePhone()" style="width:100%;accent-color:var(--gold)">
-          <span id="ed-h-val" style="font-size:9px;color:var(--text2)">500px</span>
-        </div>
-        <div>
-          <label style="display:block;font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-bottom:4px">Rotation</label>
-          <input type="range" id="ed-rot" min="-30" max="30" value="0" oninput="updatePhone()" style="width:100%;accent-color:var(--gold)">
-          <span id="ed-rot-val" style="font-size:9px;color:var(--text2)">0°</span>
-        </div>
+  <!-- Main grid -->
+  <div style="width:100%;max-width:1160px;display:grid;grid-template-columns:220px 1fr;gap:12px;flex:1">
  
-        <div style="border-top:1px solid var(--border);padding-top:10px;margin-top:2px">
-          <div style="font-size:8.5px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:8px">Text</div>
-          <input id="ed-headline" type="text" placeholder="Headline" style="width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);font-family:DM Sans,sans-serif;font-size:11px;padding:6px 8px;outline:none;margin-bottom:5px">
-          <input id="ed-sub" type="text" placeholder="Subtext" style="width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);font-family:DM Sans,sans-serif;font-size:11px;padding:6px 8px;outline:none;margin-bottom:5px">
-          <input id="ed-cta" type="text" placeholder="Call to action" style="width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);font-family:DM Sans,sans-serif;font-size:11px;padding:6px 8px;outline:none">
-        </div>
+    <!-- Controls sidebar -->
+    <div style="background:#0f0f18;border:1px solid rgba(255,255,255,.07);padding:14px;display:flex;flex-direction:column;gap:10px;overflow-y:auto">
  
-        <div style="border-top:1px solid var(--border);padding-top:10px">
-          <div style="font-size:8px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-bottom:6px">Phone Style</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
-            <button onclick="setPhoneStyle('dark')" class="pstyle-btn on" id="ps-dark" style="padding:5px;font-size:9px;font-weight:600;border:1px solid var(--gold);background:rgba(232,184,75,.1);color:var(--gold);cursor:pointer">Dark</button>
-            <button onclick="setPhoneStyle('light')" class="pstyle-btn" id="ps-light" style="padding:5px;font-size:9px;font-weight:600;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer">Light</button>
-          </div>
-        </div>
- 
-        <button onclick="resetPosition()" style="margin-top:6px;width:100%;padding:8px;font-family:DM Sans,sans-serif;font-size:9px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;border:1px solid var(--border2);color:var(--text2);background:transparent;cursor:pointer">↺ Reset Position</button>
+      <div style="font-size:8px;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:#E8B84B">Phone Size</div>
+      <div>
+        <div style="font-size:8px;color:rgba(255,255,255,.35);letter-spacing:.18em;text-transform:uppercase;margin-bottom:3px">Width</div>
+        <input type="range" id="sl-w" min="60" max="600" value="240" oninput="applySliders()" style="width:100%;accent-color:#E8B84B">
+        <span id="sl-w-v" style="font-size:9px;color:rgba(255,255,255,.4)">240px</span>
+      </div>
+      <div>
+        <div style="font-size:8px;color:rgba(255,255,255,.35);letter-spacing:.18em;text-transform:uppercase;margin-bottom:3px">Height</div>
+        <input type="range" id="sl-h" min="60" max="900" value="480" oninput="applySliders()" style="width:100%;accent-color:#E8B84B">
+        <span id="sl-h-v" style="font-size:9px;color:rgba(255,255,255,.4)">480px</span>
+      </div>
+      <div>
+        <div style="font-size:8px;color:rgba(255,255,255,.35);letter-spacing:.18em;text-transform:uppercase;margin-bottom:3px">Rotation</div>
+        <input type="range" id="sl-rot" min="-25" max="25" value="0" oninput="applySliders()" style="width:100%;accent-color:#E8B84B">
+        <span id="sl-rot-v" style="font-size:9px;color:rgba(255,255,255,.4)">0°</span>
       </div>
  
-      <!-- Canvas -->
-      <div style="position:relative">
-        <div style="font-size:9px;color:var(--text3);margin-bottom:6px;letter-spacing:.1em">Click and drag the phone to reposition it</div>
-        <div style="position:relative;overflow:hidden;border:1px solid var(--border2)" id="editor-wrap">
-          <canvas id="editor-canvas" style="display:block;width:100%;cursor:grab"></canvas>
-          <!-- Draggable phone overlay -->
-          <div id="phone-overlay" style="position:absolute;cursor:move;user-select:none;touch-action:none">
-            <div id="phone-frame" style="width:100%;height:100%;border-radius:14%;background:#1a1a1a;box-shadow:0 8px 40px rgba(0,0,0,.8),inset 0 0 0 1px rgba(255,255,255,.12);position:relative;overflow:visible">
-              <!-- Screen -->
-              <div id="phone-screen-div" style="position:absolute;inset:4% 5%;border-radius:10%;overflow:hidden;background:#000">
-                <img id="phone-screen-img" style="width:100%;height:100%;object-fit:cover;display:block">
-              </div>
-              <!-- Notch -->
-              <div style="position:absolute;top:3.5%;left:50%;transform:translateX(-50%);width:28%;height:5%;background:#1a1a1a;border-radius:0 0 30% 30%;z-index:10"></div>
-              <!-- Home bar -->
-              <div style="position:absolute;bottom:2.5%;left:50%;transform:translateX(-50%);width:30%;height:1.2%;background:rgba(255,255,255,.25);border-radius:999px"></div>
-              <!-- Resize handle -->
-              <div id="resize-handle" style="position:absolute;bottom:-8px;right:-8px;width:18px;height:18px;background:var(--gold);border-radius:50%;cursor:se-resize;z-index:20;border:2px solid #000"></div>
+      <div style="border-top:1px solid rgba(255,255,255,.07);padding-top:10px;margin-top:2px">
+        <div style="font-size:8px;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:#E8B84B;margin-bottom:8px">Text Overlay</div>
+        <div style="font-size:8px;color:rgba(255,255,255,.35);letter-spacing:.12em;text-transform:uppercase;margin-bottom:3px">Headline</div>
+        <input id="ov-head" type="text" placeholder="YOUR HEADLINE" oninput="redrawText()" style="width:100%;background:#1a1a28;border:1px solid rgba(255,255,255,.1);color:#fff;font-family:DM Sans,sans-serif;font-size:11px;padding:7px 9px;outline:none;margin-bottom:6px">
+        <div style="font-size:8px;color:rgba(255,255,255,.35);letter-spacing:.12em;text-transform:uppercase;margin-bottom:3px">Subtext</div>
+        <input id="ov-sub" type="text" placeholder="Supporting line" oninput="redrawText()" style="width:100%;background:#1a1a28;border:1px solid rgba(255,255,255,.1);color:#fff;font-family:DM Sans,sans-serif;font-size:11px;padding:7px 9px;outline:none;margin-bottom:6px">
+        <div style="font-size:8px;color:rgba(255,255,255,.35);letter-spacing:.12em;text-transform:uppercase;margin-bottom:3px">Call to Action</div>
+        <input id="ov-cta" type="text" placeholder="DM me to start" oninput="redrawText()" style="width:100%;background:#1a1a28;border:1px solid rgba(255,255,255,.1);color:#fff;font-family:DM Sans,sans-serif;font-size:11px;padding:7px 9px;outline:none">
+        <div style="display:flex;gap:5px;margin-top:8px">
+          <div>
+            <div style="font-size:8px;color:rgba(255,255,255,.35);margin-bottom:3px">Text size</div>
+            <input type="range" id="sl-fsize" min="12" max="72" value="32" oninput="redrawText()" style="width:100%;accent-color:#E8B84B">
+          </div>
+        </div>
+      </div>
+ 
+      <div style="border-top:1px solid rgba(255,255,255,.07);padding-top:10px">
+        <div style="font-size:8px;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:#E8B84B;margin-bottom:8px">Phone Style</div>
+        <div style="display:flex;gap:5px">
+          <button onclick="setStyle('dark')" id="pbtn-dark" style="flex:1;padding:7px;font-size:9px;font-weight:600;border:1px solid #E8B84B;background:rgba(232,184,75,.12);color:#E8B84B;cursor:pointer;font-family:DM Sans,sans-serif">Dark</button>
+          <button onclick="setStyle('light')" id="pbtn-light" style="flex:1;padding:7px;font-size:9px;font-weight:600;border:1px solid rgba(255,255,255,.15);background:transparent;color:rgba(255,255,255,.5);cursor:pointer;font-family:DM Sans,sans-serif">Light</button>
+        </div>
+      </div>
+ 
+      <button onclick="resetPhone()" style="width:100%;padding:9px;font-family:DM Sans,sans-serif;font-size:9px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.4);background:transparent;cursor:pointer;margin-top:4px">↺ Reset</button>
+    </div>
+ 
+    <!-- Canvas area -->
+    <div style="position:relative;background:#000;display:flex;align-items:center;justify-content:center;min-height:500px">
+      <div style="position:relative;display:inline-block" id="editor-stage">
+        <!-- Background image -->
+        <canvas id="bg-canvas" style="display:block;max-width:100%;max-height:70vh"></canvas>
+        <!-- Draggable phone div overlaid on top -->
+        <div id="phone-drag" style="position:absolute;cursor:move;user-select:none;touch-action:none">
+          <div id="phone-body" style="width:100%;height:100%;position:relative">
+            <!-- Body gradient set by JS -->
+            <div id="phone-screen-area" style="position:absolute;inset:5% 4% 4% 4%;border-radius:10%;overflow:hidden;background:#000">
+              <img id="phone-screen-img" src="" style="width:100%;height:100%;object-fit:cover;display:block">
             </div>
+            <!-- Notch -->
+            <div style="position:absolute;top:3%;left:50%;transform:translateX(-50%);width:26%;height:5%;z-index:5" id="phone-notch"></div>
+            <!-- Home bar -->
+            <div id="phone-home" style="position:absolute;bottom:2%;left:50%;transform:translateX(-50%);width:28%;height:1%;border-radius:999px;background:rgba(255,255,255,.25)"></div>
+            <!-- Resize handle -->
+            <div id="resize-handle" style="position:absolute;bottom:-10px;right:-10px;width:22px;height:22px;background:#E8B84B;border-radius:50%;cursor:se-resize;z-index:20;border:2px solid #000;box-shadow:0 2px 8px rgba(0,0,0,.5)"></div>
           </div>
         </div>
+        <!-- Text canvas overlay -->
+        <canvas id="text-canvas" style="position:absolute;top:0;left:0;pointer-events:none"></canvas>
       </div>
     </div>
+ 
   </div>
 </div>
+ 
+<script>
+// ═══════════════════════════════════════════
+// EDITOR STATE
+// ═══════════════════════════════════════════
+var edBgImg   = null;  // HTMLImageElement — background
+var edDesign  = null;  // HTMLImageElement — design for screen
+var edScale   = 1;     // canvas scale factor
+var edStyle   = 'dark';
+ 
+var phone = {
+  x:100, y:80, w:240, h:480, rot:0
+};
+ 
+// ── Open editor ───────────────────────────
+function openEditor(bgUrl, designUrl, suggestedPos, W, H){
+  document.getElementById('editor-modal').style.display = 'flex';
+ 
+  // Pre-fill text from main form if available
+  document.getElementById('ov-head').value = (document.getElementById('txt-headline')||{value:''}).value||'';
+  document.getElementById('ov-sub').value  = (document.getElementById('txt-sub')||{value:''}).value||'';
+  document.getElementById('ov-cta').value  = (document.getElementById('txt-cta')||{value:''}).value||'';
+ 
+  var bgCanvas = document.getElementById('bg-canvas');
+  var stage    = document.getElementById('editor-stage');
+ 
+  // Load background
+  edBgImg = new Image(); edBgImg.crossOrigin='anonymous';
+  edBgImg.onload = function(){
+    var maxW = window.innerWidth - 280;
+    var maxH = window.innerHeight * 0.72;
+    edScale  = Math.min(maxW / edBgImg.width, maxH / edBgImg.height, 1);
+ 
+    bgCanvas.width  = edBgImg.width;
+    bgCanvas.height = edBgImg.height;
+    bgCanvas.style.width  = Math.round(edBgImg.width  * edScale) + 'px';
+    bgCanvas.style.height = Math.round(edBgImg.height * edScale) + 'px';
+    bgCanvas.getContext('2d').drawImage(edBgImg, 0, 0);
+ 
+    var tc = document.getElementById('text-canvas');
+    tc.width  = edBgImg.width;  tc.height = edBgImg.height;
+    tc.style.width  = bgCanvas.style.width;
+    tc.style.height = bgCanvas.style.height;
+    tc.style.left = '0'; tc.style.top = '0';
+ 
+    // Set initial phone position from suggestedPos
+    if(suggestedPos){
+      phone.x   = Math.round(suggestedPos.x * edBgImg.width);
+      phone.y   = Math.round(suggestedPos.y * edBgImg.height);
+      phone.w   = Math.round(suggestedPos.w * edBgImg.width);
+      phone.h   = Math.round(suggestedPos.h * edBgImg.height);
+    }
+    document.getElementById('sl-w').value = phone.w;
+    document.getElementById('sl-h').value = phone.h;
+    positionPhoneDiv();
+    redrawText();
+  };
+  edBgImg.src = bgUrl + '?t=' + Date.now();
+ 
+  // Load design image
+  edDesign = new Image(); edDesign.crossOrigin='anonymous';
+  edDesign.onload = function(){
+    document.getElementById('phone-screen-img').src = edDesign.src;
+  };
+  edDesign.src = designUrl + '?t=' + Date.now();
+ 
+  applyStyle();
+  makeDraggable();
+  makeResizable();
+}
+ 
+function closeEditor(){
+  document.getElementById('editor-modal').style.display = 'none';
+}
+ 
+// ── Phone positioning ──────────────────────
+function positionPhoneDiv(){
+  var pd = document.getElementById('phone-drag');
+  var sw = Math.round(phone.w * edScale);
+  var sh = Math.round(phone.h * edScale);
+  pd.style.left      = Math.round(phone.x * edScale) + 'px';
+  pd.style.top       = Math.round(phone.y * edScale) + 'px';
+  pd.style.width     = sw + 'px';
+  pd.style.height    = sh + 'px';
+  pd.style.transform = 'rotate(' + phone.rot + 'deg)';
+  pd.style.transformOrigin = '0 0';
+ 
+  var pb = document.getElementById('phone-body');
+  pb.style.borderRadius = Math.round(sw * 0.1) + 'px';
+  var notch = document.getElementById('phone-notch');
+  notch.style.background = edStyle==='dark'?'#111':'#ddd';
+  notch.style.borderRadius = '0 0 '+Math.round(sw*0.05)+'px '+Math.round(sw*0.05)+'px';
+}
+ 
+function applySliders(){
+  phone.w   = +document.getElementById('sl-w').value;
+  phone.h   = +document.getElementById('sl-h').value;
+  phone.rot = +document.getElementById('sl-rot').value;
+  document.getElementById('sl-w-v').textContent   = phone.w + 'px';
+  document.getElementById('sl-h-v').textContent   = phone.h + 'px';
+  document.getElementById('sl-rot-v').textContent = phone.rot + '°';
+  positionPhoneDiv();
+}
+ 
+function resetPhone(){
+  phone.rot = 0;
+  document.getElementById('sl-rot').value = 0;
+  document.getElementById('sl-rot-v').textContent = '0°';
+  positionPhoneDiv();
+}
+ 
+function setStyle(s){
+  edStyle = s;
+  document.getElementById('pbtn-dark').style.borderColor  = s==='dark'?'#E8B84B':'rgba(255,255,255,.15)';
+  document.getElementById('pbtn-dark').style.color         = s==='dark'?'#E8B84B':'rgba(255,255,255,.5)';
+  document.getElementById('pbtn-light').style.borderColor = s==='light'?'#E8B84B':'rgba(255,255,255,.15)';
+  document.getElementById('pbtn-light').style.color        = s==='light'?'#E8B84B':'rgba(255,255,255,.5)';
+  applyStyle();
+}
+ 
+function applyStyle(){
+  var pb = document.getElementById('phone-body');
+  if(edStyle==='dark'){
+    pb.style.background  = 'linear-gradient(135deg,#3a3a3a,#1a1a1a)';
+    pb.style.boxShadow   = '0 12px 50px rgba(0,0,0,.85), inset 0 0 0 1.5px rgba(255,255,255,.12)';
+  } else {
+    pb.style.background  = 'linear-gradient(135deg,#ffffff,#d0d0d0)';
+    pb.style.boxShadow   = '0 12px 50px rgba(0,0,0,.6), inset 0 0 0 1.5px rgba(0,0,0,.1)';
+  }
+  var sa = document.getElementById('phone-screen-area');
+  sa.style.boxShadow = edStyle==='dark'?'inset 0 0 0 1px rgba(255,255,255,.05)':'inset 0 0 0 1px rgba(0,0,0,.08)';
+  positionPhoneDiv();
+}
+ 
+// ── Drag ──────────────────────────────────
+function makeDraggable(){
+  var el = document.getElementById('phone-drag');
+  var stage = document.getElementById('editor-stage');
+  var startX,startY,startPX,startPY,dragging=false;
+ 
+  el.addEventListener('mousedown',function(e){
+    if(e.target.id==='resize-handle') return;
+    e.preventDefault();
+    dragging=true; startX=e.clientX; startY=e.clientY;
+    startPX=phone.x; startPY=phone.y;
+    el.style.cursor='grabbing';
+  });
+  document.addEventListener('mousemove',function(e){
+    if(!dragging) return;
+    var dx=(e.clientX-startX)/edScale;
+    var dy=(e.clientY-startY)/edScale;
+    phone.x = Math.round(startPX+dx);
+    phone.y = Math.round(startPY+dy);
+    positionPhoneDiv();
+  });
+  document.addEventListener('mouseup',function(){
+    if(!dragging) return;
+    dragging=false;
+    el.style.cursor='move';
+  });
+ 
+  // Touch support
+  el.addEventListener('touchstart',function(e){
+    if(e.target.id==='resize-handle') return;
+    var t=e.touches[0]; startX=t.clientX; startY=t.clientY; startPX=phone.x; startPY=phone.y; dragging=true;
+  },{passive:true});
+  document.addEventListener('touchmove',function(e){
+    if(!dragging) return;
+    var t=e.touches[0];
+    phone.x=Math.round(startPX+(t.clientX-startX)/edScale);
+    phone.y=Math.round(startPY+(t.clientY-startY)/edScale);
+    positionPhoneDiv();
+  },{passive:true});
+  document.addEventListener('touchend',function(){ dragging=false; });
+}
+ 
+// ── Resize ────────────────────────────────
+function makeResizable(){
+  var handle = document.getElementById('resize-handle');
+  var startX,startY,startW,startH,resizing=false;
+ 
+  handle.addEventListener('mousedown',function(e){
+    e.preventDefault(); e.stopPropagation();
+    resizing=true; startX=e.clientX; startY=e.clientY;
+    startW=phone.w; startH=phone.h;
+  });
+  document.addEventListener('mousemove',function(e){
+    if(!resizing) return;
+    var dw=(e.clientX-startX)/edScale;
+    var dh=(e.clientY-startY)/edScale;
+    phone.w = Math.max(80, Math.round(startW+dw));
+    phone.h = Math.max(120, Math.round(startH+dh));
+    document.getElementById('sl-w').value = phone.w;
+    document.getElementById('sl-h').value = phone.h;
+    document.getElementById('sl-w-v').textContent = phone.w+'px';
+    document.getElementById('sl-h-v').textContent = phone.h+'px';
+    positionPhoneDiv();
+  });
+  document.addEventListener('mouseup',function(){ resizing=false; });
+ 
+  // Touch resize
+  handle.addEventListener('touchstart',function(e){
+    var t=e.touches[0]; startX=t.clientX; startY=t.clientY; startW=phone.w; startH=phone.h; resizing=true;
+  },{passive:true});
+  document.addEventListener('touchmove',function(e){
+    if(!resizing) return;
+    var t=e.touches[0];
+    phone.w=Math.max(80,Math.round(startW+(t.clientX-startX)/edScale));
+    phone.h=Math.max(120,Math.round(startH+(t.clientY-startY)/edScale));
+    positionPhoneDiv();
+  },{passive:true});
+}
+ 
+// ── Text overlay on canvas ─────────────────
+function redrawText(){
+  var tc = document.getElementById('text-canvas');
+  if(!tc.width) return;
+  var ctx = tc.getContext('2d');
+  ctx.clearRect(0,0,tc.width,tc.height);
+ 
+  var W=tc.width, H=tc.height;
+  var head = document.getElementById('ov-head').value.trim();
+  var sub  = document.getElementById('ov-sub').value.trim();
+  var cta  = document.getElementById('ov-cta').value.trim();
+  var fs   = +document.getElementById('sl-fsize').value || 32;
+  if(!head&&!sub&&!cta) return;
+ 
+  var bandH = Math.round(H*0.28);
+  var band = ctx.createLinearGradient(0,H-bandH,0,H);
+  band.addColorStop(0,'rgba(0,0,0,0)');
+  band.addColorStop(0.35,'rgba(0,0,0,0.72)');
+  band.addColorStop(1,'rgba(0,0,0,0.9)');
+  ctx.fillStyle=band; ctx.fillRect(0,H-bandH,W,bandH);
+ 
+  var pad=Math.round(W*0.07);
+  var ty=H-bandH+Math.round(bandH*0.2);
+ 
+  if(head){
+    ctx.font='bold '+fs+'px Arial,sans-serif';
+    ctx.fillStyle='#ffffff';
+    ctx.shadowColor='rgba(0,0,0,0.6)'; ctx.shadowBlur=10;
+    var words=head.split(' '), maxW=W-pad*2, line='', lines=[];
+    words.forEach(function(w){ var t=line?line+' '+w:w; if(ctx.measureText(t).width>maxW&&line){lines.push(line);line=w;}else line=t; });
+    if(line) lines.push(line);
+    lines.forEach(function(l){ ctx.fillText(l,pad,ty); ty+=Math.round(fs*1.28); });
+    ctx.shadowBlur=0; ty+=Math.round(W*0.01);
+  }
+  if(sub){
+    ctx.font=Math.round(fs*0.55)+'px Arial,sans-serif';
+    ctx.fillStyle='rgba(255,255,255,0.78)';
+    ctx.fillText(sub,pad,ty); ty+=Math.round(fs*0.9);
+  }
+  if(cta){
+    ctx.font='bold '+Math.round(fs*0.5)+'px Arial,sans-serif';
+    ctx.fillStyle='#E8B84B';
+    ctx.fillText('→ '+cta,pad,ty);
+  }
+}
+ 
+// ── Export final PNG ───────────────────────
+function exportFinal(){
+  if(!edBgImg){ alert('No image loaded'); return; }
+ 
+  var W=edBgImg.width, H=edBgImg.height;
+  var out = document.createElement('canvas');
+  out.width=W; out.height=H;
+  var ctx=out.getContext('2d');
+ 
+  // 1. Draw background
+  ctx.drawImage(edBgImg,0,0,W,H);
+ 
+  // 2. Draw phone mockup at actual pixel coords
+  var pw=phone.w, ph=phone.h, px=phone.x, py=phone.y, rot=phone.rot;
+  var cx=px+pw/2, cy=py+ph/2;
+ 
+  ctx.save();
+  ctx.translate(cx,cy);
+  ctx.rotate(rot*Math.PI/180);
+ 
+  // Shadow
+  ctx.shadowColor='rgba(0,0,0,0.75)'; ctx.shadowBlur=40; ctx.shadowOffsetY=14;
+ 
+  // Body
+  var bodyG=ctx.createLinearGradient(-pw/2,-ph/2,pw/2,ph/2);
+  if(edStyle==='dark'){
+    bodyG.addColorStop(0,'#3a3a3a'); bodyG.addColorStop(0.5,'#242424'); bodyG.addColorStop(1,'#1a1a1a');
+  } else {
+    bodyG.addColorStop(0,'#ffffff'); bodyG.addColorStop(0.5,'#e0e0e0'); bodyG.addColorStop(1,'#c0c0c0');
+  }
+  ctx.fillStyle=bodyG;
+  phoneRoundRect(ctx,-pw/2,-ph/2,pw,ph,pw*0.1); ctx.fill();
+  ctx.shadowBlur=0; ctx.shadowOffsetY=0; ctx.shadowColor='transparent';
+ 
+  // Edge highlight
+  ctx.strokeStyle=edStyle==='dark'?'rgba(255,255,255,0.15)':'rgba(0,0,0,0.12)';
+  ctx.lineWidth=1.5; phoneRoundRect(ctx,-pw/2,-ph/2,pw,ph,pw*0.1); ctx.stroke();
+ 
+  // Screen area
+  var sx=-pw/2+pw*0.04, sy=-ph/2+ph*0.05, sw=pw*0.92, sh=ph*0.90;
+  ctx.fillStyle='#000'; phoneRoundRect(ctx,sx,sy,sw,sh,pw*0.07); ctx.fill();
+ 
+  // Draw design on screen
+  if(edDesign){
+    ctx.save(); phoneRoundRect(ctx,sx,sy,sw,sh,pw*0.07); ctx.clip();
+    ctx.drawImage(edDesign,sx,sy,sw,sh);
+    // Glare
+    var gl=ctx.createLinearGradient(sx,sy,sx+sw*0.55,sy+sh*0.45);
+    gl.addColorStop(0,'rgba(255,255,255,0.09)'); gl.addColorStop(1,'rgba(255,255,255,0)');
+    ctx.fillStyle=gl; ctx.fillRect(sx,sy,sw,sh);
+    ctx.restore();
+  }
+ 
+  // Notch
+  ctx.fillStyle=edStyle==='dark'?'#111':'#ddd';
+  phoneRoundRect(ctx,-pw*0.14,-ph/2+ph*0.015,pw*0.28,ph*0.042,ph*0.018); ctx.fill();
+ 
+  // Home bar
+  ctx.fillStyle=edStyle==='dark'?'rgba(255,255,255,0.22)':'rgba(0,0,0,0.2)';
+  phoneRoundRect(ctx,-pw*0.15,ph/2-ph*0.036,pw*0.30,ph*0.016,ph*0.008); ctx.fill();
+ 
+  ctx.restore();
+ 
+  // 3. Draw text overlay from text-canvas
+  var tc=document.getElementById('text-canvas');
+  if(tc.width) ctx.drawImage(tc,0,0,W,H);
+ 
+  // 4. Download
+  var a=document.createElement('a');
+  a.href=out.toDataURL('image/png',1.0);
+  a.download='promo-'+Date.now()+'.png';
+  a.click();
+}
+ 
+function phoneRoundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.arcTo(x+w,y,x+w,y+r,r);
+  ctx.lineTo(x+w,y+h-r); ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
+  ctx.lineTo(x+r,y+h); ctx.arcTo(x,y+h,x,y+h-r,r);
+  ctx.lineTo(x,y+r); ctx.arcTo(x,y,x+r,y,r);
+  ctx.closePath();
+}
+</script>
+ 
+</body>
+</html>
