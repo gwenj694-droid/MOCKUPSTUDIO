@@ -208,13 +208,34 @@ html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'D
         </div>
       </div>
  
-      <!-- Text overlay -->
+      <!-- AI Copy + Text overlay -->
       <div class="panel">
-        <div class="ph"><div class="pt">Text Overlay (optional)</div></div>
+        <div class="ph"><div class="pt">✦ AI Copy Generator</div></div>
         <div class="pb">
-          <div class="field"><label>Headline</label><input class="inp" type="text" id="txt-headline" placeholder="e.g. Everything I Needed, I Built"></div>
-          <div class="field"><label>Subtext</label><input class="inp" type="text" id="txt-sub" placeholder="e.g. Join 500+ women building online"></div>
-          <div class="field"><label>Call to Action</label><input class="inp" type="text" id="txt-cta" placeholder="e.g. DM me AI to start"></div>
+          <div class="field"><label>Product Name</label>
+            <input class="inp" type="text" id="prod-name" placeholder="e.g. UGC Twin Engine, AI Tool Bundle"></div>
+          <div class="field"><label>What it does / who it's for</label>
+            <textarea class="inp" id="prod-desc" rows="2" style="resize:none" placeholder="e.g. Helps female entrepreneurs create viral UGC content with AI in minutes"></textarea></div>
+          <div class="field"><label>Price (optional)</label>
+            <input class="inp" type="text" id="prod-price" placeholder="e.g. £10/month, Free, £97"></div>
+          <div class="field"><label>Platform</label>
+            <select class="inp" id="prod-platform">
+              <option value="instagram">Instagram / TikTok</option>
+              <option value="facebook">Facebook</option>
+              <option value="linkedin">LinkedIn</option>
+            </select></div>
+          <button id="ai-gen-btn" onclick="generateAIText()" style="width:100%;padding:12px;font-family:DM Sans,sans-serif;font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;border:none;cursor:pointer;background:linear-gradient(135deg,#5b21b6,var(--purple),#9B6BF2);color:#fff;box-shadow:0 2px 14px rgba(155,107,242,.35);transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:14px">
+            <span id="ai-btn-txt">✦ Write Copy with Claude</span>
+          </button>
+          <div style="border-top:1px solid var(--border);padding-top:12px">
+            <div style="font-size:8px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-bottom:8px">Generated Text (edit if needed)</div>
+            <div class="field"><label>Headline</label>
+              <input class="inp" type="text" id="txt-headline" placeholder="Auto-generated or type your own"></div>
+            <div class="field"><label>Subtext</label>
+              <input class="inp" type="text" id="txt-sub" placeholder="Auto-generated or type your own"></div>
+            <div class="field"><label>Call to Action</label>
+              <input class="inp" type="text" id="txt-cta" placeholder="Auto-generated or type your own"></div>
+          </div>
         </div>
       </div>
  
@@ -415,6 +436,35 @@ async function generate(){
   document.getElementById('gen-btn').disabled=false;
 }
  
+async function generateAIText(){
+  var name = document.getElementById('prod-name').value.trim();
+  if(!name){ toast('Enter your product name first','e'); return; }
+  var btn = document.getElementById('ai-gen-btn');
+  var btnTxt = document.getElementById('ai-btn-txt');
+  btnTxt.textContent = '⏳ Claude is writing…';
+  btn.disabled = true;
+  try{
+    var r = await fetch(S+'/api/generate-text',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        productName: name,
+        productDesc: document.getElementById('prod-desc').value.trim(),
+        price: document.getElementById('prod-price').value.trim(),
+        platform: document.getElementById('prod-platform').value
+      })
+    });
+    var d = await r.json();
+    if(d.error) throw new Error(d.error);
+    document.getElementById('txt-headline').value = d.headline || '';
+    document.getElementById('txt-sub').value     = d.subtext  || '';
+    document.getElementById('txt-cta').value     = d.cta      || '';
+    toast('Copy written by Claude ✓','g');
+  } catch(e){ toast('Claude error: '+e.message,'e'); }
+  btnTxt.textContent = '✦ Write Copy with Claude';
+  btn.disabled = false;
+}
+ 
 async function download(){
   if(!resultUrl){ toast('Generate first','e'); return; }
   try{
@@ -437,3 +487,80 @@ function toast(msg,tp){
 </body>
 </html>
  
+<!-- INTERACTIVE EDITOR MODAL -->
+<div id="editor-modal" style="display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.88);backdrop-filter:blur(6px);flex-direction:column;align-items:center;justify-content:flex-start;padding:16px;overflow-y:auto">
+  <div style="width:100%;max-width:1100px;margin:0 auto">
+    <!-- Editor header -->
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+      <div style="font-family:Syne,sans-serif;font-size:15px;font-weight:800;color:var(--gold2)">✦ Position Editor</div>
+      <div style="font-size:10px;color:var(--text3);letter-spacing:.12em">Drag · Resize · Rotate · then Export</div>
+      <div style="flex:1"></div>
+      <button onclick="closeEditor()" style="background:transparent;border:1px solid var(--border2);color:var(--text2);padding:7px 16px;font-family:DM Sans,sans-serif;font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;cursor:pointer">✕ Close</button>
+      <button onclick="exportEditor()" id="export-btn" style="background:var(--gold);color:#0a0800;border:none;padding:7px 18px;font-family:DM Sans,sans-serif;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;cursor:pointer">↓ Export PNG</button>
+    </div>
+ 
+    <!-- Editor layout -->
+    <div style="display:grid;grid-template-columns:200px 1fr;gap:12px;align-items:start">
+      <!-- Controls -->
+      <div style="background:var(--s1);border:1px solid var(--border);padding:14px;display:flex;flex-direction:column;gap:10px">
+        <div style="font-size:8.5px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:2px">Phone Mockup</div>
+ 
+        <div>
+          <label style="display:block;font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-bottom:4px">Width</label>
+          <input type="range" id="ed-w" min="100" max="900" value="280" oninput="updatePhone()" style="width:100%;accent-color:var(--gold)">
+          <span id="ed-w-val" style="font-size:9px;color:var(--text2)">280px</span>
+        </div>
+        <div>
+          <label style="display:block;font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-bottom:4px">Height</label>
+          <input type="range" id="ed-h" min="100" max="1200" value="500" oninput="updatePhone()" style="width:100%;accent-color:var(--gold)">
+          <span id="ed-h-val" style="font-size:9px;color:var(--text2)">500px</span>
+        </div>
+        <div>
+          <label style="display:block;font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-bottom:4px">Rotation</label>
+          <input type="range" id="ed-rot" min="-30" max="30" value="0" oninput="updatePhone()" style="width:100%;accent-color:var(--gold)">
+          <span id="ed-rot-val" style="font-size:9px;color:var(--text2)">0°</span>
+        </div>
+ 
+        <div style="border-top:1px solid var(--border);padding-top:10px;margin-top:2px">
+          <div style="font-size:8.5px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:8px">Text</div>
+          <input id="ed-headline" type="text" placeholder="Headline" style="width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);font-family:DM Sans,sans-serif;font-size:11px;padding:6px 8px;outline:none;margin-bottom:5px">
+          <input id="ed-sub" type="text" placeholder="Subtext" style="width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);font-family:DM Sans,sans-serif;font-size:11px;padding:6px 8px;outline:none;margin-bottom:5px">
+          <input id="ed-cta" type="text" placeholder="Call to action" style="width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);font-family:DM Sans,sans-serif;font-size:11px;padding:6px 8px;outline:none">
+        </div>
+ 
+        <div style="border-top:1px solid var(--border);padding-top:10px">
+          <div style="font-size:8px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-bottom:6px">Phone Style</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
+            <button onclick="setPhoneStyle('dark')" class="pstyle-btn on" id="ps-dark" style="padding:5px;font-size:9px;font-weight:600;border:1px solid var(--gold);background:rgba(232,184,75,.1);color:var(--gold);cursor:pointer">Dark</button>
+            <button onclick="setPhoneStyle('light')" class="pstyle-btn" id="ps-light" style="padding:5px;font-size:9px;font-weight:600;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer">Light</button>
+          </div>
+        </div>
+ 
+        <button onclick="resetPosition()" style="margin-top:6px;width:100%;padding:8px;font-family:DM Sans,sans-serif;font-size:9px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;border:1px solid var(--border2);color:var(--text2);background:transparent;cursor:pointer">↺ Reset Position</button>
+      </div>
+ 
+      <!-- Canvas -->
+      <div style="position:relative">
+        <div style="font-size:9px;color:var(--text3);margin-bottom:6px;letter-spacing:.1em">Click and drag the phone to reposition it</div>
+        <div style="position:relative;overflow:hidden;border:1px solid var(--border2)" id="editor-wrap">
+          <canvas id="editor-canvas" style="display:block;width:100%;cursor:grab"></canvas>
+          <!-- Draggable phone overlay -->
+          <div id="phone-overlay" style="position:absolute;cursor:move;user-select:none;touch-action:none">
+            <div id="phone-frame" style="width:100%;height:100%;border-radius:14%;background:#1a1a1a;box-shadow:0 8px 40px rgba(0,0,0,.8),inset 0 0 0 1px rgba(255,255,255,.12);position:relative;overflow:visible">
+              <!-- Screen -->
+              <div id="phone-screen-div" style="position:absolute;inset:4% 5%;border-radius:10%;overflow:hidden;background:#000">
+                <img id="phone-screen-img" style="width:100%;height:100%;object-fit:cover;display:block">
+              </div>
+              <!-- Notch -->
+              <div style="position:absolute;top:3.5%;left:50%;transform:translateX(-50%);width:28%;height:5%;background:#1a1a1a;border-radius:0 0 30% 30%;z-index:10"></div>
+              <!-- Home bar -->
+              <div style="position:absolute;bottom:2.5%;left:50%;transform:translateX(-50%);width:30%;height:1.2%;background:rgba(255,255,255,.25);border-radius:999px"></div>
+              <!-- Resize handle -->
+              <div id="resize-handle" style="position:absolute;bottom:-8px;right:-8px;width:18px;height:18px;background:var(--gold);border-radius:50%;cursor:se-resize;z-index:20;border:2px solid #000"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
