@@ -1,316 +1,567 @@
-// ═══════════════════════════════════════════════════
-// PROMO STUDIO — Railway server
-// 1. FAL generates lifestyle background scene
-// 2. Server composites a phone mockup with user's design on screen
-// ENV: FAL_API_KEY
-// ═══════════════════════════════════════════════════
-const express = require('express');
-const cors    = require('cors');
-const multer  = require('multer');
-const path    = require('path');
-const fs      = require('fs');
-const https   = require('https');
-const http    = require('http');
-const { createCanvas, loadImage } = require('canvas');
-const { fal } = require('@fal-ai/client');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Promo Studio — NG Intel Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#08080f;--s1:#0f0f18;--s2:#151520;--card:#1a1a28;
+  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.13);
+  --gold:#E8B84B;--gold2:#F5D07A;--pink:#F06BCD;--purple:#9B6BF2;
+  --text:rgba(255,255,255,.92);--text2:rgba(255,255,255,.5);--text3:rgba(255,255,255,.22);
+  --green:#22c55e;--red:#ef4444;
+}
+html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px}
  
-const app = express();
-app.use(cors());
-app.use(express.json({ limit: '30mb' }));
-app.use(express.static('public'));
+/* GATE */
+#gate{position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;background:var(--bg);overflow:hidden;cursor:pointer}
+#gate.out{animation:gateOut 1.1s cubic-bezier(.76,0,.24,1) forwards;pointer-events:none}
+@keyframes gateOut{0%{opacity:1;transform:none}100%{opacity:0;transform:scale(1.06);filter:blur(4px)}}
+.g-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(232,184,75,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(232,184,75,.04) 1px,transparent 1px);background-size:80px 80px;animation:gridShift 20s linear infinite}
+@keyframes gridShift{0%{transform:translateY(0)}100%{transform:translateY(80px)}}
+.g-orb{position:absolute;border-radius:50%;filter:blur(80px);animation:orbDrift 8s ease-in-out infinite alternate}
+.g-orb-1{width:400px;height:400px;background:rgba(232,184,75,.09);top:-10%;left:-5%;animation-delay:0s}
+.g-orb-2{width:300px;height:300px;background:rgba(232,184,75,.06);bottom:-5%;right:0%;animation-delay:-4s}
+@keyframes orbDrift{0%{transform:translate(0,0) scale(1)}100%{transform:translate(30px,20px) scale(1.1)}}
+.g-scan{position:absolute;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(232,184,75,.35),transparent);animation:scan 6s ease-in-out infinite}
+.g-scan:nth-child(1){top:28%;animation-delay:0s}.g-scan:nth-child(2){top:60%;animation-delay:2s}.g-scan:nth-child(3){top:82%;animation-delay:4s}
+@keyframes scan{0%,100%{opacity:0;transform:scaleX(0)}40%,60%{opacity:1;transform:scaleX(1)}}
+.g-corner{position:absolute;width:22px;height:22px}
+.g-corner::before,.g-corner::after{content:'';position:absolute;background:var(--gold);border-radius:1px}
+.g-corner::before{width:2px;height:100%}.g-corner::after{height:2px;width:100%}
+.g-corner.tl{top:32px;left:32px}.g-corner.tl::before{top:0;left:0}.g-corner.tl::after{top:0;left:0}
+.g-corner.tr{top:32px;right:32px}.g-corner.tr::before{top:0;right:0}.g-corner.tr::after{top:0;right:0}
+.g-corner.bl{bottom:32px;left:32px}.g-corner.bl::before{bottom:0;left:0}.g-corner.bl::after{bottom:0;left:0}
+.g-corner.br{bottom:32px;right:32px}.g-corner.br::before{bottom:0;right:0}.g-corner.br::after{bottom:0;right:0}
+.g-content{position:relative;z-index:1;text-align:center;max-width:640px;padding:0 24px}
+.g-by{font-size:9px;letter-spacing:.7em;text-transform:uppercase;color:rgba(232,184,75,.45);margin-bottom:24px;animation:fadeUp .7s .3s ease both}
+.g-title{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(60px,10vw,108px);line-height:.92;letter-spacing:-.02em;color:rgba(255,255,255,.92);margin-bottom:8px;animation:fadeUp .9s .45s ease both}
+.g-title strong{font-weight:800;font-style:italic;color:var(--gold2)}
+.g-rule{width:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:22px auto;animation:ruleGrow .9s .8s ease both}
+@keyframes ruleGrow{to{width:280px}}
+.g-sub{font-size:13px;font-weight:300;color:rgba(255,255,255,.4);letter-spacing:.1em;margin-bottom:48px;animation:fadeUp .7s .7s ease both}
+.g-btn{display:inline-flex;align-items:center;gap:14px;padding:0;font-family:'DM Sans';font-size:10px;font-weight:500;letter-spacing:.6em;text-transform:uppercase;color:var(--gold2);background:none;border:none;cursor:pointer;animation:fadeUp .7s .9s ease both;transition:gap .3s}
+.g-btn:hover{gap:22px}
+.g-btn::after{content:'';width:52px;height:1px;background:var(--gold);display:block;transition:width .3s}
+.g-btn:hover::after{width:72px}
+.g-hint{position:absolute;bottom:28px;left:50%;transform:translateX(-50%);font-size:8.5px;letter-spacing:.45em;text-transform:uppercase;color:rgba(255,255,255,.2);animation:gblink 2s 2s ease infinite both}
+@keyframes gblink{0%,100%{opacity:.3}50%{opacity:.9}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
  
-const FAL_KEY = process.env.FAL_API_KEY || '';
-fal.config({ credentials: FAL_KEY });
-console.log('Promo Studio · FAL:', FAL_KEY ? FAL_KEY.substring(0,14)+'...' : 'MISSING ⚠');
+/* APP */
+#app{display:none;min-height:100vh}
+.hd{height:52px;background:rgba(8,8,15,.95);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:12px;position:sticky;top:0;z-index:50;backdrop-filter:blur(12px)}
+.hd-logo{font-family:'Syne';font-size:17px;font-weight:800;background:linear-gradient(90deg,var(--gold),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hd-sep{width:1px;height:20px;background:var(--border)}
+.hd-tag{font-size:9px;letter-spacing:.3em;text-transform:uppercase;color:var(--text3)}
+.hd-sp{flex:1}
  
-// ── Upload ──────────────────────────────────────────
-const storage = multer.diskStorage({
-  destination: 'public/uploads/',
-  filename: (_, f, cb) => cb(null, Date.now() + path.extname(f.originalname))
-});
-const upload = multer({ storage, limits: { fileSize: 30*1024*1024 } });
+/* LAYOUT */
+.body{max-width:1200px;margin:0 auto;padding:28px 22px 80px;display:grid;grid-template-columns:340px 1fr;gap:24px;align-items:start}
+@media(max-width:900px){.body{grid-template-columns:1fr}}
  
-app.post('/api/upload', upload.single('file'), (req, res) => {
-  if (!req.file) return res.status(400).json({ error: 'No file' });
-  res.json({ url: `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`, filename: req.file.filename });
-});
+/* PANELS */
+.panel{background:var(--s1);border:1px solid var(--border);margin-bottom:12px;overflow:hidden}
+.ph{padding:11px 16px 9px;border-bottom:1px solid var(--border)}
+.pt{font-size:9px;font-weight:600;letter-spacing:.26em;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:6px}
+.pt::before{content:'';width:3px;height:11px;background:var(--gold);flex-shrink:0}
+.pb{padding:14px}
  
-// ── Scene backgrounds — lifestyle photography ───────
-// These describe the SCENE WITHOUT the product — we add the phone ourselves
-const SCENE_BACKGROUNDS = {
-  car: {
-    prompt: 'elegant confident woman in stylish outfit standing next to a sleek luxury black sports car, holding a blank white smartphone screen facing toward the camera, warm golden hour sunlight, professional fashion photography, cinematic, bokeh background, photorealistic, 8K',
-    phone: { x:0.38, y:0.22, w:0.24, h:0.44 }, // phone position on 1:1 canvas
-    format: { w:1080, h:1080 }
-  },
-  flatlay_bag: {
-    prompt: 'luxury feminine flat lay, overhead shot, cream marble surface, designer handbag, gold keys, fresh pink roses, a blank white iPhone face-up showing empty white screen, gold jewellery, editorial photography, warm natural light, 4K',
-    phone: { x:0.52, y:0.38, w:0.32, h:0.38 },
-    format: { w:1080, h:1080 }
-  },
-  cafe_table: {
-    prompt: 'stylish woman sitting at a luxury cafe table, holding a blank white smartphone screen facing camera, cappuccino and flowers on the table, warm ambient lighting, lifestyle photography, blurred background, 8K photorealistic',
-    phone: { x:0.36, y:0.18, w:0.28, h:0.50 },
-    format: { w:1080, h:1080 }
-  },
-  desk_flatlay: {
-    prompt: 'overhead luxury desk flat lay, white marble surface, open designer notebook, gold pen, small succulent plant, blank white iPhone screen face-up, macbook keyboard partially visible, editorial photography, natural window light, 4K',
-    phone: { x:0.55, y:0.40, w:0.28, h:0.36 },
-    format: { w:1080, h:1080 }
-  },
-  woman_window: {
-    prompt: 'confident elegant woman standing in front of large bright window, holding blank white smartphone screen toward camera, luxury minimal interior, white walls, natural diffused light, professional photography, 8K',
-    phone: { x:0.36, y:0.20, w:0.28, h:0.50 },
-    format: { w:1080, h:1080 }
-  },
-  story_model: {
-    prompt: 'stylish female entrepreneur in modern office, looking at camera, holding blank white smartphone showing empty screen, confident pose, professional backdrop, editorial fashion photography, 9:16 portrait, 4K',
-    phone: { x:0.36, y:0.22, w:0.28, h:0.46 },
-    format: { w:1080, h:1920 }
-  },
-  story_lifestyle: {
-    prompt: 'beautiful woman walking in luxury shopping district, holding blank white smartphone screen toward camera, golden hour sunlight, designer outfit, blurred city background, lifestyle fashion photography, 9:16 portrait, 8K',
-    phone: { x:0.36, y:0.20, w:0.28, h:0.48 },
-    format: { w:1080, h:1920 }
-  },
-  laptop_cafe: {
-    prompt: 'stylish woman working at a bright cafe, open MacBook with blank white screen visible, coffee cup, flowers, warm ambient light, work from anywhere lifestyle photography, 8K photorealistic',
-    phone: { x:0.25, y:0.25, w:0.50, h:0.38 }, // laptop screen
-    format: { w:1080, h:1080 }
-  },
-  rooftop: {
-    prompt: 'confident woman on luxury hotel rooftop terrace, city skyline behind, holding blank white smartphone toward camera, golden sunset light, editorial fashion photography, cinematic, 8K',
-    phone: { x:0.37, y:0.22, w:0.26, h:0.46 },
-    format: { w:1080, h:1080 }
-  },
-  minimal_studio: {
-    prompt: 'minimal white studio photography setup, female model in elegant outfit, holding blank white smartphone screen facing camera, clean white background, dramatic side lighting, commercial photography, 8K',
-    phone: { x:0.37, y:0.20, w:0.26, h:0.48 },
-    format: { w:1080, h:1080 }
-  },
-  pool_villa: {
-    prompt: 'luxury infinity pool villa, woman in elegant swimwear lounging, blank white smartphone on marble surface beside pool, tropical flowers, blue water, golden light, aspirational lifestyle photography, 8K',
-    phone: { x:0.50, y:0.45, w:0.28, h:0.34 },
-    format: { w:1080, h:1080 }
-  },
-  flowers_flatlay: {
-    prompt: 'luxury flat lay overhead, soft pink and white peonies, cream linen fabric, blank white iPhone face-up, pearl jewellery, gold pen, editorial feminine photography, natural light, 4K',
-    phone: { x:0.48, y:0.35, w:0.30, h:0.36 },
-    format: { w:1080, h:1080 }
-  },
-};
+/* Upload */
+.upload-zone{border:2px dashed rgba(232,184,75,.22);padding:22px 14px;text-align:center;cursor:pointer;transition:all .2s;background:rgba(232,184,75,.02);position:relative}
+.upload-zone:hover,.upload-zone.drag{border-color:rgba(232,184,75,.5);background:rgba(232,184,75,.07)}
+.upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload-zone.filled{padding:5px;border-style:solid;border-color:rgba(232,184,75,.4)}
+.upload-zone.filled img{width:100%;max-height:130px;object-fit:contain;display:block;background:#000}
+.uz-ico{font-size:26px;opacity:.28;margin-bottom:6px}
+.uz-txt{font-size:10px;color:var(--text3);line-height:1.6}
  
-// ── Draw phone mockup with design on screen ─────────
-function drawPhoneMockup(ctx, designImg, px, py, pw, ph, isLaptop) {
-  if (isLaptop) {
-    // Laptop screen frame
-    const r = 4;
-    // Screen back
-    const sg = ctx.createLinearGradient(px, py, px+pw, py+ph);
-    sg.addColorStop(0, '#2a2a2a'); sg.addColorStop(1, '#1a1a1a');
-    ctx.fillStyle = sg;
-    roundRectFill(ctx, px, py, pw, ph, r);
-    // Screen bezel
-    const bx=px+8, by=py+6, bw=pw-16, bh=ph-12;
-    ctx.fillStyle = '#050508';
-    roundRectFill(ctx, bx, by, bw, bh, 3);
-    // Design
-    ctx.save();
-    roundRectClip(ctx, bx, by, bw, bh, 3);
-    ctx.drawImage(designImg, bx, by, bw, bh);
-    // glare
-    const gl = ctx.createLinearGradient(bx, by, bx+bw*0.5, by+bh*0.4);
-    gl.addColorStop(0,'rgba(255,255,255,0.06)'); gl.addColorStop(1,'rgba(255,255,255,0)');
-    ctx.fillStyle=gl; ctx.fillRect(bx,by,bw,bh);
-    ctx.restore();
-    // Base
-    ctx.fillStyle = '#222'; roundRectFill(ctx, px-12, py+ph, pw+24, 10, 0,0,4,4);
-    return;
-  }
+/* Scene grid */
+.scene-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.scene-btn{background:var(--card);border:1px solid var(--border);padding:9px 5px;cursor:pointer;text-align:center;transition:all .14s;border-radius:3px}
+.scene-btn:hover{border-color:var(--border2)}
+.scene-btn.on{border-color:var(--gold);background:rgba(232,184,75,.1)}
+.sb-ico{font-size:17px;margin-bottom:3px}
+.sb-lbl{font-size:9px;font-weight:500;color:var(--text2);line-height:1.2}
+.scene-btn.on .sb-lbl{color:var(--gold)}
  
-  // Phone frame
-  const r = Math.round(pw * 0.12);
-  // Shadow
-  ctx.save();
-  ctx.shadowColor = 'rgba(0,0,0,0.65)'; ctx.shadowBlur = 28; ctx.shadowOffsetX = 4; ctx.shadowOffsetY = 10;
-  const bodyG = ctx.createLinearGradient(px, py, px+pw, py+ph);
-  bodyG.addColorStop(0, '#3a3a3a'); bodyG.addColorStop(0.4, '#242424'); bodyG.addColorStop(1, '#1a1a1a');
-  ctx.fillStyle = bodyG; roundRectFill(ctx, px, py, pw, ph, r); ctx.fill();
-  ctx.restore();
-  // Body
-  const bodyG2 = ctx.createLinearGradient(px, py, px+pw, py+ph);
-  bodyG2.addColorStop(0, '#3a3a3a'); bodyG2.addColorStop(0.4, '#242424'); bodyG2.addColorStop(1, '#1a1a1a');
-  ctx.fillStyle = bodyG2; roundRectFill(ctx, px, py, pw, ph, r); ctx.fill();
-  // Edge glint
-  ctx.strokeStyle = 'rgba(255,255,255,0.18)'; ctx.lineWidth = 1.5; roundRectPath(ctx, px, py, pw, ph, r); ctx.stroke();
-  // Screen area
-  const sx = px+5, sy = py+10, sw = pw-10, sh = ph-20, sr = r-4;
-  ctx.fillStyle = '#020209'; roundRectFill(ctx, sx, sy, sw, sh, sr); ctx.fill();
-  // Design on screen
-  ctx.save(); roundRectClip(ctx, sx, sy, sw, sh, sr);
-  ctx.drawImage(designImg, sx, sy, sw, sh);
-  // Screen glare
-  const glare = ctx.createLinearGradient(sx, sy, sx+sw*0.6, sy+sh*0.45);
-  glare.addColorStop(0,'rgba(255,255,255,0.09)'); glare.addColorStop(1,'rgba(255,255,255,0)');
-  ctx.fillStyle = glare; ctx.fillRect(sx, sy, sw, sh);
-  ctx.restore();
-  // Notch/Dynamic Island
-  ctx.fillStyle = '#020209';
-  roundRectFill(ctx, px+pw/2-pw*0.18, sy+4, pw*0.36, ph*0.034, ph*0.016); ctx.fill();
-  // Home bar
-  const hbG = ctx.createLinearGradient(px+pw/2-pw*0.22, 0, px+pw/2+pw*0.22, 0);
-  hbG.addColorStop(0,'rgba(255,255,255,0)'); hbG.addColorStop(0.5,'rgba(255,255,255,0.25)'); hbG.addColorStop(1,'rgba(255,255,255,0)');
-  ctx.fillStyle = hbG; roundRectFill(ctx, px+pw/2-pw*0.22, py+ph-ph*0.028, pw*0.44, ph*0.014, ph*0.007); ctx.fill();
+/* Text fields */
+.field{margin-bottom:10px}
+.field label{display:block;font-size:8px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--text3);margin-bottom:4px}
+.inp{width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);font-family:'DM Sans';font-size:12px;padding:8px 10px;outline:none;transition:border-color .15s}
+.inp:focus{border-color:rgba(232,184,75,.45)}
+.inp::placeholder{color:var(--text3)}
+ 
+/* Format pills */
+.fmt-row{display:flex;gap:5px}
+.fmt-btn{flex:1;padding:6px 4px;font-size:9.5px;font-weight:600;letter-spacing:.06em;border:1px solid var(--border);color:var(--text2);background:transparent;cursor:pointer;text-align:center;transition:all .14s}
+.fmt-btn:hover{border-color:var(--border2);color:var(--text)}
+.fmt-btn.on{border-color:var(--gold);color:var(--gold);background:rgba(232,184,75,.08)}
+ 
+/* Generate button */
+.gen-btn{width:100%;padding:15px;font-family:'Syne';font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border:none;cursor:pointer;background:linear-gradient(135deg,#8B6100,var(--gold),var(--gold2));color:#0a0800;box-shadow:0 3px 18px rgba(232,184,75,.28);transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.gen-btn:hover{box-shadow:0 6px 28px rgba(232,184,75,.48);transform:translateY(-1px)}
+.gen-btn:disabled{opacity:.35;cursor:not-allowed;transform:none!important}
+.gen-spin{width:16px;height:16px;border:2.5px solid rgba(0,0,0,.2);border-top-color:#000;border-radius:50%;animation:sp .6s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+ 
+/* RIGHT: Result */
+.right{position:sticky;top:68px}
+.out-lbl{font-size:9px;font-weight:600;letter-spacing:.3em;text-transform:uppercase;color:var(--text3);margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.out-lbl::before,.out-lbl::after{content:'';flex:1;height:1px;background:var(--border2)}
+.out-empty{background:var(--s1);border:1px solid var(--border);min-height:520px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+.oe-ico{font-size:52px;opacity:.1}
+.oe-txt{font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);text-align:center;line-height:1.9}
+.out-result{display:none}
+.out-result img{width:100%;display:block;border:1px solid var(--border)}
+.dl-row{display:flex;gap:8px;margin-top:10px}
+.act-btn{flex:1;padding:12px;font-family:'DM Sans';font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;border:none;cursor:pointer;transition:all .18s;display:flex;align-items:center;justify-content:center;gap:6px}
+.act-btn.gold{background:var(--gold);color:#0a0800;box-shadow:0 2px 12px rgba(232,184,75,.3)}
+.act-btn.gold:hover{background:var(--gold2);box-shadow:0 4px 22px rgba(232,184,75,.5);transform:translateY(-1px)}
+.act-btn.outline{background:transparent;border:1px solid var(--border2);color:var(--text2)}
+.act-btn.outline:hover{border-color:var(--border);color:var(--text)}
+.out-meta{font-size:9.5px;color:var(--text3);text-align:center;margin-top:8px}
+ 
+/* Loading */
+.loading-overlay{display:none;background:var(--s1);border:1px solid var(--border);min-height:520px;flex-direction:column;align-items:center;justify-content:center;gap:18px}
+.loading-overlay.show{display:flex}
+.load-ring{width:48px;height:48px;border:3px solid rgba(232,184,75,.15);border-top-color:var(--gold);border-radius:50%;animation:sp .8s linear infinite}
+.load-steps{display:flex;flex-direction:column;gap:8px;align-items:center}
+.load-step{font-size:10px;letter-spacing:.12em;color:var(--text3);display:flex;align-items:center;gap:8px;transition:color .3s}
+.load-step.act{color:var(--gold)}
+.load-step.done{color:var(--green)}
+.load-step::before{content:'○';font-size:10px}
+.load-step.act::before{content:'◉';color:var(--gold)}
+.load-step.done::before{content:'✓';color:var(--green)}
+ 
+/* Toast */
+#toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%) translateY(50px);z-index:999;background:var(--s1);border:1px solid var(--border2);border-top:2px solid var(--gold);padding:9px 18px;font-size:11px;font-weight:500;opacity:0;transition:all .25s;white-space:nowrap;border-radius:5px}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+#toast.g{border-top-color:var(--green)}
+#toast.e{border-top-color:var(--red)}
+</style>
+</head>
+<body>
+ 
+<!-- GATE -->
+<div id="gate" onclick="enter()">
+  <div class="g-grid"></div>
+  <div class="g-orb g-orb-1"></div><div class="g-orb g-orb-2"></div>
+  <div class="g-scan"></div><div class="g-scan"></div><div class="g-scan"></div>
+  <div class="g-corner tl"></div><div class="g-corner tr"></div>
+  <div class="g-corner bl"></div><div class="g-corner br"></div>
+  <div class="g-content">
+    <div class="g-by">NG Intel Studio</div>
+    <div class="g-title">Promo<br><strong>Studio</strong></div>
+    <div class="g-rule"></div>
+    <div class="g-sub">Your product on a phone · in a lifestyle scene · ready to post</div>
+    <button class="g-btn">Open Studio</button>
+  </div>
+  <div class="g-hint">Click anywhere to enter</div>
+</div>
+ 
+<!-- APP -->
+<div id="app">
+  <div class="hd">
+    <div class="hd-logo">Promo Studio</div>
+    <div class="hd-sep"></div>
+    <div class="hd-tag">NG Intel Studio</div>
+    <div class="hd-sp"></div>
+  </div>
+ 
+  <div class="body">
+    <div class="left">
+ 
+      <!-- Upload -->
+      <div class="panel">
+        <div class="ph"><div class="pt">Your Image</div></div>
+        <div class="pb">
+          <div class="upload-zone" id="dz" ondragover="dzOver(event)" ondragleave="dzLeave(event)" ondrop="dzDrop(event)">
+            <input type="file" accept="image/*" onchange="handleUpload(this)">
+            <div id="dz-inner"><div class="uz-ico">📸</div><div class="uz-txt">Upload your photo, poster, product<br>or any promotional image</div></div>
+            <img id="dz-prev" style="display:none">
+          </div>
+        </div>
+      </div>
+ 
+      <!-- Scene -->
+      <div class="panel">
+        <div class="ph"><div class="pt">Lifestyle Scene</div></div>
+        <div class="pb">
+          <div class="scene-grid">
+            <div class="scene-btn on" data-s="car" onclick="pickScene(this)"><div class="sb-ico">🚗</div><div class="sb-lbl">Woman + Car</div></div>
+            <div class="scene-btn" data-s="flatlay_bag" onclick="pickScene(this)"><div class="sb-ico">👜</div><div class="sb-lbl">Bag + Flowers</div></div>
+            <div class="scene-btn" data-s="cafe_table" onclick="pickScene(this)"><div class="sb-ico">☕</div><div class="sb-lbl">Café Table</div></div>
+            <div class="scene-btn" data-s="desk_flatlay" onclick="pickScene(this)"><div class="sb-ico">💼</div><div class="sb-lbl">Desk Flat Lay</div></div>
+            <div class="scene-btn" data-s="woman_window" onclick="pickScene(this)"><div class="sb-ico">🪟</div><div class="sb-lbl">Woman + Window</div></div>
+            <div class="scene-btn" data-s="story_model" onclick="pickScene(this)"><div class="sb-ico">📱</div><div class="sb-lbl">Story — Model</div></div>
+            <div class="scene-btn" data-s="story_lifestyle" onclick="pickScene(this)"><div class="sb-ico">🛍</div><div class="sb-lbl">Story — Street</div></div>
+            <div class="scene-btn" data-s="laptop_cafe" onclick="pickScene(this)"><div class="sb-ico">💻</div><div class="sb-lbl">Laptop Scene</div></div>
+            <div class="scene-btn" data-s="rooftop" onclick="pickScene(this)"><div class="sb-ico">🌆</div><div class="sb-lbl">Rooftop View</div></div>
+            <div class="scene-btn" data-s="minimal_studio" onclick="pickScene(this)"><div class="sb-ico">✨</div><div class="sb-lbl">Studio White</div></div>
+            <div class="scene-btn" data-s="pool_villa" onclick="pickScene(this)"><div class="sb-ico">🏖</div><div class="sb-lbl">Pool Villa</div></div>
+            <div class="scene-btn" data-s="flowers_flatlay" onclick="pickScene(this)"><div class="sb-ico">🌸</div><div class="sb-lbl">Flowers Flat Lay</div></div>
+          </div>
+        </div>
+      </div>
+ 
+      <!-- AI Copy + Text overlay -->
+      <div class="panel">
+        <div class="ph"><div class="pt">✦ AI Copy Generator</div></div>
+        <div class="pb">
+          <div class="field"><label>Product Name</label>
+            <input class="inp" type="text" id="prod-name" placeholder="e.g. UGC Twin Engine, AI Tool Bundle"></div>
+          <div class="field"><label>What it does / who it's for</label>
+            <textarea class="inp" id="prod-desc" rows="2" style="resize:none" placeholder="e.g. Helps female entrepreneurs create viral UGC content with AI in minutes"></textarea></div>
+          <div class="field"><label>Price (optional)</label>
+            <input class="inp" type="text" id="prod-price" placeholder="e.g. £10/month, Free, £97"></div>
+          <div class="field"><label>Platform</label>
+            <select class="inp" id="prod-platform">
+              <option value="instagram">Instagram / TikTok</option>
+              <option value="facebook">Facebook</option>
+              <option value="linkedin">LinkedIn</option>
+            </select></div>
+          <button id="ai-gen-btn" onclick="generateAIText()" style="width:100%;padding:12px;font-family:DM Sans,sans-serif;font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;border:none;cursor:pointer;background:linear-gradient(135deg,#5b21b6,var(--purple),#9B6BF2);color:#fff;box-shadow:0 2px 14px rgba(155,107,242,.35);transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:14px">
+            <span id="ai-btn-txt">✦ Write Copy with Claude</span>
+          </button>
+          <div style="border-top:1px solid var(--border);padding-top:12px">
+            <div style="font-size:8px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-bottom:8px">Generated Text (edit if needed)</div>
+            <div class="field"><label>Headline</label>
+              <input class="inp" type="text" id="txt-headline" placeholder="Auto-generated or type your own"></div>
+            <div class="field"><label>Subtext</label>
+              <input class="inp" type="text" id="txt-sub" placeholder="Auto-generated or type your own"></div>
+            <div class="field"><label>Call to Action</label>
+              <input class="inp" type="text" id="txt-cta" placeholder="Auto-generated or type your own"></div>
+          </div>
+        </div>
+      </div>
+ 
+      <!-- Format -->
+      <div class="panel">
+        <div class="ph"><div class="pt">Output Format</div></div>
+        <div class="pb">
+          <div class="fmt-row">
+            <div class="fmt-btn on" data-f="square" onclick="pickFmt(this)">1:1 Square</div>
+            <div class="fmt-btn" data-f="portrait" onclick="pickFmt(this)">4:5 Feed</div>
+            <div class="fmt-btn" data-f="story" onclick="pickFmt(this)">9:16 Story</div>
+          </div>
+        </div>
+      </div>
+ 
+      <!-- Custom -->
+      <div class="panel">
+        <div class="ph"><div class="pt">Custom Scene (optional)</div></div>
+        <div class="pb">
+          <textarea class="inp" id="custom-prompt" rows="3" placeholder="Describe a custom scene… e.g. rooftop terrace at sunset, luxury pool villa, neon-lit studio"></textarea>
+        </div>
+      </div>
+ 
+      <button class="gen-btn" id="gen-btn" onclick="generate()" disabled>✦ Generate Promo</button>
+      <div style="font-size:9.5px;color:var(--text3);text-align:center;margin-top:8px">Takes ~30 seconds · FAL AI · Ready to post</div>
+    </div>
+ 
+    <!-- RIGHT -->
+    <div class="right">
+      <div class="out-lbl">Promo Result</div>
+ 
+      <div class="out-empty" id="out-empty">
+        <div class="oe-ico">✦</div>
+        <div class="oe-txt">Upload your image<br>choose a lifestyle scene<br>click Generate Promo<br><br>Your image placed into a<br>real-world promotional photo</div>
+      </div>
+ 
+      <div class="loading-overlay" id="loading">
+        <div class="load-ring"></div>
+        <div class="load-steps">
+          <div class="load-step" id="ls1">Generating lifestyle background</div>
+          <div class="load-step" id="ls2">Compositing your image</div>
+          <div class="load-step" id="ls3">Adding text overlay</div>
+          <div class="load-step" id="ls4">Finalising</div>
+        </div>
+      </div>
+ 
+      <div class="out-result" id="out-result">
+        <img id="result-img" alt="Promo result">
+        <div class="dl-row">
+          <button class="act-btn gold" onclick="download()">↓ Download</button>
+          <button class="act-btn outline" onclick="generate()">↺ Regenerate</button>
+        </div>
+        <div class="out-meta" id="out-meta"></div>
+      </div>
+    </div>
+  </div>
+</div>
+ 
+<div id="toast"></div>
+ 
+<script>
+const S = window.location.origin;
+var uploadedUrl = null;
+var currentScene = 'car';
+var currentFmt   = 'square';
+var resultUrl    = null;
+var generating   = false;
+ 
+function enter(){
+  var g=document.getElementById('gate'); g.classList.add('out');
+  setTimeout(function(){ g.style.display='none'; document.getElementById('app').style.display='block'; },1000);
 }
  
-// Canvas helpers
-function roundRectFill(ctx, x, y, w, h, tl, tr, br, bl) {
-  roundRectPath(ctx, x, y, w, h, tl, tr, br, bl); ctx.fill();
-}
-function roundRectClip(ctx, x, y, w, h, r) {
-  roundRectPath(ctx, x, y, w, h, r); ctx.clip();
-}
-function roundRectPath(ctx, x, y, w, h, tl, tr, br, bl) {
-  const r = typeof tl === 'number' ? tl : 6;
-  tr = tr||r; br = br||r; bl = bl||r;
-  ctx.beginPath();
-  ctx.moveTo(x+r, y);
-  ctx.lineTo(x+w-tr, y); ctx.arcTo(x+w, y, x+w, y+tr, tr);
-  ctx.lineTo(x+w, y+h-br); ctx.arcTo(x+w, y+h, x+w-br, y+h, br);
-  ctx.lineTo(x+bl, y+h); ctx.arcTo(x, y+h, x, y+h-bl, bl);
-  ctx.lineTo(x, y+r); ctx.arcTo(x, y, x+r, y, r);
-  ctx.closePath();
-}
- 
-// Fetch helper
-function fetchBuffer(url) {
-  return new Promise((resolve, reject) => {
-    const mod = url.startsWith('https') ? https : http;
-    mod.get(url, res => {
-      const chunks = [];
-      res.on('data', c => chunks.push(c));
-      res.on('end', () => resolve(Buffer.concat(chunks)));
-      res.on('error', reject);
-    }).on('error', reject);
+// Upload with auto-crop
+function autoCropBlack(file){
+  return new Promise(function(resolve){
+    var reader=new FileReader();
+    reader.onload=function(e){
+      var img=new Image();
+      img.onload=function(){
+        var W=img.width,H=img.height;
+        var c=document.createElement('canvas'); c.width=W; c.height=H;
+        var ctx=c.getContext('2d'); ctx.drawImage(img,0,0);
+        var data=ctx.getImageData(0,0,W,H).data;
+        var top=H,bot=0,lft=W,rgt=0;
+        for(var y=0;y<H;y++) for(var x=0;x<W;x++){
+          var i=(y*W+x)*4;
+          if(data[i+3]>20&&(data[i]>18||data[i+1]>18||data[i+2]>18)){
+            if(y<top)top=y; if(y>bot)bot=y; if(x<lft)lft=x; if(x>rgt)rgt=x;
+          }
+        }
+        var pad=4; top=Math.max(0,top-pad); bot=Math.min(H-1,bot+pad); lft=Math.max(0,lft-pad); rgt=Math.min(W-1,rgt+pad);
+        var cw=rgt-lft+1,ch=bot-top+1;
+        if(cw>10&&ch>10&&(cw<W*0.97||ch<H*0.97)){
+          var out=document.createElement('canvas'); out.width=cw; out.height=ch;
+          out.getContext('2d').drawImage(c,lft,top,cw,ch,0,0,cw,ch);
+          out.toBlob(function(blob){ resolve(blob?new File([blob],file.name,{type:'image/png'}):file); },'image/png',0.98);
+        } else resolve(file);
+      };
+      img.onerror=function(){ resolve(file); };
+      img.src=e.target.result;
+    };
+    reader.onerror=function(){ resolve(file); };
+    reader.readAsDataURL(file);
   });
 }
  
-// ── GENERATE ───────────────────────────────────────
-app.post('/api/mockup', async (req, res) => {
-  if (!FAL_KEY) return res.status(500).json({ error: 'FAL_API_KEY not set in Railway env vars' });
+async function handleUpload(input){
+  var file=input.files[0]; if(!file) return;
+  var zone=document.getElementById('dz');
+  zone.querySelector('#dz-inner').style.display='none';
+  toast('Processing image…');
+  try{
+    var clean=await autoCropBlack(file);
+    var fd=new FormData(); fd.append('file',clean);
+    var r=await fetch(S+'/api/upload',{method:'POST',body:fd});
+    var d=await r.json();
+    if(d.error) throw new Error(d.error);
+    uploadedUrl=d.url;
+    var prev=document.getElementById('dz-prev');
+    prev.src=uploadedUrl; prev.style.display='block';
+    zone.classList.add('filled');
+    document.getElementById('gen-btn').disabled=false;
+    toast('Image ready ✓','g');
+  } catch(e){ toast(e.message,'e'); zone.querySelector('#dz-inner').style.display=''; }
+}
+function dzOver(e){e.preventDefault();document.getElementById('dz').classList.add('drag')}
+function dzLeave(e){document.getElementById('dz').classList.remove('drag')}
+function dzDrop(e){e.preventDefault();dzLeave(e);handleUpload({files:e.dataTransfer.files})}
  
-  const { imageUrl, scene, customPrompt, headline='', subtext='', cta='' } = req.body;
-  if (!imageUrl) return res.status(400).json({ error: 'No image URL' });
+function pickScene(el){ document.querySelectorAll('.scene-btn').forEach(function(b){b.classList.remove('on')}); el.classList.add('on'); currentScene=el.dataset.s; }
+function pickFmt(el){ document.querySelectorAll('.fmt-btn').forEach(function(b){b.classList.remove('on')}); el.classList.add('on'); currentFmt=el.dataset.f; }
  
-  const sceneConfig = SCENE_BACKGROUNDS[scene] || SCENE_BACKGROUNDS.car;
-  const bgPrompt = customPrompt || sceneConfig.prompt;
-  const phonePos = sceneConfig.phone;
-  const fmt = sceneConfig.format;
-  const isLaptop = scene === 'laptop_cafe';
+// Step indicators
+function stepAct(n){ document.getElementById('ls'+n).className='load-step act'; }
+function stepDone(n){ document.getElementById('ls'+n).className='load-step done'; }
+function stepsReset(){ for(var i=1;i<=4;i++) document.getElementById('ls'+i).className='load-step'; }
  
-  console.log(`[promo] scene=${scene} fmt=${fmt.w}x${fmt.h} generating BG…`);
+async function generate(){
+  if(!uploadedUrl){ toast('Upload your image first','e'); return; }
+  if(generating) return;
+  generating=true;
+  document.getElementById('gen-btn').innerHTML='<div class="gen-spin"></div> Generating…';
+  document.getElementById('gen-btn').disabled=true;
+  document.getElementById('out-empty').style.display='none';
+  document.getElementById('out-result').style.display='none';
+  document.getElementById('loading').classList.add('show');
+  stepsReset(); stepAct(1);
  
-  try {
-    // Step 1: Generate background with FAL text2image
-    const bgResult = await fal.subscribe('fal-ai/flux/dev', {
-      input: {
-        prompt: bgPrompt,
-        image_size: { width: fmt.w, height: fmt.h },
-        num_inference_steps: 25,
-        guidance_scale: 3.5,
-        num_images: 1,
-      },
-      logs: false
-    });
+  var stepTimer=setTimeout(function(){ stepDone(1); stepAct(2); },8000);
+  var step2Timer=setTimeout(function(){ stepDone(2); stepAct(3); },18000);
  
-    const bgUrl = bgResult.data?.images?.[0]?.url || bgResult.data?.image?.url;
-    if (!bgUrl) throw new Error('Background generation failed — no image returned');
-    console.log(`[promo] BG ready: ${bgUrl.substring(0,60)}`);
+  try{
+    var body={
+      imageUrl: uploadedUrl,
+      scene: currentScene,
+      format: currentFmt,
+      headline: document.getElementById('txt-headline').value.trim(),
+      subtext: document.getElementById('txt-sub').value.trim(),
+      cta: document.getElementById('txt-cta').value.trim(),
+      customPrompt: document.getElementById('custom-prompt').value.trim()||null
+    };
+    var r=await fetch(S+'/api/mockup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    var d=await r.json();
+    clearTimeout(stepTimer); clearTimeout(step2Timer);
+    if(d.error) throw new Error(d.error);
  
-    // Step 2: Load images
-    const bgBuf = await fetchBuffer(bgUrl);
-    const bgImg  = await loadImage(bgBuf);
+    stepDone(1); stepDone(2); stepAct(3);
+    setTimeout(function(){ stepDone(3); stepDone(4); },400);
  
-    // Load design from disk (fastest, no CORS)
-    const designFilename = imageUrl.split('/uploads/').pop().split('?')[0];
-    const designDiskPath = path.join(__dirname, 'public/uploads', designFilename);
-    const designImg = fs.existsSync(designDiskPath)
-      ? await loadImage(designDiskPath)
-      : await loadImage(await fetchBuffer(imageUrl));
-    console.log('[promo] design loaded');
+    resultUrl=d.url;
+    var img=document.getElementById('result-img');
+    img.onload=function(){
+      document.getElementById('loading').classList.remove('show');
+      document.getElementById('out-result').style.display='block';
+      document.getElementById('out-meta').textContent='Scene: '+currentScene+' · FAL AI · Ready to post';
+      toast('Promo image ready!','g');
+    };
+    img.onerror=function(){
+      document.getElementById('loading').classList.remove('show');
+      document.getElementById('out-result').style.display='block';
+      toast('Done — download below','g');
+    };
+    setTimeout(function(){
+      document.getElementById('loading').classList.remove('show');
+      document.getElementById('out-result').style.display='block';
+    },5000);
+    img.src=d.url+'?t='+Date.now();
  
-    // Step 3: Composite
-    const W = bgImg.width  || fmt.w;
-    const H = bgImg.height || fmt.h;
-    const canvas = createCanvas(W, H);
-    const ctx    = canvas.getContext('2d');
- 
-    // Draw background
-    ctx.drawImage(bgImg, 0, 0, W, H);
- 
-    // Calculate phone position from relative coords
-    const px = Math.round(phonePos.x * W);
-    const py = Math.round(phonePos.y * H);
-    const pw = Math.round(phonePos.w * W);
-    const ph = Math.round(phonePos.h * H);
- 
-    // Draw phone mockup with design on screen
-    drawPhoneMockup(ctx, designImg, px, py, pw, ph, isLaptop);
- 
-    // Step 4: Text overlay
-    if (headline || subtext || cta) {
-      const bandH = Math.round(H * 0.26);
-      const band = ctx.createLinearGradient(0, H - bandH, 0, H);
-      band.addColorStop(0, 'rgba(0,0,0,0)');
-      band.addColorStop(0.35, 'rgba(0,0,0,0.7)');
-      band.addColorStop(1, 'rgba(0,0,0,0.88)');
-      ctx.fillStyle = band; ctx.fillRect(0, H - bandH, W, bandH);
- 
-      const pad = Math.round(W * 0.07);
-      let ty = H - bandH + Math.round(bandH * 0.2);
- 
-      if (headline) {
-        const fs1 = Math.round(W * 0.062);
-        ctx.font = `bold ${fs1}px Arial, sans-serif`;
-        ctx.fillStyle = '#ffffff';
-        ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 8;
-        const words = headline.split(' '), maxW = W - pad*2;
-        let line = '', lines = [];
-        words.forEach(w => { const t = line ? line+' '+w : w; if(ctx.measureText(t).width>maxW && line){lines.push(line);line=w;}else line=t; });
-        if(line) lines.push(line);
-        lines.forEach(l => { ctx.fillText(l, pad, ty); ty += Math.round(fs1*1.28); });
-        ctx.shadowBlur = 0; ty += Math.round(W*0.01);
-      }
-      if (subtext) {
-        const fs2 = Math.round(W * 0.036);
-        ctx.font = `${fs2}px Arial, sans-serif`;
-        ctx.fillStyle = 'rgba(255,255,255,0.78)';
-        ctx.fillText(subtext, pad, ty); ty += Math.round(fs2*1.6);
-      }
-      if (cta) {
-        const fs3 = Math.round(W * 0.032);
-        ctx.font = `bold ${fs3}px Arial, sans-serif`;
-        ctx.fillStyle = '#E8B84B';
-        ctx.fillText('→ ' + cta, pad, ty);
-      }
-    }
- 
-    // Save
-    const outName = `promo-${Date.now()}.jpg`;
-    const outPath = path.join(__dirname, 'public/uploads', outName);
-    fs.writeFileSync(outPath, canvas.toBuffer('image/jpeg', { quality: 0.93 }));
- 
-    const finalUrl = `${req.protocol}://${req.get('host')}/uploads/${outName}`;
-    console.log('[promo] done:', finalUrl);
-    res.json({ url: finalUrl });
- 
-  } catch(e) {
-    console.error('[promo] ERROR:', e.message);
-    res.status(500).json({ error: e.message });
+  } catch(e){
+    clearTimeout(stepTimer); clearTimeout(step2Timer);
+    document.getElementById('loading').classList.remove('show');
+    document.getElementById('out-empty').style.display='flex';
+    toast(e.message,'e');
   }
-});
+  generating=false;
+  document.getElementById('gen-btn').innerHTML='✦ Generate Promo';
+  document.getElementById('gen-btn').disabled=false;
+}
  
-app.get('/health', (_, res) => res.json({ ok: true, fal: !!FAL_KEY }));
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Promo Studio on :${PORT}`));
+async function generateAIText(){
+  var name = document.getElementById('prod-name').value.trim();
+  if(!name){ toast('Enter your product name first','e'); return; }
+  var btn = document.getElementById('ai-gen-btn');
+  var btnTxt = document.getElementById('ai-btn-txt');
+  btnTxt.textContent = '⏳ Claude is writing…';
+  btn.disabled = true;
+  try{
+    var r = await fetch(S+'/api/generate-text',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        productName: name,
+        productDesc: document.getElementById('prod-desc').value.trim(),
+        price: document.getElementById('prod-price').value.trim(),
+        platform: document.getElementById('prod-platform').value
+      })
+    });
+    var d = await r.json();
+    if(d.error) throw new Error(d.error);
+    document.getElementById('txt-headline').value = d.headline || '';
+    document.getElementById('txt-sub').value     = d.subtext  || '';
+    document.getElementById('txt-cta').value     = d.cta      || '';
+    toast('Copy written by Claude ✓','g');
+  } catch(e){ toast('Claude error: '+e.message,'e'); }
+  btnTxt.textContent = '✦ Write Copy with Claude';
+  btn.disabled = false;
+}
+ 
+async function download(){
+  if(!resultUrl){ toast('Generate first','e'); return; }
+  try{
+    var r=await fetch(resultUrl);
+    var blob=await r.blob();
+    var a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download='promo-'+currentScene+'-'+Date.now()+'.jpg';
+    a.click(); toast('Downloaded ✓','g');
+  } catch(e){ window.open(resultUrl,'_blank'); toast('Opened in new tab — right-click to save','g'); }
+}
+ 
+function toast(msg,tp){
+  var t=document.getElementById('toast');
+  t.textContent=(tp==='g'?'✓ ':tp==='e'?'✕ ':'')+msg;
+  t.className='show'+(tp?' '+tp:'');
+  clearTimeout(t._t); t._t=setTimeout(function(){ t.className=''; },3000);
+}
+</script>
+</body>
+</html>
+ 
+<!-- INTERACTIVE EDITOR MODAL -->
+<div id="editor-modal" style="display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.88);backdrop-filter:blur(6px);flex-direction:column;align-items:center;justify-content:flex-start;padding:16px;overflow-y:auto">
+  <div style="width:100%;max-width:1100px;margin:0 auto">
+    <!-- Editor header -->
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+      <div style="font-family:Syne,sans-serif;font-size:15px;font-weight:800;color:var(--gold2)">✦ Position Editor</div>
+      <div style="font-size:10px;color:var(--text3);letter-spacing:.12em">Drag · Resize · Rotate · then Export</div>
+      <div style="flex:1"></div>
+      <button onclick="closeEditor()" style="background:transparent;border:1px solid var(--border2);color:var(--text2);padding:7px 16px;font-family:DM Sans,sans-serif;font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;cursor:pointer">✕ Close</button>
+      <button onclick="exportEditor()" id="export-btn" style="background:var(--gold);color:#0a0800;border:none;padding:7px 18px;font-family:DM Sans,sans-serif;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;cursor:pointer">↓ Export PNG</button>
+    </div>
+ 
+    <!-- Editor layout -->
+    <div style="display:grid;grid-template-columns:200px 1fr;gap:12px;align-items:start">
+      <!-- Controls -->
+      <div style="background:var(--s1);border:1px solid var(--border);padding:14px;display:flex;flex-direction:column;gap:10px">
+        <div style="font-size:8.5px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:2px">Phone Mockup</div>
+ 
+        <div>
+          <label style="display:block;font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-bottom:4px">Width</label>
+          <input type="range" id="ed-w" min="100" max="900" value="280" oninput="updatePhone()" style="width:100%;accent-color:var(--gold)">
+          <span id="ed-w-val" style="font-size:9px;color:var(--text2)">280px</span>
+        </div>
+        <div>
+          <label style="display:block;font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-bottom:4px">Height</label>
+          <input type="range" id="ed-h" min="100" max="1200" value="500" oninput="updatePhone()" style="width:100%;accent-color:var(--gold)">
+          <span id="ed-h-val" style="font-size:9px;color:var(--text2)">500px</span>
+        </div>
+        <div>
+          <label style="display:block;font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-bottom:4px">Rotation</label>
+          <input type="range" id="ed-rot" min="-30" max="30" value="0" oninput="updatePhone()" style="width:100%;accent-color:var(--gold)">
+          <span id="ed-rot-val" style="font-size:9px;color:var(--text2)">0°</span>
+        </div>
+ 
+        <div style="border-top:1px solid var(--border);padding-top:10px;margin-top:2px">
+          <div style="font-size:8.5px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:8px">Text</div>
+          <input id="ed-headline" type="text" placeholder="Headline" style="width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);font-family:DM Sans,sans-serif;font-size:11px;padding:6px 8px;outline:none;margin-bottom:5px">
+          <input id="ed-sub" type="text" placeholder="Subtext" style="width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);font-family:DM Sans,sans-serif;font-size:11px;padding:6px 8px;outline:none;margin-bottom:5px">
+          <input id="ed-cta" type="text" placeholder="Call to action" style="width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);font-family:DM Sans,sans-serif;font-size:11px;padding:6px 8px;outline:none">
+        </div>
+ 
+        <div style="border-top:1px solid var(--border);padding-top:10px">
+          <div style="font-size:8px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-bottom:6px">Phone Style</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
+            <button onclick="setPhoneStyle('dark')" class="pstyle-btn on" id="ps-dark" style="padding:5px;font-size:9px;font-weight:600;border:1px solid var(--gold);background:rgba(232,184,75,.1);color:var(--gold);cursor:pointer">Dark</button>
+            <button onclick="setPhoneStyle('light')" class="pstyle-btn" id="ps-light" style="padding:5px;font-size:9px;font-weight:600;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer">Light</button>
+          </div>
+        </div>
+ 
+        <button onclick="resetPosition()" style="margin-top:6px;width:100%;padding:8px;font-family:DM Sans,sans-serif;font-size:9px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;border:1px solid var(--border2);color:var(--text2);background:transparent;cursor:pointer">↺ Reset Position</button>
+      </div>
+ 
+      <!-- Canvas -->
+      <div style="position:relative">
+        <div style="font-size:9px;color:var(--text3);margin-bottom:6px;letter-spacing:.1em">Click and drag the phone to reposition it</div>
+        <div style="position:relative;overflow:hidden;border:1px solid var(--border2)" id="editor-wrap">
+          <canvas id="editor-canvas" style="display:block;width:100%;cursor:grab"></canvas>
+          <!-- Draggable phone overlay -->
+          <div id="phone-overlay" style="position:absolute;cursor:move;user-select:none;touch-action:none">
+            <div id="phone-frame" style="width:100%;height:100%;border-radius:14%;background:#1a1a1a;box-shadow:0 8px 40px rgba(0,0,0,.8),inset 0 0 0 1px rgba(255,255,255,.12);position:relative;overflow:visible">
+              <!-- Screen -->
+              <div id="phone-screen-div" style="position:absolute;inset:4% 5%;border-radius:10%;overflow:hidden;background:#000">
+                <img id="phone-screen-img" style="width:100%;height:100%;object-fit:cover;display:block">
+              </div>
+              <!-- Notch -->
+              <div style="position:absolute;top:3.5%;left:50%;transform:translateX(-50%);width:28%;height:5%;background:#1a1a1a;border-radius:0 0 30% 30%;z-index:10"></div>
+              <!-- Home bar -->
+              <div style="position:absolute;bottom:2.5%;left:50%;transform:translateX(-50%);width:30%;height:1.2%;background:rgba(255,255,255,.25);border-radius:999px"></div>
+              <!-- Resize handle -->
+              <div id="resize-handle" style="position:absolute;bottom:-8px;right:-8px;width:18px;height:18px;background:var(--gold);border-radius:50%;cursor:se-resize;z-index:20;border:2px solid #000"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
  
