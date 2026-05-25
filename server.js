@@ -12,7 +12,21 @@ const Anthropic = require('@anthropic-ai/sdk');
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: '30mb' }));
-app.use(express.static('public'));
+app.use(express.static('public', {
+  setHeaders: (res) => {
+    res.set('Access-Control-Allow-Origin', '*');
+    res.set('Cross-Origin-Resource-Policy', 'cross-origin');
+  }
+}));
+ 
+// Image proxy — serves any uploaded file with CORS headers for canvas use
+app.get('/api/img/:filename', (req, res) => {
+  const p = path.join(__dirname, 'public/uploads', path.basename(req.params.filename));
+  if (!fs.existsSync(p)) return res.status(404).json({ error: 'Not found' });
+  res.set('Access-Control-Allow-Origin', '*');
+  res.set('Cross-Origin-Resource-Policy', 'cross-origin');
+  res.sendFile(p);
+});
  
 const FAL_KEY = process.env.FAL_API_KEY || '';
 const ANT_KEY = process.env.ANTHROPIC_API_KEY || '';
