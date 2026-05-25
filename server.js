@@ -84,7 +84,15 @@ function fetchBuffer(url){
 // ── Generate mockup ───────────────────────────────
 app.post('/api/mockup', async (req, res) => {
   if (!FAL_KEY) return res.status(500).json({ error: 'FAL_API_KEY not set' });
-  const { imageUrl, scene, customPrompt } = req.body;
+  const { imageUrl, scene, customPrompt, format='square', headline='', subtext='', cta='' } = req.body;
+ 
+  // Output dimensions by format
+  const FORMATS = {
+    square:  { w:1080, h:1080 },
+    portrait:{ w:1080, h:1350 },
+    story:   { w:1080, h:1920 },
+  };
+  const fmt = FORMATS[format] || FORMATS.square;
   if (!imageUrl) return res.status(400).json({ error: 'No image URL' });
  
   const bgPrompt = customPrompt || BG_PROMPTS[scene] || BG_PROMPTS.desk;
@@ -99,7 +107,7 @@ app.post('/api/mockup', async (req, res) => {
     const bgResult = await fal.subscribe('fal-ai/flux/schnell', {
       input: {
         prompt: bgPrompt,
-        image_size: { width:1080, height:1080 },
+        image_size: { width: fmt.w, height: fmt.h },
         num_inference_steps: 4,
         num_images: 1,
       },
@@ -134,8 +142,8 @@ app.post('/api/mockup', async (req, res) => {
       throw new Error('Could not load your design image: ' + imgErr.message);
     }
  
-    const W = bgImg.width  || 1080;
-    const H = bgImg.height || 1080;
+    const W = bgImg.width  || fmt.w;
+    const H = bgImg.height || fmt.h;
  
     const canvas = createCanvas(W, H);
     const ctx = canvas.getContext('2d');
@@ -178,6 +186,61 @@ app.post('/api/mockup', async (req, res) => {
     ctx.fillRect(-dw/2, -dh/2, dw, dh);
  
     ctx.restore();
+ 
+    // Text overlay
+    if (headline || subtext || cta) {
+      // Bottom gradient band
+      const bandH = Math.round(H * 0.28);
+      const band = ctx.createLinearGradient(0, H - bandH, 0, H);
+      band.addColorStop(0, 'rgba(0,0,0,0)');
+      band.addColorStop(0.4, 'rgba(0,0,0,0.72)');
+      band.addColorStop(1, 'rgba(0,0,0,0.88)');
+      ctx.fillStyle = band;
+      ctx.fillRect(0, H - bandH, W, bandH);
+ 
+      const pad = Math.round(W * 0.07);
+      let ty = H - bandH + Math.round(bandH * 0.22);
+ 
+      if (headline) {
+        const fsize = Math.round(W * 0.065);
+        ctx.font = `700 ${fsize}px "DM Sans", Arial, sans-serif`;
+        ctx.fillStyle = '#ffffff';
+        ctx.shadowColor = 'rgba(0,0,0,0.5)';
+        ctx.shadowBlur = 8;
+        // Word wrap
+        const words = headline.split(' ');
+        const maxW = W - pad * 2;
+        let line = '';
+        const lines = [];
+        words.forEach(function(w) {
+          const test = line ? line + ' ' + w : w;
+          if (ctx.measureText(test).width > maxW && line) { lines.push(line); line = w; }
+          else line = test;
+        });
+        if (line) lines.push(line);
+        lines.forEach(function(l) {
+          ctx.fillText(l, pad, ty);
+          ty += Math.round(fsize * 1.25);
+        });
+        ctx.shadowBlur = 0;
+        ty += Math.round(W * 0.012);
+      }
+ 
+      if (subtext) {
+        const fsize2 = Math.round(W * 0.038);
+        ctx.font = `300 ${fsize2}px "DM Sans", Arial, sans-serif`;
+        ctx.fillStyle = 'rgba(255,255,255,0.8)';
+        ctx.fillText(subtext, pad, ty);
+        ty += Math.round(fsize2 * 1.6);
+      }
+ 
+      if (cta) {
+        const fsize3 = Math.round(W * 0.034);
+        ctx.font = `600 ${fsize3}px "DM Sans", Arial, sans-serif`;
+        ctx.fillStyle = '#E8B84B';
+        ctx.fillText('→ ' + cta, pad, ty);
+      }
+    }
  
     // Save as JPEG
     const buf = canvas.toBuffer('image/jpeg', { quality: 0.92 });
