@@ -247,6 +247,7 @@ html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'D
           <button class="act dl" onclick="dl()">↓ Download</button>
           <button class="act re" onclick="generate()">↺ Regenerate</button>
         </div>
+        <button onclick="openEd()" style="width:100%;margin-top:8px;padding:11px;font-family:DM Sans,sans-serif;font-size:10px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;border:1px solid rgba(232,184,75,.4);color:var(--gold);background:rgba(232,184,75,.06);cursor:pointer;transition:all .18s" onmouseover="this.style.background='rgba(232,184,75,.14)'" onmouseout="this.style.background='rgba(232,184,75,.06)'">⤢ Adjust Phone Position & Text</button>
         <div class="out-meta" id="out-meta"></div>
       </div>
     </div>
@@ -257,7 +258,7 @@ html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'D
  
 <script>
 const S=window.location.origin;
-var uploadedUrl=null, scene='car', fmt='square', generating=false, resultUrl=null;
+var uploadedUrl=null, scene='car', fmt='square', generating=false, resultUrl=null, edData=null;
  
 function enter(){
   var g=document.getElementById('gate'); g.classList.add('out');
@@ -360,7 +361,7 @@ async function generate(){
     if(d.error) throw new Error(d.error);
     sd(1); sd(2); sd(3); sd(4);
  
-    resultUrl=d.url;
+    resultUrl=d.url; edData=d;
     var img=document.getElementById('result-img');
     img.onload=function(){
       document.getElementById('loading').classList.remove('show');
@@ -425,6 +426,270 @@ function toast(msg,tp){
   t.textContent=(tp==='g'?'✓ ':tp==='e'?'✕ ':'')+msg;
   t.className='show'+(tp?' '+tp:'');
   clearTimeout(t._t); t._t=setTimeout(function(){ t.className=''; },3000);
+}
+</script>
+ 
+<!-- ═══════════ POSITION EDITOR ═══════════ -->
+<div id="ed-modal" style="display:none;position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.92);backdrop-filter:blur(8px);flex-direction:column;align-items:center;padding:14px;overflow-y:auto">
+  <div style="width:100%;max-width:1160px">
+    <!-- Header -->
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+      <div style="font-family:Syne,sans-serif;font-size:15px;font-weight:800;background:linear-gradient(90deg,#E8B84B,#F06BCD);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">⤢ Position Editor</div>
+      <div style="font-size:9.5px;color:rgba(255,255,255,.35);letter-spacing:.1em">Drag the phone · resize from gold dot · then Export</div>
+      <div style="flex:1"></div>
+      <button onclick="closeEd()" style="padding:8px 16px;font-family:DM Sans,sans-serif;font-size:9px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.5);background:transparent;cursor:pointer;font-family:DM Sans">✕ Close</button>
+      <button onclick="exportEd()" style="padding:8px 20px;font-family:DM Sans,sans-serif;font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;border:none;background:#E8B84B;color:#0a0800;cursor:pointer">↓ Export PNG</button>
+    </div>
+    <!-- Grid -->
+    <div style="display:grid;grid-template-columns:200px 1fr;gap:12px">
+      <!-- Controls -->
+      <div style="background:#0f0f18;border:1px solid rgba(255,255,255,.07);padding:14px;display:flex;flex-direction:column;gap:10px">
+        <div style="font-size:8px;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:#E8B84B">Phone Size</div>
+        <div>
+          <div style="font-size:8px;color:rgba(255,255,255,.35);margin-bottom:3px;letter-spacing:.12em;text-transform:uppercase">Width</div>
+          <input type="range" id="ed-w" min="60" max="700" value="240" oninput="edApply()" style="width:100%;accent-color:#E8B84B">
+          <span id="ed-wv" style="font-size:9px;color:rgba(255,255,255,.4)">240px</span>
+        </div>
+        <div>
+          <div style="font-size:8px;color:rgba(255,255,255,.35);margin-bottom:3px;letter-spacing:.12em;text-transform:uppercase">Height</div>
+          <input type="range" id="ed-h" min="60" max="1100" value="480" oninput="edApply()" style="width:100%;accent-color:#E8B84B">
+          <span id="ed-hv" style="font-size:9px;color:rgba(255,255,255,.4)">480px</span>
+        </div>
+        <div>
+          <div style="font-size:8px;color:rgba(255,255,255,.35);margin-bottom:3px;letter-spacing:.12em;text-transform:uppercase">Rotation</div>
+          <input type="range" id="ed-r" min="-25" max="25" value="0" oninput="edApply()" style="width:100%;accent-color:#E8B84B">
+          <span id="ed-rv" style="font-size:9px;color:rgba(255,255,255,.4)">0°</span>
+        </div>
+        <div style="border-top:1px solid rgba(255,255,255,.07);padding-top:10px">
+          <div style="font-size:8px;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:#E8B84B;margin-bottom:8px">Text Overlay</div>
+          <input id="ed-th" type="text" placeholder="Headline" oninput="edText()" style="width:100%;background:#1a1a28;border:1px solid rgba(255,255,255,.1);color:#fff;font-family:DM Sans,sans-serif;font-size:11px;padding:6px 8px;outline:none;margin-bottom:5px">
+          <input id="ed-ts" type="text" placeholder="Subtext" oninput="edText()" style="width:100%;background:#1a1a28;border:1px solid rgba(255,255,255,.1);color:#fff;font-family:DM Sans,sans-serif;font-size:11px;padding:6px 8px;outline:none;margin-bottom:5px">
+          <input id="ed-tc" type="text" placeholder="Call to action" oninput="edText()" style="width:100%;background:#1a1a28;border:1px solid rgba(255,255,255,.1);color:#fff;font-family:DM Sans,sans-serif;font-size:11px;padding:6px 8px;outline:none;margin-bottom:8px">
+          <div style="font-size:8px;color:rgba(255,255,255,.35);margin-bottom:3px;letter-spacing:.1em;text-transform:uppercase">Text size</div>
+          <input type="range" id="ed-fs" min="12" max="80" value="32" oninput="edText()" style="width:100%;accent-color:#E8B84B">
+        </div>
+        <div style="border-top:1px solid rgba(255,255,255,.07);padding-top:10px">
+          <div style="font-size:8px;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:#E8B84B;margin-bottom:6px">Phone Style</div>
+          <div style="display:flex;gap:5px">
+            <button onclick="edStyle('dark')" id="ps-d" style="flex:1;padding:7px;font-size:9px;font-weight:600;border:1px solid #E8B84B;background:rgba(232,184,75,.12);color:#E8B84B;cursor:pointer;font-family:DM Sans">Dark</button>
+            <button onclick="edStyle('light')" id="ps-l" style="flex:1;padding:7px;font-size:9px;font-weight:600;border:1px solid rgba(255,255,255,.15);background:transparent;color:rgba(255,255,255,.5);cursor:pointer;font-family:DM Sans">Light</button>
+          </div>
+        </div>
+        <button onclick="edReset()" style="width:100%;padding:8px;font-family:DM Sans,sans-serif;font-size:9px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.4);background:transparent;cursor:pointer">↺ Reset</button>
+      </div>
+      <!-- Canvas stage -->
+      <div style="background:#000;display:flex;align-items:flex-start;justify-content:center;padding:12px;min-height:500px">
+        <div style="position:relative;display:inline-block" id="ed-stage">
+          <canvas id="ed-bg" style="display:block;max-width:100%;max-height:68vh"></canvas>
+          <canvas id="ed-tc-canvas" style="position:absolute;top:0;left:0;pointer-events:none"></canvas>
+          <div id="ed-phone" style="position:absolute;top:0;left:0;cursor:move;user-select:none;touch-action:none">
+            <div id="ed-pbody" style="width:100%;height:100%;position:relative;border-radius:12%;box-shadow:0 12px 50px rgba(0,0,0,.85),inset 0 0 0 1.5px rgba(255,255,255,.12);background:linear-gradient(135deg,#3a3a3a,#1a1a1a)">
+              <div id="ed-screen" style="position:absolute;inset:5% 4%;border-radius:10%;overflow:hidden;background:#000">
+                <img id="ed-design" src="" style="width:100%;height:100%;object-fit:cover;display:block">
+              </div>
+              <div id="ed-notch" style="position:absolute;top:3%;left:50%;transform:translateX(-50%);width:26%;height:5%;background:#111;border-radius:0 0 40% 40%;z-index:5"></div>
+              <div style="position:absolute;bottom:2%;left:50%;transform:translateX(-50%);width:28%;height:1.2%;background:rgba(255,255,255,.25);border-radius:999px"></div>
+              <div id="ed-rh" style="position:absolute;bottom:-10px;right:-10px;width:22px;height:22px;background:#E8B84B;border-radius:50%;cursor:se-resize;z-index:20;border:2px solid #000;box-shadow:0 2px 8px rgba(0,0,0,.6)"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+ 
+<script>
+// ═══════════ EDITOR STATE ═══════════
+var edBg=null, edDes=null, edScale=1, edPhoneStyle='dark';
+var edP={x:100,y:80,w:240,h:480,rot:0};
+var edDragging=false, edResizing=false;
+var edDragStart={}, edResizeStart={};
+ 
+function proxyUrl(url){
+  // Use proxy endpoint to avoid CORS issues with canvas
+  var fname=url.split('/uploads/').pop().split('?')[0];
+  return window.location.origin+'/api/img/'+fname;
+}
+ 
+function openEd(){
+  if(!edData){ toast('Generate first','e'); return; }
+  document.getElementById('ed-modal').style.display='flex';
+  // Pre-fill text
+  document.getElementById('ed-th').value=document.getElementById('txt-h').value||'';
+  document.getElementById('ed-ts').value=document.getElementById('txt-s').value||'';
+  document.getElementById('ed-tc').value=document.getElementById('txt-c').value||'';
+ 
+  var bgC=document.getElementById('ed-bg');
+  var stage=document.getElementById('ed-stage');
+ 
+  edBg=new Image();
+  edBg.onload=function(){
+    var maxW=window.innerWidth-260, maxH=window.innerHeight*.7;
+    edScale=Math.min(maxW/edBg.width, maxH/edBg.height, 1);
+    bgC.width=edBg.width; bgC.height=edBg.height;
+    bgC.style.width=Math.round(edBg.width*edScale)+'px';
+    bgC.style.height=Math.round(edBg.height*edScale)+'px';
+    bgC.getContext('2d').drawImage(edBg,0,0);
+    var tc=document.getElementById('ed-tc-canvas');
+    tc.width=edBg.width; tc.height=edBg.height;
+    tc.style.width=bgC.style.width; tc.style.height=bgC.style.height;
+    // Set phone from suggested position
+    if(edData.phonePos){
+      var pp=edData.phonePos;
+      edP.x=Math.round(pp.x*edBg.width);
+      edP.y=Math.round(pp.y*edBg.height);
+      edP.w=Math.round(pp.w*edBg.width);
+      edP.h=Math.round(pp.h*edBg.height);
+    }
+    document.getElementById('ed-w').value=edP.w;
+    document.getElementById('ed-h').value=edP.h;
+    edApply(); edText();
+  };
+  edBg.onerror=function(){ toast('Could not load background image','e'); };
+  edBg.src=proxyUrl(edData.bgUrl||edData.url);
+ 
+  edDes=new Image();
+  edDes.onload=function(){ document.getElementById('ed-design').src=edDes.src; };
+  edDes.src=proxyUrl(edData.designUrl||uploadedUrl);
+ 
+  makeDrag(); makeResize();
+}
+ 
+function closeEd(){ document.getElementById('ed-modal').style.display='none'; }
+ 
+function edApply(){
+  edP.w=+document.getElementById('ed-w').value;
+  edP.h=+document.getElementById('ed-h').value;
+  edP.rot=+document.getElementById('ed-r').value;
+  document.getElementById('ed-wv').textContent=edP.w+'px';
+  document.getElementById('ed-hv').textContent=edP.h+'px';
+  document.getElementById('ed-rv').textContent=edP.rot+'°';
+  posPhone();
+}
+ 
+function posPhone(){
+  var ph=document.getElementById('ed-phone');
+  ph.style.left=Math.round(edP.x*edScale)+'px';
+  ph.style.top=Math.round(edP.y*edScale)+'px';
+  ph.style.width=Math.round(edP.w*edScale)+'px';
+  ph.style.height=Math.round(edP.h*edScale)+'px';
+  ph.style.transform='rotate('+edP.rot+'deg)';
+  ph.style.transformOrigin='0 0';
+  var r=Math.round(edP.w*edScale*.1);
+  document.getElementById('ed-pbody').style.borderRadius=r+'px';
+  document.getElementById('ed-notch').style.background=edPhoneStyle==='dark'?'#111':'#ddd';
+}
+ 
+function edStyle(s){
+  edPhoneStyle=s;
+  var d=document.getElementById('ps-d'), l=document.getElementById('ps-l');
+  d.style.borderColor=s==='dark'?'#E8B84B':'rgba(255,255,255,.15)'; d.style.color=s==='dark'?'#E8B84B':'rgba(255,255,255,.5)';
+  l.style.borderColor=s==='light'?'#E8B84B':'rgba(255,255,255,.15)'; l.style.color=s==='light'?'#E8B84B':'rgba(255,255,255,.5)';
+  document.getElementById('ed-pbody').style.background=s==='dark'?'linear-gradient(135deg,#3a3a3a,#1a1a1a)':'linear-gradient(135deg,#ffffff,#d0d0d0)';
+  document.getElementById('ed-pbody').style.boxShadow=s==='dark'?'0 12px 50px rgba(0,0,0,.85),inset 0 0 0 1.5px rgba(255,255,255,.12)':'0 12px 50px rgba(0,0,0,.5),inset 0 0 0 1.5px rgba(0,0,0,.1)';
+  document.getElementById('ed-notch').style.background=s==='dark'?'#111':'#ddd';
+  document.getElementById('ed-design').parentElement.style.background=s==='dark'?'#000':'#fff';
+}
+ 
+function edReset(){ edP.rot=0; document.getElementById('ed-r').value=0; document.getElementById('ed-rv').textContent='0°'; posPhone(); }
+ 
+function edText(){
+  var tc=document.getElementById('ed-tc-canvas');
+  if(!tc.width) return;
+  var ctx=tc.getContext('2d'); ctx.clearRect(0,0,tc.width,tc.height);
+  var W=tc.width,H=tc.height;
+  var head=document.getElementById('ed-th').value.trim();
+  var sub=document.getElementById('ed-ts').value.trim();
+  var cta=document.getElementById('ed-tc').value.trim();
+  var fs=+document.getElementById('ed-fs').value||32;
+  if(!head&&!sub&&!cta) return;
+  var bh=Math.round(H*.26);
+  var band=ctx.createLinearGradient(0,H-bh,0,H);
+  band.addColorStop(0,'rgba(0,0,0,0)'); band.addColorStop(.35,'rgba(0,0,0,.72)'); band.addColorStop(1,'rgba(0,0,0,.9)');
+  ctx.fillStyle=band; ctx.fillRect(0,H-bh,W,bh);
+  var pad=Math.round(W*.07), ty=H-bh+Math.round(bh*.2);
+  if(head){ ctx.font='bold '+fs+'px Arial,sans-serif'; ctx.fillStyle='#fff'; ctx.shadowColor='rgba(0,0,0,.5)'; ctx.shadowBlur=10; var words=head.split(' '),maxW=W-pad*2,line='',lines=[]; words.forEach(function(w){ var t=line?line+' '+w:w; if(ctx.measureText(t).width>maxW&&line){lines.push(line);line=w;}else line=t; }); if(line)lines.push(line); lines.forEach(function(l){ ctx.fillText(l,pad,ty); ty+=Math.round(fs*1.28); }); ctx.shadowBlur=0; ty+=Math.round(W*.01); }
+  if(sub){ var fs2=Math.round(fs*.55); ctx.font=fs2+'px Arial,sans-serif'; ctx.fillStyle='rgba(255,255,255,.78)'; ctx.fillText(sub,pad,ty); ty+=Math.round(fs2*1.6); }
+  if(cta){ var fs3=Math.round(fs*.5); ctx.font='bold '+fs3+'px Arial,sans-serif'; ctx.fillStyle='#E8B84B'; ctx.fillText('→ '+cta,pad,ty); }
+}
+ 
+// Drag
+function makeDrag(){
+  var el=document.getElementById('ed-phone');
+  el.onmousedown=function(e){
+    if(e.target.id==='ed-rh') return;
+    e.preventDefault(); edDragging=true;
+    edDragStart={mx:e.clientX,my:e.clientY,px:edP.x,py:edP.y};
+    el.style.cursor='grabbing';
+  };
+  el.ontouchstart=function(e){
+    if(e.target.id==='ed-rh') return;
+    var t=e.touches[0]; edDragging=true;
+    edDragStart={mx:t.clientX,my:t.clientY,px:edP.x,py:edP.y};
+  };
+  document.onmousemove=function(e){
+    if(edDragging){ edP.x=Math.round(edDragStart.px+(e.clientX-edDragStart.mx)/edScale); edP.y=Math.round(edDragStart.py+(e.clientY-edDragStart.my)/edScale); posPhone(); }
+    if(edResizing){ edP.w=Math.max(60,Math.round(edResizeStart.pw+(e.clientX-edResizeStart.mx)/edScale)); edP.h=Math.max(100,Math.round(edResizeStart.ph+(e.clientY-edResizeStart.my)/edScale)); document.getElementById('ed-w').value=edP.w; document.getElementById('ed-h').value=edP.h; document.getElementById('ed-wv').textContent=edP.w+'px'; document.getElementById('ed-hv').textContent=edP.h+'px'; posPhone(); }
+  };
+  document.ontouchmove=function(e){
+    var t=e.touches[0];
+    if(edDragging){ edP.x=Math.round(edDragStart.px+(t.clientX-edDragStart.mx)/edScale); edP.y=Math.round(edDragStart.py+(t.clientY-edDragStart.my)/edScale); posPhone(); }
+    if(edResizing){ edP.w=Math.max(60,Math.round(edResizeStart.pw+(t.clientX-edResizeStart.mx)/edScale)); edP.h=Math.max(100,Math.round(edResizeStart.ph+(t.clientY-edResizeStart.my)/edScale)); posPhone(); }
+  };
+  document.onmouseup=function(){ edDragging=false; edResizing=false; document.getElementById('ed-phone').style.cursor='move'; };
+  document.ontouchend=function(){ edDragging=false; edResizing=false; };
+}
+ 
+function makeResize(){
+  var rh=document.getElementById('ed-rh');
+  rh.onmousedown=function(e){ e.preventDefault(); e.stopPropagation(); edResizing=true; edResizeStart={mx:e.clientX,my:e.clientY,pw:edP.w,ph:edP.h}; };
+  rh.ontouchstart=function(e){ var t=e.touches[0]; edResizing=true; edResizeStart={mx:t.clientX,my:t.clientY,pw:edP.w,ph:edP.h}; };
+}
+ 
+// Export
+function exportEd(){
+  if(!edBg){ toast('Editor not ready','e'); return; }
+  var W=edBg.width, H=edBg.height;
+  var out=document.createElement('canvas'); out.width=W; out.height=H;
+  var ctx=out.getContext('2d');
+  ctx.drawImage(edBg,0,0,W,H);
+ 
+  // Draw phone
+  var px=edP.x,py=edP.y,pw=edP.w,ph=edP.h,rot=edP.rot;
+  ctx.save(); ctx.translate(px+pw/2,py+ph/2); ctx.rotate(rot*Math.PI/180);
+  var r=Math.round(pw*.1);
+  ctx.shadowColor='rgba(0,0,0,0.72)'; ctx.shadowBlur=36; ctx.shadowOffsetY=12;
+  var bg=ctx.createLinearGradient(-pw/2,-ph/2,pw/2,ph/2);
+  if(edPhoneStyle==='dark'){ bg.addColorStop(0,'#3a3a3a'); bg.addColorStop(.5,'#242424'); bg.addColorStop(1,'#1a1a1a'); }
+  else { bg.addColorStop(0,'#fff'); bg.addColorStop(.5,'#e0e0e0'); bg.addColorStop(1,'#c0c0c0'); }
+  ctx.fillStyle=bg; prr(ctx,-pw/2,-ph/2,pw,ph,r); ctx.fill();
+  ctx.shadowBlur=0; ctx.shadowOffsetY=0; ctx.shadowColor='transparent';
+  ctx.strokeStyle=edPhoneStyle==='dark'?'rgba(255,255,255,.14)':'rgba(0,0,0,.1)'; ctx.lineWidth=1.5; prr(ctx,-pw/2,-ph/2,pw,ph,r); ctx.stroke();
+  var sx=-pw/2+pw*.04,sy=-ph/2+ph*.05,sw=pw*.92,sh=ph*.9,sr=r*.7;
+  ctx.fillStyle='#000'; prr(ctx,sx,sy,sw,sh,sr); ctx.fill();
+  if(edDes && edDes.complete && edDes.naturalWidth){
+    ctx.save(); prr(ctx,sx,sy,sw,sh,sr); ctx.clip(); ctx.drawImage(edDes,sx,sy,sw,sh);
+    var gl=ctx.createLinearGradient(sx,sy,sx+sw*.55,sy+sh*.45);
+    gl.addColorStop(0,'rgba(255,255,255,.08)'); gl.addColorStop(1,'rgba(255,255,255,0)');
+    ctx.fillStyle=gl; ctx.fillRect(sx,sy,sw,sh); ctx.restore();
+  }
+  ctx.fillStyle=edPhoneStyle==='dark'?'#111':'#ddd'; prr(ctx,-pw*.14,-ph/2+ph*.015,pw*.28,ph*.042,ph*.018); ctx.fill();
+  ctx.fillStyle=edPhoneStyle==='dark'?'rgba(255,255,255,.22)':'rgba(0,0,0,.18)'; prr(ctx,-pw*.15,ph/2-ph*.036,pw*.30,ph*.016,ph*.008); ctx.fill();
+  ctx.restore();
+ 
+  // Text overlay from text canvas
+  var tc=document.getElementById('ed-tc-canvas');
+  if(tc.width) ctx.drawImage(tc,0,0,W,H);
+ 
+  var a=document.createElement('a'); a.href=out.toDataURL('image/png',1); a.download='promo-edited-'+Date.now()+'.png'; a.click();
+  toast('Exported ✓','g');
+}
+ 
+function prr(ctx,x,y,w,h,r){
+  ctx.beginPath(); ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.arcTo(x+w,y,x+w,y+r,r);
+  ctx.lineTo(x+w,y+h-r); ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
+  ctx.lineTo(x+r,y+h); ctx.arcTo(x,y+h,x,y+h-r,r);
+  ctx.lineTo(x,y+r); ctx.arcTo(x,y,x+r,y,r); ctx.closePath();
 }
 </script>
 </body>
