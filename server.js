@@ -28,18 +28,18 @@ const upload = multer({ storage, limits: { fileSize: 30 * 1024 * 1024 } });
  
 // ── Scene prompts ──────────────────────────────────
 const SCENE_PROMPTS = {
-  window:    'product placed inside a large illuminated retail lightbox display mounted in a luxury shopping mall window. warm interior lighting, professional retail environment, photorealistic commercial photography',
-  phone:     'product displayed on iPhone screen filling the entire screen edge to edge, hand holding phone naturally, soft bokeh background, lifestyle photography, photorealistic',
-  laptop:    'product displayed fullscreen on MacBook laptop screen filling entire display, laptop open on wooden desk with coffee, professional workspace, photorealistic photography',
-  billboard: 'product displayed on large outdoor city billboard filling the entire billboard face edge to edge, golden hour urban street, photorealistic advertising photography',
-  book:      'product displayed as full book cover filling the entire cover without cropping, hardback book on marble surface, editorial flat lay photography, photorealistic',
-  poster:    'product displayed as large framed wall print filling the entire frame, hung on white gallery wall, soft directional museum lighting, photorealistic interior photography',
-  shirt:     'product design printed large on the front chest area of a clean white t-shirt, person wearing it outdoors, lifestyle photography, photorealistic clothing mockup',
-  mural:     'product painted as a large street mural filling the entire brick wall face, urban environment, wide angle photography, photorealistic street art mockup',
-  magazine:  'product displayed as a full glossy magazine cover or full page spread, magazine on marble surface, editorial flat lay, photorealistic publishing mockup',
-  car:       'product applied as vinyl decal on luxury car bonnet, showroom lighting, reflections on bodywork, photorealistic automotive photography',
-  bag:       'product printed large on front of white canvas tote bag, filling the bag face, clean lifestyle setting, natural light, photorealistic fashion photography',
-  ipad:      'product displayed fullscreen on iPad Pro filling entire screen, lying on minimalist desk, flat lay, natural light, photorealistic device mockup',
+  desk:      'a framed print of the product leaning against books on a clean luxury desk, beside a coffee cup and laptop, warm golden hour window light, soft bokeh, professional lifestyle photography, photorealistic, 8K',
+  cafe:      'the product displayed as a large printed poster inside a warm cozy cafe, hung on exposed brick wall, ambient warm lighting, people in background blurred, lifestyle photography, photorealistic, 8K',
+  studio:    'the product framed and displayed on an easel in a bright minimalist photography studio, white walls, soft diffused light from large windows, clean and professional, photorealistic, 8K',
+  marble:    'the product lying flat on a luxury white marble surface, beside gold jewellery, a candle and a pen, editorial luxury flat lay photography, overhead shot, photorealistic, 8K',
+  shelf:     'the product propped up on a wooden floating shelf on a white wall, surrounded by plants and minimal decor, lifestyle interior photography, natural light, photorealistic, 8K',
+  office:    'the product framed large on a corporate office wall behind an executive desk, clean modern interior, dramatic directional lighting, photorealistic commercial photography, 8K',
+  gallery:   'the product displayed as a large canvas print mounted on a white gallery wall, museum lighting, shadow beneath the frame, professional fine art photography, photorealistic, 8K',
+  outdoor:   'the product displayed on a large outdoor billboard on a sunny city street, golden hour light, urban street scene, photorealistic advertising photography, 8K',
+  bedroom:   'the product as a framed print on a bedroom wall above a styled bed, luxury interior, warm evening light, interior design photography, photorealistic, 8K',
+  window:    'the product as a backlit poster display in a shop window at night, interior warm glow, city street reflection in glass, commercial retail photography, photorealistic, 8K',
+  linen:     'the product printed card lying on cream linen fabric, beside fresh flowers and a coffee cup, soft natural light from left, luxury lifestyle flat lay, photorealistic, 8K',
+  laptop:    'the product displayed on a laptop screen on a desk, open MacBook in a stylish home office setting, natural light, depth of field, lifestyle photography, photorealistic, 8K',
 };
  
 // ── Upload design ──────────────────────────────────
