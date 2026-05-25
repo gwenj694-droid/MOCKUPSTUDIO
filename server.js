@@ -383,4 +383,3 @@ Return ONLY valid JSON in this exact format, nothing else:
 app.get('/health', (_, res) => res.json({ ok: true, fal: !!FAL_KEY, claude: !!ANT_KEY }));
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Promo Studio on :${PORT}`));
- 
