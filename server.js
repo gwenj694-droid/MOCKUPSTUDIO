@@ -11,6 +11,7 @@ const fs      = require('fs');
 const https   = require('https');
 const http    = require('http');
 const { createCanvas, loadImage } = require('canvas');
+const { URL: NodeURL } = require('url');
 const { fal } = require('@fal-ai/client');
  
 const app = express();
@@ -109,15 +110,29 @@ app.post('/api/mockup', async (req, res) => {
     if (!bgUrl) throw new Error('Background generation failed');
     console.log(`[mockup] bg generated: ${bgUrl.substring(0,60)}`);
  
-    // Step 2: Download both images
-    const [bgBuf, designBuf] = await Promise.all([
-      fetchBuffer(bgUrl),
-      fetchBuffer(imageUrl)
-    ]);
+    // Step 2: Download background from FAL
+    const bgBuf = await fetchBuffer(bgUrl);
  
-    // Step 3: Composite design onto background using canvas
-    const bgImg     = await loadImage(bgBuf);
-    const designImg = await loadImage(designBuf);
+    // Step 3: Load background; load design from disk or URL
+    const bgImg = await loadImage(bgBuf);
+ 
+    // Design: extract filename from URL and read from disk
+    let designImg;
+    try {
+      const designFilename = imageUrl.split('/uploads/').pop().split('?')[0];
+      const designDiskPath = path.join(__dirname, 'public/uploads', designFilename);
+      if (fs.existsSync(designDiskPath)) {
+        designImg = await loadImage(designDiskPath);
+        console.log('[mockup] design loaded from disk:', designDiskPath);
+      } else {
+        const designBuf = await fetchBuffer(imageUrl);
+        designImg = await loadImage(designBuf);
+        console.log('[mockup] design loaded from URL');
+      }
+    } catch(imgErr) {
+      console.error('[mockup] design load error:', imgErr.message);
+      throw new Error('Could not load your design image: ' + imgErr.message);
+    }
  
     const W = bgImg.width  || 1080;
     const H = bgImg.height || 1080;
