@@ -28,18 +28,18 @@ const upload = multer({ storage, limits: { fileSize: 30 * 1024 * 1024 } });
  
 // ── Scene prompts ──────────────────────────────────
 const SCENE_PROMPTS = {
-  window:    'The provided image/design is displayed as a large printed poster mounted inside a luxury shop window display. Professional retail photography, warm interior ambient light, slight glass reflection, real-world commercial mockup, photorealistic, 8K.',
-  phone:     'The provided design is shown on an iPhone screen, held naturally by a hand. Lifestyle photography, soft natural window light, blurred background, photorealistic product mockup, 8K.',
-  laptop:    'The provided design fills the screen of an open MacBook Pro on a clean wooden desk with coffee cup. Natural side lighting, shallow depth of field, professional workspace photography, photorealistic, 8K.',
-  billboard: 'The provided design is displayed on a large outdoor billboard in a city street at golden hour. Real photography, dramatic sky, urban environment, photorealistic advertising mockup, 8K.',
-  book:      'The provided design is the cover of a hardback book lying on a marble surface. Editorial flat lay photography, coffee cup and pen beside it, natural light, photorealistic mockup, 8K.',
-  poster:    'The provided design is a framed print hung on a white wall in a modern gallery. Professional interior photography, soft directional lighting, casting a subtle frame shadow, photorealistic, 8K.',
-  shirt:     'The provided design is printed on the front of a white t-shirt worn by a person standing outdoors. Lifestyle photography, natural daylight, clean background, photorealistic clothing mockup, 8K.',
-  mural:     'The provided design is painted as a large street art mural on a brick wall in an urban neighbourhood. Wide angle photography, natural daylight, photorealistic street mockup, 8K.',
-  magazine:  'The provided design is featured as a full-page spread in a glossy open magazine lying on a marble surface. Editorial flat lay, natural light, photorealistic publishing mockup, 8K.',
-  car:       'The provided design is applied as a vinyl wrap decal on the bonnet of a luxury car in a showroom. Studio lighting, reflections on the bodywork, photorealistic automotive mockup, 8K.',
-  bag:       'The provided design is printed on a luxury white canvas tote bag resting on a table. Lifestyle photography, natural light, clean backdrop, photorealistic fashion mockup, 8K.',
-  ipad:      'The provided design is displayed on an iPad Pro screen lying on a minimalist desk. Flat lay photography, natural light, accessories beside it, photorealistic device mockup, 8K.',
+  window:    'product placed inside a large illuminated retail lightbox display mounted in a luxury shopping mall window. warm interior lighting, professional retail environment, photorealistic commercial photography',
+  phone:     'product displayed on iPhone screen filling the entire screen edge to edge, hand holding phone naturally, soft bokeh background, lifestyle photography, photorealistic',
+  laptop:    'product displayed fullscreen on MacBook laptop screen filling entire display, laptop open on wooden desk with coffee, professional workspace, photorealistic photography',
+  billboard: 'product displayed on large outdoor city billboard filling the entire billboard face edge to edge, golden hour urban street, photorealistic advertising photography',
+  book:      'product displayed as full book cover filling the entire cover without cropping, hardback book on marble surface, editorial flat lay photography, photorealistic',
+  poster:    'product displayed as large framed wall print filling the entire frame, hung on white gallery wall, soft directional museum lighting, photorealistic interior photography',
+  shirt:     'product design printed large on the front chest area of a clean white t-shirt, person wearing it outdoors, lifestyle photography, photorealistic clothing mockup',
+  mural:     'product painted as a large street mural filling the entire brick wall face, urban environment, wide angle photography, photorealistic street art mockup',
+  magazine:  'product displayed as a full glossy magazine cover or full page spread, magazine on marble surface, editorial flat lay, photorealistic publishing mockup',
+  car:       'product applied as vinyl decal on luxury car bonnet, showroom lighting, reflections on bodywork, photorealistic automotive photography',
+  bag:       'product printed large on front of white canvas tote bag, filling the bag face, clean lifestyle setting, natural light, photorealistic fashion photography',
+  ipad:      'product displayed fullscreen on iPad Pro filling entire screen, lying on minimalist desk, flat lay, natural light, photorealistic device mockup',
 };
  
 // ── Upload design ──────────────────────────────────
