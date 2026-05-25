@@ -28,18 +28,18 @@ const upload = multer({ storage, limits: { fileSize: 30 * 1024 * 1024 } });
  
 // ── Scene prompts ──────────────────────────────────
 const SCENE_PROMPTS = {
-  window:    'professional photograph of a poster mounted on a large glass window display of an upscale coffee shop, warm ambient interior lighting, shallow depth of field, bokeh background showing cafe interior, ultra realistic product mockup photography, 8K',
-  phone:     'close-up photograph of a smartphone screen displaying the design, person holding phone, modern lifestyle setting, soft natural light, ultra realistic product mockup photography',
-  laptop:    'professional photograph of an open MacBook laptop displaying the design on screen, modern minimalist desk workspace, natural side lighting, ultra realistic product mockup photography, 8K',
-  billboard: 'professional aerial photograph of a large outdoor billboard displaying the design in a busy city street intersection, golden hour sunlight, ultra realistic advertising mockup photography, 8K',
-  book:      'professional photograph of an open hardcover book with the design printed on its pages, lying on a marble surface with coffee cup, editorial photography style, ultra realistic mockup, 8K',
-  poster:    'professional photograph of a framed poster on a clean white gallery wall, soft museum lighting, shadow from frame, ultra realistic interior mockup photography, 8K',
-  shirt:     'professional photograph of a person wearing a t-shirt with the design printed on the front, lifestyle outdoor setting, natural daylight, ultra realistic clothing mockup photography',
-  mural:     'professional photograph of a large mural painted on a brick wall in an urban street art setting, wide angle, graffiti neighbourhood, ultra realistic street mockup photography, 8K',
-  magazine:  'professional photograph of a glossy magazine lying open on a marble surface, the design featured as a full page spread, editorial flat lay photography, 8K',
-  car:       'professional photograph of a luxury car bonnet with the design applied as a vinyl wrap decal, showroom lighting, ultra realistic automotive mockup photography, 8K',
-  bag:       'professional photograph of a luxury tote bag with the design printed on it, lifestyle setting, natural light, ultra realistic product mockup photography',
-  ipad:      'professional photograph of an iPad Pro displaying the design on screen, lying on a clean desk with accessories, modern workspace, ultra realistic device mockup photography, 8K',
+  window:    'The provided image/design is displayed as a large printed poster mounted inside a luxury shop window display. Professional retail photography, warm interior ambient light, slight glass reflection, real-world commercial mockup, photorealistic, 8K.',
+  phone:     'The provided design is shown on an iPhone screen, held naturally by a hand. Lifestyle photography, soft natural window light, blurred background, photorealistic product mockup, 8K.',
+  laptop:    'The provided design fills the screen of an open MacBook Pro on a clean wooden desk with coffee cup. Natural side lighting, shallow depth of field, professional workspace photography, photorealistic, 8K.',
+  billboard: 'The provided design is displayed on a large outdoor billboard in a city street at golden hour. Real photography, dramatic sky, urban environment, photorealistic advertising mockup, 8K.',
+  book:      'The provided design is the cover of a hardback book lying on a marble surface. Editorial flat lay photography, coffee cup and pen beside it, natural light, photorealistic mockup, 8K.',
+  poster:    'The provided design is a framed print hung on a white wall in a modern gallery. Professional interior photography, soft directional lighting, casting a subtle frame shadow, photorealistic, 8K.',
+  shirt:     'The provided design is printed on the front of a white t-shirt worn by a person standing outdoors. Lifestyle photography, natural daylight, clean background, photorealistic clothing mockup, 8K.',
+  mural:     'The provided design is painted as a large street art mural on a brick wall in an urban neighbourhood. Wide angle photography, natural daylight, photorealistic street mockup, 8K.',
+  magazine:  'The provided design is featured as a full-page spread in a glossy open magazine lying on a marble surface. Editorial flat lay, natural light, photorealistic publishing mockup, 8K.',
+  car:       'The provided design is applied as a vinyl wrap decal on the bonnet of a luxury car in a showroom. Studio lighting, reflections on the bodywork, photorealistic automotive mockup, 8K.',
+  bag:       'The provided design is printed on a luxury white canvas tote bag resting on a table. Lifestyle photography, natural light, clean backdrop, photorealistic fashion mockup, 8K.',
+  ipad:      'The provided design is displayed on an iPad Pro screen lying on a minimalist desk. Flat lay photography, natural light, accessories beside it, photorealistic device mockup, 8K.',
 };
  
 // ── Upload design ──────────────────────────────────
@@ -63,9 +63,22 @@ app.post('/api/mockup', async (req, res) => {
  
   console.log(`[mockup] scene=${scene} url=${imageUrl.substring(0,60)}`);
  
-  // Try product-shot first (best for scene compositing), fall back to img2img
+  // Endpoint cascade — best quality first
   const ENDPOINTS = [
     {
+      // Best: Flux img2img — composites the actual design into the scene
+      id: 'fal-ai/flux/dev/image-to-image',
+      build: () => ({
+        image_url: imageUrl,
+        prompt: fullPrompt,
+        strength: 0.85,
+        num_inference_steps: 35,
+        guidance_scale: 7,
+        negative_prompt: 'blurry, low quality, distorted, text artifacts, watermark, ugly, duplicate, bad proportions, extra elements'
+      })
+    },
+    {
+      // Fallback: Bria product shot
       id: 'fal-ai/bria/product-shot',
       build: () => ({
         image_url: imageUrl,
@@ -76,23 +89,13 @@ app.post('/api/mockup', async (req, res) => {
       })
     },
     {
-      id: 'fal-ai/flux/dev/image-to-image',
+      // Last resort: flux schnell (fast but lower quality)
+      id: 'fal-ai/flux/schnell/image-to-image',
       build: () => ({
         image_url: imageUrl,
         prompt: fullPrompt,
-        strength: 0.72,
-        num_inference_steps: 30,
-        guidance_scale: 4.5,
-        negative_prompt: 'blurry, low quality, distorted, watermark, ugly, bad composition'
-      })
-    },
-    {
-      id: 'fal-ai/flux-realism',
-      build: () => ({
-        image_url: imageUrl,
-        prompt: fullPrompt,
-        strength: 0.7,
-        num_inference_steps: 28
+        strength: 0.8,
+        num_inference_steps: 4
       })
     }
   ];
