@@ -288,6 +288,9 @@ html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'D
           <button class="act-btn gold" onclick="download()">↓ Download</button>
           <button class="act-btn outline" onclick="generate()">↺ Regenerate</button>
         </div>
+        <div style="margin-top:8px">
+          <button onclick="openEditorFromResult()" style="width:100%;padding:11px;font-family:DM Sans,sans-serif;font-size:10px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;border:1px solid rgba(232,184,75,.4);color:var(--gold);background:rgba(232,184,75,.06);cursor:pointer;transition:all .18s" onmouseover="this.style.background='rgba(232,184,75,.12)'" onmouseout="this.style.background='rgba(232,184,75,.06)'">✦ Edit Position & Text</button>
+        </div>
         <div class="out-meta" id="out-meta"></div>
       </div>
     </div>
@@ -302,6 +305,7 @@ var uploadedUrl = null;
 var currentScene = 'car';
 var currentFmt   = 'square';
 var resultUrl    = null;
+var editorData   = null;
 var generating   = false;
  
 function enter(){
@@ -407,26 +411,25 @@ async function generate(){
     setTimeout(function(){ stepDone(3); stepDone(4); },400);
  
     resultUrl = d.url;
-    // Show fallback result
-    var img = document.getElementById('result-img');
-    img.src = d.url + '?t=' + Date.now();
-    document.getElementById('loading').classList.remove('show');
-    document.getElementById('out-result').style.display = 'block';
-    document.getElementById('out-meta').textContent = 'Scene: '+currentScene+' · FAL AI · Ready to position';
-    toast('Generated! Opening editor…','g');
+    editorData = d; // store for editor button
  
-    // Open interactive editor after short delay
+    var img = document.getElementById('result-img');
+    img.onload = function(){
+      document.getElementById('loading').classList.remove('show');
+      document.getElementById('out-result').style.display = 'block';
+      document.getElementById('out-meta').textContent = 'Scene: '+currentScene+' · FAL AI · Ready to post';
+      toast('Promo ready! ✓','g');
+    };
+    img.onerror = function(){
+      document.getElementById('loading').classList.remove('show');
+      document.getElementById('out-result').style.display = 'block';
+      toast('Done — download below','g');
+    };
     setTimeout(function(){
-      var bgUrl     = d.bgUrl     || d.url;
-      var designUrl = d.designUrl || uploadedUrl;
-      var pos       = d.phonePos  || null;
-      openEditor(bgUrl, designUrl, pos, d.canvasW, d.canvasH);
-      // Pre-fill text from generated copy
-      if(d.headline) document.getElementById('ov-head').value = d.headline;
-      if(d.subtext)  document.getElementById('ov-sub').value  = d.subtext;
-      if(d.cta)      document.getElementById('ov-cta').value  = d.cta;
-      setTimeout(redrawText, 500);
-    }, 800);
+      document.getElementById('loading').classList.remove('show');
+      document.getElementById('out-result').style.display = 'block';
+    }, 5000);
+    img.src = d.url + '?t=' + Date.now();
  
   } catch(e){
     clearTimeout(stepTimer); clearTimeout(step2Timer);
@@ -466,6 +469,18 @@ async function generateAIText(){
   } catch(e){ toast('Claude error: '+e.message,'e'); }
   btnTxt.textContent = '✦ Write Copy with Claude';
   btn.disabled = false;
+}
+ 
+function openEditorFromResult(){
+  if(!editorData) return;
+  var bgUrl     = editorData.bgUrl     || editorData.url;
+  var designUrl = editorData.designUrl || uploadedUrl;
+  var pos       = editorData.phonePos  || null;
+  openEditor(bgUrl, designUrl, pos, editorData.canvasW, editorData.canvasH);
+  if(editorData.headline) document.getElementById('ov-head').value = editorData.headline;
+  if(editorData.subtext)  document.getElementById('ov-sub').value  = editorData.subtext;
+  if(editorData.cta)      document.getElementById('ov-cta').value  = editorData.cta;
+  setTimeout(redrawText, 600);
 }
  
 async function download(){
@@ -606,8 +621,9 @@ function openEditor(bgUrl, designUrl, suggestedPos, W, H){
   var bgCanvas = document.getElementById('bg-canvas');
   var stage    = document.getElementById('editor-stage');
  
-  // Load background
-  edBgImg = new Image(); edBgImg.crossOrigin='anonymous';
+  // Load background via same-origin URL (files are on our server)
+  edBgImg = new Image();
+  edBgImg.crossOrigin = 'use-credentials';
   edBgImg.onload = function(){
     var maxW = window.innerWidth - 280;
     var maxH = window.innerHeight * 0.72;
@@ -637,14 +653,15 @@ function openEditor(bgUrl, designUrl, suggestedPos, W, H){
     positionPhoneDiv();
     redrawText();
   };
-  edBgImg.src = bgUrl + '?t=' + Date.now();
+  // Strip any existing query and add fresh cache-bust
+  edBgImg.src = bgUrl.split('?')[0] + '?t=' + Date.now();
  
   // Load design image
-  edDesign = new Image(); edDesign.crossOrigin='anonymous';
+  edDesign = new Image();
   edDesign.onload = function(){
-    document.getElementById('phone-screen-img').src = edDesign.src;
+    document.getElementById('phone-screen-img').src = designUrl.split('?')[0] + '?t=' + Date.now();
   };
-  edDesign.src = designUrl + '?t=' + Date.now();
+  edDesign.src = designUrl.split('?')[0] + '?t=' + Date.now();
  
   applyStyle();
   makeDraggable();
@@ -925,3 +942,4 @@ function phoneRoundRect(ctx,x,y,w,h,r){
  
 </body>
 </html>
+ 
