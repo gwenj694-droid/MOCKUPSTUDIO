@@ -1,12 +1,16 @@
 // ═══════════════════════════════════════════════════
 // MOCKUP STUDIO — Railway server
 // ENV: FAL_API_KEY
+// Approach: generate photorealistic BG → composite design onto it
 // ═══════════════════════════════════════════════════
 const express = require('express');
 const cors    = require('cors');
 const multer  = require('multer');
 const path    = require('path');
 const fs      = require('fs');
+const https   = require('https');
+const http    = require('http');
+const { createCanvas, loadImage } = require('canvas');
 const { fal } = require('@fal-ai/client');
  
 const app = express();
@@ -16,139 +20,162 @@ app.use(express.static('public'));
  
 const FAL_KEY = process.env.FAL_API_KEY || '';
 fal.config({ credentials: FAL_KEY });
+console.log('Mockup Studio · FAL:', FAL_KEY ? FAL_KEY.substring(0,14)+'...' : 'MISSING ⚠');
  
-console.log('Mockup Studio · FAL:', FAL_KEY ? FAL_KEY.substring(0,12)+'...' : 'MISSING ⚠');
- 
-// ── Multer upload ──────────────────────────────────
+// ── Upload ─────────────────────────────────────────
 const storage = multer.diskStorage({
   destination: 'public/uploads/',
   filename: (_, f, cb) => cb(null, Date.now() + path.extname(f.originalname))
 });
-const upload = multer({ storage, limits: { fileSize: 30 * 1024 * 1024 } });
+const upload = multer({ storage, limits: { fileSize: 30*1024*1024 } });
  
-// ── Scene prompts ──────────────────────────────────
-const SCENE_PROMPTS = {
-  desk:      'a framed print of the product leaning against books on a clean luxury desk, beside a coffee cup and laptop, warm golden hour window light, soft bokeh, professional lifestyle photography, photorealistic, 8K',
-  cafe:      'the product displayed as a large printed poster inside a warm cozy cafe, hung on exposed brick wall, ambient warm lighting, people in background blurred, lifestyle photography, photorealistic, 8K',
-  studio:    'the product framed and displayed on an easel in a bright minimalist photography studio, white walls, soft diffused light from large windows, clean and professional, photorealistic, 8K',
-  marble:    'the product lying flat on a luxury white marble surface, beside gold jewellery, a candle and a pen, editorial luxury flat lay photography, overhead shot, photorealistic, 8K',
-  shelf:     'the product propped up on a wooden floating shelf on a white wall, surrounded by plants and minimal decor, lifestyle interior photography, natural light, photorealistic, 8K',
-  office:    'the product framed large on a corporate office wall behind an executive desk, clean modern interior, dramatic directional lighting, photorealistic commercial photography, 8K',
-  gallery:   'the product displayed as a large canvas print mounted on a white gallery wall, museum lighting, shadow beneath the frame, professional fine art photography, photorealistic, 8K',
-  outdoor:   'the product displayed on a large outdoor billboard on a sunny city street, golden hour light, urban street scene, photorealistic advertising photography, 8K',
-  bedroom:   'the product as a framed print on a bedroom wall above a styled bed, luxury interior, warm evening light, interior design photography, photorealistic, 8K',
-  window:    'the product as a backlit poster display in a shop window at night, interior warm glow, city street reflection in glass, commercial retail photography, photorealistic, 8K',
-  linen:     'the product printed card lying on cream linen fabric, beside fresh flowers and a coffee cup, soft natural light from left, luxury lifestyle flat lay, photorealistic, 8K',
-  laptop:    'the product displayed on a laptop screen on a desk, open MacBook in a stylish home office setting, natural light, depth of field, lifestyle photography, photorealistic, 8K',
-};
- 
-// ── Upload design ──────────────────────────────────
 app.post('/api/upload', upload.single('file'), (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No file' });
-  const url = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
-  res.json({ url, filename: req.file.filename });
+  res.json({ url: `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`, filename: req.file.filename });
 });
  
-// ── Generate mockup ────────────────────────────────
+// ── Scene background prompts (no design — just the scene) ──
+const BG_PROMPTS = {
+  desk:     'luxury minimalist home office desk, empty clean surface, stack of books to one side, white ceramic coffee cup, warm golden hour window light, soft bokeh background, professional lifestyle photography, no people, 4K',
+  cafe:     'warm cozy cafe interior, exposed brick wall with empty blank white frames, ambient warm lighting, blurred coffee cups and people in background, professional interior photography, 4K',
+  studio:   'bright white photography studio, large windows letting in natural light, wooden easel with blank white canvas board, clean minimalist setting, professional photography, 4K',
+  marble:   'luxury white marble surface flat lay, fresh flowers at edge, gold pen, small candle, blank white card area in centre, overhead shot, editorial photography, natural light, 4K',
+  shelf:    'wooden floating shelf on white wall, small potted green plants beside an empty picture frame, minimal Scandinavian interior, soft natural light, interior design photography, 4K',
+  office:   'modern corporate office, clean executive desk in foreground, large blank white framed canvas on wall behind, dramatic directional lighting, professional commercial photography, 4K',
+  gallery:  'pristine white gallery walls, museum directional spotlights, empty large white picture frame on wall, polished concrete floor, fine art photography, 4K',
+  outdoor:  'busy city street at dusk, large outdoor billboard structure with blank white face, golden hour street lighting, urban background, advertising photography, 4K',
+  bedroom:  'luxury bedroom interior, styled bed with linen pillows, blank white picture frame on dark wall above headboard, warm evening ambient lighting, interior design photography, 4K',
+  window:   'luxury retail shop window at night, illuminated display case with blank white backing, city street reflection in glass, commercial retail photography, 4K',
+  linen:    'cream linen fabric surface flat lay, small fresh flowers at corner, blank white card space in centre, soft natural side light, editorial lifestyle photography, 4K',
+  laptop:   'open MacBook laptop on wooden desk, blank white screen, coffee cup beside it, minimalist home office, natural window light, lifestyle photography, 4K',
+};
+ 
+// ── Composite positions per scene (x%, y%, w%, h% of output image) ──
+// Where to paste the design onto the generated background
+const COMPOSITE_POS = {
+  desk:    { x:0.32, y:0.38, w:0.34, h:0.50, angle: 0  },
+  cafe:    { x:0.30, y:0.15, w:0.38, h:0.60, angle: 0  },
+  studio:  { x:0.30, y:0.12, w:0.40, h:0.72, angle: 0  },
+  marble:  { x:0.25, y:0.20, w:0.50, h:0.60, angle:-4  },
+  shelf:   { x:0.28, y:0.10, w:0.44, h:0.65, angle: 0  },
+  office:  { x:0.28, y:0.08, w:0.44, h:0.60, angle: 0  },
+  gallery: { x:0.22, y:0.12, w:0.56, h:0.72, angle: 0  },
+  outdoor: { x:0.30, y:0.10, w:0.40, h:0.48, angle: 0  },
+  bedroom: { x:0.28, y:0.10, w:0.44, h:0.55, angle: 0  },
+  window:  { x:0.25, y:0.15, w:0.50, h:0.68, angle: 0  },
+  linen:   { x:0.22, y:0.22, w:0.56, h:0.56, angle:-3  },
+  laptop:  { x:0.28, y:0.12, w:0.44, h:0.52, angle: 0  },
+};
+ 
+// ── Fetch helper ─────────────────────────────────
+function fetchBuffer(url){
+  return new Promise((resolve, reject)=>{
+    const mod = url.startsWith('https') ? https : http;
+    mod.get(url, res=>{
+      const chunks=[];
+      res.on('data', c=>chunks.push(c));
+      res.on('end', ()=>resolve(Buffer.concat(chunks)));
+      res.on('error', reject);
+    }).on('error', reject);
+  });
+}
+ 
+// ── Generate mockup ───────────────────────────────
 app.post('/api/mockup', async (req, res) => {
-  if (!FAL_KEY) return res.status(500).json({ error: 'FAL_API_KEY not set in Railway env vars' });
+  if (!FAL_KEY) return res.status(500).json({ error: 'FAL_API_KEY not set' });
+  const { imageUrl, scene, customPrompt } = req.body;
+  if (!imageUrl) return res.status(400).json({ error: 'No image URL' });
  
-  const { imageUrl, scene, customPrompt, style = 'realistic' } = req.body;
-  if (!imageUrl) return res.status(400).json({ error: 'No image URL provided' });
+  const bgPrompt = customPrompt || BG_PROMPTS[scene] || BG_PROMPTS.desk;
+  const pos = COMPOSITE_POS[scene] || COMPOSITE_POS.desk;
+  const outName = `mockup-${Date.now()}.jpg`;
+  const outPath = path.join(__dirname, 'public/uploads', outName);
  
-  const scenePrompt = customPrompt || SCENE_PROMPTS[scene] || SCENE_PROMPTS.window;
+  console.log(`[mockup] scene=${scene} generating background…`);
  
-  // Prompt — preserve the source image, only change the environment around it
-  const fullPrompt = `${scenePrompt}. Keep the exact original design/product/image unchanged. Only change the background scene and environment. The subject/design must remain identical to the input image. Professional commercial photography, photorealistic.`;
+  try {
+    // Step 1: Generate photorealistic background with FAL text2image
+    const bgResult = await fal.subscribe('fal-ai/flux/schnell', {
+      input: {
+        prompt: bgPrompt,
+        image_size: { width:1080, height:1080 },
+        num_inference_steps: 4,
+        num_images: 1,
+      },
+      logs: false
+    });
  
-  console.log(`[mockup] scene=${scene} url=${imageUrl.substring(0,60)}`);
+    const bgUrl = bgResult.data?.images?.[0]?.url || bgResult.data?.image?.url;
+    if (!bgUrl) throw new Error('Background generation failed');
+    console.log(`[mockup] bg generated: ${bgUrl.substring(0,60)}`);
  
-  // Endpoint cascade — product placement first, img2img fallback
-  const ENDPOINTS = [
-    {
-      // BEST: Bria product-shot — purpose-built for placing YOUR image into a scene
-      // Preserves your design exactly, changes only the background/environment
-      id: 'fal-ai/bria/product-shot',
-      build: () => ({
-        image_url: imageUrl,
-        scene_description: scenePrompt,
-        num_results: 1,
-        placement: 'original',
-        shot_type: 'product'
-      })
-    },
-    {
-      // Fallback: img2img with LOW strength — preserves source image
-      // 0.4 = 60% source image preserved, 40% scene influence
-      id: 'fal-ai/flux/dev/image-to-image',
-      build: () => ({
-        image_url: imageUrl,
-        prompt: fullPrompt,
-        strength: 0.42,
-        num_inference_steps: 28,
-        guidance_scale: 5,
-        negative_prompt: 'replace design, change text, different image, blurry, distorted, watermark, low quality'
-      })
-    },
-    {
-      // Last resort: flux schnell low strength
-      id: 'fal-ai/flux/schnell/image-to-image',
-      build: () => ({
-        image_url: imageUrl,
-        prompt: fullPrompt,
-        strength: 0.38,
-        num_inference_steps: 4
-      })
-    }
-  ];
+    // Step 2: Download both images
+    const [bgBuf, designBuf] = await Promise.all([
+      fetchBuffer(bgUrl),
+      fetchBuffer(imageUrl)
+    ]);
  
-  let lastErr = '';
-  for (const ep of ENDPOINTS) {
-    try {
-      console.log('[mockup] trying:', ep.id);
-      const result = await fal.subscribe(ep.id, {
-        input: ep.build(),
-        logs: false,
-        onQueueUpdate: (u) => console.log('[mockup]', ep.id, u.status)
-      });
+    // Step 3: Composite design onto background using canvas
+    const bgImg     = await loadImage(bgBuf);
+    const designImg = await loadImage(designBuf);
  
-      const data = result.data || result;
-      const outUrl = data.images?.[0]?.url
-        || data.image?.url
-        || data.image_url
-        || data.output?.image_url
-        || data.result?.[0]?.url;
+    const W = bgImg.width  || 1080;
+    const H = bgImg.height || 1080;
  
-      if (!outUrl) throw new Error('No image URL in response: ' + JSON.stringify(data).substring(0,200));
+    const canvas = createCanvas(W, H);
+    const ctx = canvas.getContext('2d');
  
-      console.log('[mockup] success:', outUrl.substring(0,80));
+    // Draw background
+    ctx.drawImage(bgImg, 0, 0, W, H);
  
-      // Download from FAL and save locally — prevents CDN expiry & CORS issues on frontend
-      try {
-        const dlRes = await fetch(outUrl);
-        if (dlRes.ok) {
-          const buf  = Buffer.from(await dlRes.arrayBuffer());
-          const name = 'mockup-' + Date.now() + '.png';
-          const localPath = path.join(__dirname, 'public', 'uploads', name);
-          fs.writeFileSync(localPath, buf);
-          const localUrl = req.protocol + '://' + req.get('host') + '/uploads/' + name;
-          console.log('[mockup] saved locally:', localUrl);
-          return res.json({ url: localUrl, endpoint: ep.id });
-        }
-      } catch (dlErr) {
-        console.warn('[mockup] local save failed, returning FAL URL directly:', dlErr.message);
-      }
+    // Calculate design position
+    const dx = pos.x * W;
+    const dy = pos.y * H;
+    const dw = pos.w * W;
+    const dh = pos.h * H;
+    const cx = dx + dw/2;
+    const cy = dy + dh/2;
  
-      // Fallback: return FAL URL directly
-      return res.json({ url: outUrl, endpoint: ep.id });
+    // Draw design with subtle shadow and slight angle
+    ctx.save();
+    ctx.translate(cx, cy);
+    if (pos.angle) ctx.rotate(pos.angle * Math.PI / 180);
  
-    } catch (e) {
-      console.error('[mockup]', ep.id, 'failed:', e.message);
-      lastErr = e.message;
-    }
+    // Drop shadow
+    ctx.shadowColor = 'rgba(0,0,0,0.55)';
+    ctx.shadowBlur  = 28;
+    ctx.shadowOffsetX = 6;
+    ctx.shadowOffsetY = 10;
+ 
+    ctx.drawImage(designImg, -dw/2, -dh/2, dw, dh);
+ 
+    // Remove shadow for glare layer
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur  = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+ 
+    // Subtle glare overlay
+    const glare = ctx.createLinearGradient(-dw/2, -dh/2, dw*0.1, dh*0.2);
+    glare.addColorStop(0, 'rgba(255,255,255,0.07)');
+    glare.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = glare;
+    ctx.fillRect(-dw/2, -dh/2, dw, dh);
+ 
+    ctx.restore();
+ 
+    // Save as JPEG
+    const buf = canvas.toBuffer('image/jpeg', { quality: 0.92 });
+    fs.writeFileSync(outPath, buf);
+ 
+    const finalUrl = `${req.protocol}://${req.get('host')}/uploads/${outName}`;
+    console.log(`[mockup] done: ${finalUrl}`);
+    res.json({ url: finalUrl });
+ 
+  } catch(e) {
+    console.error('[mockup] ERROR:', e.message);
+    res.status(500).json({ error: e.message });
   }
- 
-  res.status(500).json({ error: 'All mockup endpoints failed. Last: ' + lastErr });
 });
  
 app.get('/health', (_, res) => res.json({ ok: true, fal: !!FAL_KEY }));
