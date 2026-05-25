@@ -361,14 +361,60 @@ function enter(){
   setTimeout(function(){ g.style.display='none'; document.getElementById('app').style.display='block'; },900);
 }
  
+// ── AUTO-CROP: removes black letterbox borders ────
+function autoCropBlack(file){
+  return new Promise(function(resolve){
+    var reader=new FileReader();
+    reader.onload=function(e){
+      var img=new Image();
+      img.onload=function(){
+        var W=img.width, H=img.height;
+        var c=document.createElement('canvas');
+        c.width=W; c.height=H;
+        var ctx=c.getContext('2d');
+        ctx.drawImage(img,0,0);
+        var data=ctx.getImageData(0,0,W,H).data;
+        var top=H,bot=0,lft=W,rgt=0;
+        for(var y=0;y<H;y++){
+          for(var x=0;x<W;x++){
+            var i=(y*W+x)*4;
+            if(data[i+3]>20 && (data[i]>18||data[i+1]>18||data[i+2]>18)){
+              if(y<top)top=y; if(y>bot)bot=y;
+              if(x<lft)lft=x; if(x>rgt)rgt=x;
+            }
+          }
+        }
+        var pad=6;
+        top=Math.max(0,top-pad); bot=Math.min(H-1,bot+pad);
+        lft=Math.max(0,lft-pad); rgt=Math.min(W-1,rgt+pad);
+        var cw=rgt-lft+1, ch=bot-top+1;
+        if(cw>10&&ch>10&&(cw<W*0.97||ch<H*0.97)){
+          var out=document.createElement('canvas');
+          out.width=cw; out.height=ch;
+          out.getContext('2d').drawImage(c,lft,top,cw,ch,0,0,cw,ch);
+          out.toBlob(function(blob){
+            resolve(blob?new File([blob],file.name,{type:'image/png'}):file);
+          },'image/png',0.98);
+        } else { resolve(file); }
+      };
+      img.onerror=function(){ resolve(file); };
+      img.src=e.target.result;
+    };
+    reader.onerror=function(){ resolve(file); };
+    reader.readAsDataURL(file);
+  });
+}
+ 
 // ── UPLOAD ────────────────────────────────────────
 async function handleUpload(input){
   var file=input.files[0]; if(!file) return;
-  var fd=new FormData(); fd.append('file',file);
   var zone=document.getElementById('upload-zone');
   zone.querySelector('#uz-inner').style.display='none';
-  toast('Uploading…');
+  toast('Processing…');
   try{
+    // Auto-remove black letterbox bars
+    var clean=await autoCropBlack(file);
+    var fd=new FormData(); fd.append('file',clean);
     var r=await fetch(S+'/api/upload',{method:'POST',body:fd});
     var d=await r.json();
     if(d.error) throw new Error(d.error);
