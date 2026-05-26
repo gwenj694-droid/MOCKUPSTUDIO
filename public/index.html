@@ -517,6 +517,12 @@ function toast(msg,tp){
         <div style="position:relative;display:inline-block" id="ed-stage">
           <canvas id="ed-bg" style="display:block;max-width:100%;max-height:68vh"></canvas>
           <canvas id="ed-tc-canvas" style="position:absolute;top:0;left:0;pointer-events:none"></canvas>
+          <!-- Text position dot — always visible, drag to move text -->
+          <div id="ed-txt-handle" style="position:absolute;z-index:50;cursor:grab;user-select:none;touch-action:none;display:none;transform:translate(-50%,-50%)">
+            <div style="width:36px;height:36px;border-radius:50%;background:#E8B84B;border:3px solid #fff;box-shadow:0 2px 12px rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center">
+              <span style="font-size:14px;line-height:1">T</span>
+            </div>
+          </div>
           <div id="ed-phone" style="position:absolute;top:0;left:0;cursor:move;user-select:none;touch-action:none">
             <div id="ed-pbody" style="width:100%;height:100%;position:relative;border-radius:12%;box-shadow:0 12px 50px rgba(0,0,0,.85),inset 0 0 0 1.5px rgba(255,255,255,.12);background:linear-gradient(135deg,#3a3a3a,#1a1a1a)">
               <div id="ed-screen" style="position:absolute;inset:5% 4%;border-radius:10%;overflow:hidden;background:#000">
@@ -537,8 +543,9 @@ function toast(msg,tp){
 // ═══════════ EDITOR STATE ═══════════
 var edBg=null, edDes=null, edScale=1, edPhoneStyle='dark';
 var edP={x:100,y:80,w:240,h:480,rot:0};
-var edDragging=false, edResizing=false;
-var edDragStart={}, edResizeStart={};
+var edTxt={x:0, y:0}; // text block position in canvas pixels
+var edDragging=false, edResizing=false, edTxtDragging=false;
+var edDragStart={}, edResizeStart={}, edTxtStart={};
  
 function proxyUrl(url){
   // Use proxy endpoint to avoid CORS issues with canvas
@@ -578,7 +585,11 @@ function openEd(){
     }
     document.getElementById('ed-w').value=edP.w;
     document.getElementById('ed-h').value=edP.h;
+    // Set default text position to bottom 30% of image
+    edTxt.x = Math.round(edBg.width * 0.5);
+    edTxt.y = Math.round(edBg.height * 0.78);
     edApply(); edText();
+    makeTxtDrag();
   };
   edBg.onerror=function(){ toast('Could not load background image','e'); };
   edBg.src=proxyUrl(edData.bgUrl||edData.url);
@@ -631,23 +642,106 @@ function edReset(){ edP.rot=0; document.getElementById('ed-r').value=0; document
 function edText(){
   var tc=document.getElementById('ed-tc-canvas');
   if(!tc.width) return;
-  var ctx=tc.getContext('2d'); ctx.clearRect(0,0,tc.width,tc.height);
-  var W=tc.width,H=tc.height;
+  var ctx=tc.getContext('2d');
+  ctx.clearRect(0,0,tc.width,tc.height);
+ 
   var head=document.getElementById('ed-th').value.trim();
-  var sub=document.getElementById('ed-ts').value.trim();
-  var cta=document.getElementById('ed-tc').value.trim();
-  var fs=+document.getElementById('ed-fs').value||32;
-  if(!head&&!sub&&!cta) return;
-  var bh=Math.round(H*.32);
-  var band=ctx.createLinearGradient(0,H-bh,0,H);
-  band.addColorStop(0,'rgba(0,0,0,0)'); band.addColorStop(.35,'rgba(0,0,0,.72)'); band.addColorStop(1,'rgba(0,0,0,.9)');
-  ctx.fillStyle=band; ctx.fillRect(0,H-bh,W,bh);
-  var pad=Math.round(W*.07), ty=H-bh+Math.round(bh*.2);
-  ctx.textAlign='center'; var cx3=W/2;
-  if(head){ ctx.font='bold '+fs+'px Arial,sans-serif'; ctx.fillStyle='#fff'; ctx.shadowColor='rgba(0,0,0,.6)'; ctx.shadowBlur=14; var words=head.split(' '),maxW=W-pad*2,line='',lines=[]; words.forEach(function(w){ var t=line?line+' '+w:w; if(ctx.measureText(t).width>maxW&&line){lines.push(line);line=w;}else line=t; }); if(line)lines.push(line); lines.forEach(function(l){ ctx.fillText(l,cx3,ty); ty+=Math.round(fs*1.22); }); ctx.shadowBlur=0; ty+=Math.round(W*.015); }
-  if(sub){ var fs2=Math.round(fs*.58); ctx.font=fs2+'px Arial,sans-serif'; ctx.fillStyle='rgba(255,255,255,.85)'; ctx.shadowBlur=8; ctx.fillText(sub,cx3,ty); ctx.shadowBlur=0; ty+=Math.round(fs2*1.7); }
-  if(cta){ var fs3=Math.round(fs*.52); ctx.font='bold '+fs3+'px Arial,sans-serif'; ctx.fillStyle='#E8B84B'; ctx.fillText('→  '+cta+'  ←',cx3,ty); }
+  var sub =document.getElementById('ed-ts').value.trim();
+  var cta =document.getElementById('ed-tc').value.trim();
+  var fs  =+document.getElementById('ed-fs').value||32;
+ 
+  // Move the gold dot handle to current text position (in screen pixels)
+  var handle=document.getElementById('ed-txt-handle');
+  if(!head&&!sub&&!cta){ handle.style.display='none'; return; }
+  handle.style.display='block';
+  handle.style.left = Math.round(edTxt.x * edScale) + 'px';
+  handle.style.top  = Math.round(edTxt.y * edScale) + 'px';
+ 
+  // Draw gradient band centred on edTxt.y
+  var W=tc.width, H=tc.height;
+  var bh=Math.round(H*0.30);
+  var bandTop=Math.max(0, edTxt.y - Math.round(bh*0.18));
+  var band=ctx.createLinearGradient(0,bandTop,0,bandTop+bh);
+  band.addColorStop(0,'rgba(0,0,0,0)');
+  band.addColorStop(0.3,'rgba(0,0,0,0.75)');
+  band.addColorStop(1,'rgba(0,0,0,0.92)');
+  ctx.fillStyle=band;
+  ctx.fillRect(0,bandTop,W,bh);
+ 
+  // Draw text centred on edTxt.x (horizontal) starting at edTxt.y (vertical)
+  var maxW=W-Math.round(W*0.1);
+  ctx.textAlign='center';
+  var ty=edTxt.y;
+ 
+  if(head){
+    ctx.font='bold '+fs+'px Arial,sans-serif';
+    ctx.fillStyle='#ffffff';
+    ctx.shadowColor='rgba(0,0,0,0.7)'; ctx.shadowBlur=14;
+    var words=head.split(' '), line='', lines=[];
+    words.forEach(function(w){
+      var t=line?line+' '+w:w;
+      if(ctx.measureText(t).width>maxW&&line){ lines.push(line); line=w; } else line=t;
+    });
+    if(line) lines.push(line);
+    lines.forEach(function(l){ ctx.fillText(l,edTxt.x,ty); ty+=Math.round(fs*1.24); });
+    ctx.shadowBlur=0; ty+=Math.round(fs*0.4);
+  }
+  if(sub){
+    var fs2=Math.round(fs*0.55);
+    ctx.font=fs2+'px Arial,sans-serif';
+    ctx.fillStyle='rgba(255,255,255,0.85)';
+    ctx.fillText(sub,edTxt.x,ty); ty+=Math.round(fs2*1.7);
+  }
+  if(cta){
+    var fs3=Math.round(fs*0.50);
+    ctx.font='bold '+fs3+'px Arial,sans-serif';
+    ctx.fillStyle='#E8B84B';
+    ctx.fillText('→  '+cta+'  ←',edTxt.x,ty);
+  }
   ctx.textAlign='left';
+}
+ 
+function makeTxtDrag(){
+  var handle=document.getElementById('ed-txt-handle');
+  handle.style.cursor='grab';
+ 
+  function startDrag(mx,my){
+    edTxtDragging=true;
+    edTxtStart={mx:mx, my:my, tx:edTxt.x, ty:edTxt.y};
+    handle.style.cursor='grabbing';
+  }
+  function moveDrag(mx,my){
+    if(!edTxtDragging) return;
+    edTxt.x=Math.round(edTxtStart.tx+(mx-edTxtStart.mx)/edScale);
+    edTxt.y=Math.round(edTxtStart.ty+(my-edTxtStart.my)/edScale);
+    edText();
+  }
+  function endDrag(){
+    edTxtDragging=false;
+    handle.style.cursor='grab';
+  }
+ 
+  handle.addEventListener('mousedown',function(e){
+    e.preventDefault(); e.stopPropagation();
+    startDrag(e.clientX, e.clientY);
+  });
+  handle.addEventListener('touchstart',function(e){
+    e.stopPropagation();
+    var t=e.touches[0]; startDrag(t.clientX, t.clientY);
+  },{passive:true});
+ 
+  // Global move/up listeners (attached once)
+  if(!handle._listenersAdded){
+    handle._listenersAdded=true;
+    document.addEventListener('mousemove',function(e){
+      if(edTxtDragging) moveDrag(e.clientX, e.clientY);
+    });
+    document.addEventListener('mouseup', endDrag);
+    document.addEventListener('touchmove',function(e){
+      if(edTxtDragging){ var t=e.touches[0]; moveDrag(t.clientX,t.clientY); }
+    },{passive:true});
+    document.addEventListener('touchend', endDrag);
+  }
 }
  
 // Drag
@@ -667,14 +761,16 @@ function makeDrag(){
   document.onmousemove=function(e){
     if(edDragging){ edP.x=Math.round(edDragStart.px+(e.clientX-edDragStart.mx)/edScale); edP.y=Math.round(edDragStart.py+(e.clientY-edDragStart.my)/edScale); posPhone(); }
     if(edResizing){ edP.w=Math.max(60,Math.round(edResizeStart.pw+(e.clientX-edResizeStart.mx)/edScale)); edP.h=Math.max(100,Math.round(edResizeStart.ph+(e.clientY-edResizeStart.my)/edScale)); document.getElementById('ed-w').value=edP.w; document.getElementById('ed-h').value=edP.h; document.getElementById('ed-wv').textContent=edP.w+'px'; document.getElementById('ed-hv').textContent=edP.h+'px'; posPhone(); }
+    // text drag handled by makeTxtDrag listeners
   };
   document.ontouchmove=function(e){
     var t=e.touches[0];
     if(edDragging){ edP.x=Math.round(edDragStart.px+(t.clientX-edDragStart.mx)/edScale); edP.y=Math.round(edDragStart.py+(t.clientY-edDragStart.my)/edScale); posPhone(); }
     if(edResizing){ edP.w=Math.max(60,Math.round(edResizeStart.pw+(t.clientX-edResizeStart.mx)/edScale)); edP.h=Math.max(100,Math.round(edResizeStart.ph+(t.clientY-edResizeStart.my)/edScale)); posPhone(); }
+    // text drag handled by makeTxtDrag listeners
   };
-  document.onmouseup=function(){ edDragging=false; edResizing=false; document.getElementById('ed-phone').style.cursor='move'; };
-  document.ontouchend=function(){ edDragging=false; edResizing=false; };
+  document.onmouseup=function(){ edDragging=false; edResizing=false; edTxtDragging=false; document.getElementById('ed-phone').style.cursor='move'; };
+  document.ontouchend=function(){ edDragging=false; edResizing=false; edTxtDragging=false; };
 }
  
 function makeResize(){
@@ -714,9 +810,24 @@ function exportEd(){
   ctx.fillStyle=edPhoneStyle==='dark'?'rgba(255,255,255,.22)':'rgba(0,0,0,.18)'; prr(ctx,-pw*.15,ph/2-ph*.036,pw*.30,ph*.016,ph*.008); ctx.fill();
   ctx.restore();
  
-  // Text overlay from text canvas
-  var tc=document.getElementById('ed-tc-canvas');
-  if(tc.width) ctx.drawImage(tc,0,0,W,H);
+  // Text overlay — redraw at full resolution using edTxt coords
+  var head2=document.getElementById('ed-th').value.trim();
+  var sub2=document.getElementById('ed-ts').value.trim();
+  var cta2=document.getElementById('ed-tc').value.trim();
+  var fs2=+document.getElementById('ed-fs').value||32;
+  if(head2||sub2||cta2){
+    var bh2=Math.round(H*.28);
+    var bandY2=Math.max(0,edTxt.y-bh2*.15);
+    var band2=ctx.createLinearGradient(0,bandY2,0,bandY2+bh2);
+    band2.addColorStop(0,'rgba(0,0,0,0)'); band2.addColorStop(.3,'rgba(0,0,0,.75)'); band2.addColorStop(1,'rgba(0,0,0,.92)');
+    ctx.fillStyle=band2; ctx.fillRect(0,bandY2,W,bh2);
+    var pad2=Math.round(W*.06), maxW2=W-pad2*2;
+    ctx.textAlign='center'; var ty2=edTxt.y;
+    if(head2){ ctx.font='bold '+fs2+'px Arial,sans-serif'; ctx.fillStyle='#fff'; ctx.shadowColor='rgba(0,0,0,.65)'; ctx.shadowBlur=14; var words2=head2.split(' '),line2='',lines2=[]; words2.forEach(function(w){ var t=line2?line2+' '+w:w; if(ctx.measureText(t).width>maxW2&&line2){lines2.push(line2);line2=w;}else line2=t; }); if(line2)lines2.push(line2); lines2.forEach(function(l){ ctx.fillText(l,W/2,ty2); ty2+=Math.round(fs2*1.22); }); ctx.shadowBlur=0; ty2+=Math.round(W*.01); }
+    if(sub2){ var fsb=Math.round(fs2*.55); ctx.font=fsb+'px Arial,sans-serif'; ctx.fillStyle='rgba(255,255,255,.85)'; ctx.shadowBlur=8; ctx.fillText(sub2,W/2,ty2); ctx.shadowBlur=0; ty2+=Math.round(fsb*1.7); }
+    if(cta2){ var fsc=Math.round(fs2*.50); ctx.font='bold '+fsc+'px Arial,sans-serif'; ctx.fillStyle='#E8B84B'; ctx.fillText('→  '+cta2+'  ←',W/2,ty2); }
+    ctx.textAlign='left';
+  }
  
   var a=document.createElement('a'); a.href=out.toDataURL('image/png',1); a.download='promo-edited-'+Date.now()+'.png'; a.click();
   toast('Exported ✓','g');
