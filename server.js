@@ -56,18 +56,86 @@ app.post('/api/upload', upload.single('file'), (req,res) => {
  
 // Scenes
 const SCENES = {
-  car:             { prompt:'confident elegant woman standing next to a sleek luxury black car, holding a blank white smartphone screen facing toward the camera, golden hour sunset light, cinematic photography, bokeh background, photorealistic 8K', phone:{x:.36,y:.20,w:.26,h:.50} },
-  flatlay_bag:     { prompt:'luxury feminine flat lay overhead shot, cream marble surface, pink designer handbag, gold keys, fresh pink roses, pearl bracelet, a blank white iPhone lying face-up showing empty white screen, warm natural light, editorial photography 4K', phone:{x:.50,y:.38,w:.30,h:.36} },
-  cafe_table:      { prompt:'stylish woman sitting at a luxury cafe table, smiling, holding a blank white smartphone screen facing camera, cappuccino and flowers on table, warm ambient lighting, lifestyle photography, blurred background 8K', phone:{x:.36,y:.18,w:.28,h:.52} },
-  desk_flatlay:    { prompt:'overhead luxury desk flat lay, white marble surface, open notebook, gold pen, small plant, blank white iPhone screen face-up, MacBook keyboard visible at edge, editorial photography, natural window light 4K', phone:{x:.52,y:.38,w:.28,h:.36} },
-  woman_window:    { prompt:'confident woman in white blazer standing in front of large bright window, holding blank white smartphone screen toward camera, luxury minimal interior, natural diffused light, professional photography 8K', phone:{x:.36,y:.20,w:.28,h:.50} },
-  story_model:     { prompt:'stylish female entrepreneur in modern bright office, looking at camera, holding blank white smartphone showing empty screen, confident pose, editorial fashion photography, 9:16 portrait 4K', phone:{x:.36,y:.22,w:.28,h:.46}, story:true },
-  story_lifestyle: { prompt:'beautiful woman walking in luxury shopping district, holding blank white smartphone screen toward camera, golden hour sunlight, designer outfit, blurred city background, lifestyle fashion photography, 9:16 portrait 8K', phone:{x:.36,y:.20,w:.28,h:.48}, story:true },
-  laptop_cafe:     { prompt:'stylish woman working at a bright modern cafe, open MacBook with blank white screen visible facing camera, coffee cup beside it, flowers, warm light, lifestyle photography 8K', phone:{x:.25,y:.22,w:.50,h:.40}, laptop:true },
-  rooftop:         { prompt:'confident woman on luxury hotel rooftop terrace, city skyline behind her, holding blank white smartphone toward camera, golden sunset light, editorial fashion photography, cinematic 8K', phone:{x:.37,y:.22,w:.26,h:.48} },
-  minimal_studio:  { prompt:'female model in elegant cream outfit, holding blank white smartphone screen facing camera, clean white studio background, dramatic side lighting, commercial photography 8K', phone:{x:.37,y:.20,w:.26,h:.48} },
-  pool_villa:      { prompt:'luxury infinity pool villa, elegant woman in swimwear, blank white smartphone lying on marble surface beside pool, tropical flowers, blue water, golden afternoon light, aspirational lifestyle photography 8K', phone:{x:.48,y:.44,w:.28,h:.34} },
-  flowers_flatlay: { prompt:'luxury flat lay overhead, soft pink and white peonies, cream linen fabric, blank white iPhone face-up, pearl jewellery, gold pen, editorial feminine photography, natural light 4K', phone:{x:.46,y:.34,w:.30,h:.36} },
+ 
+  // ── FLAT LAYS — no person ──────────────────────────────
+  flatlay_marble: {
+    prompt: 'luxury overhead editorial flat lay, straight down 90-degree shot, white veined marble surface, iPhone face-up with blank white screen in centre, fresh white gardenias scattered around it, single gold ring, espresso cup on small saucer, Architectural Digest editorial style, soft diffused daylight, 4K commercial photography',
+    phone:{x:.35,y:.28,w:.38,h:.46}
+  },
+  flatlay_linen: {
+    prompt: 'minimal editorial flat lay, overhead shot, crinkled cream linen fabric background, iPhone face-up with blank white screen, dried pampas grass, small brown leather journal, vintage brass pen, single dried rose, warm earthy tones, editorial lifestyle photography, natural side light 4K',
+    phone:{x:.36,y:.30,w:.36,h:.44}
+  },
+  flatlay_neon: {
+    prompt: 'bold editorial overhead flat lay, black matte surface, iPhone face-up with blank white screen glowing, neon pink and purple LED light strips creating dramatic colour shadows, holographic confetti scattered, modern Y2K aesthetic, studio photography with coloured gels 4K',
+    phone:{x:.36,y:.28,w:.36,h:.46}
+  },
+ 
+  // ── LIFESTYLE WITHOUT PERSON ───────────────────────────
+  coffee_aesthetic: {
+    prompt: 'cosy lifestyle editorial photograph, side angle shot, iPhone propped up against a stack of coffee table books, blank white screen visible, steaming latte art beside it in a ceramic cup, open book with glasses on top, candle flickering in background, warm amber morning light through sheer curtain, photorealistic 8K',
+    phone:{x:.30,y:.15,w:.32,h:.62}
+  },
+  bed_morning: {
+    prompt: 'aspirational lifestyle editorial, iPhone propped against fluffy white pillow on luxurious made bed, blank white screen clearly visible, white duvet with subtle texture, sunlight streaming through sheer curtains creating beautiful lens flare, a tray with croissant and orange juice at edge, morning light editorial photography 8K',
+    phone:{x:.32,y:.14,w:.32,h:.60}
+  },
+  botanicals: {
+    prompt: 'editorial still life photograph, iPhone standing upright leaning against a large tropical leaf monstera plant, blank white screen facing camera, terracotta pot, warm afternoon sunlight casting leaf shadows across the phone screen, minimal white wall background, lifestyle interior photography 8K',
+    phone:{x:.32,y:.15,w:.30,h:.58}
+  },
+ 
+  // ── CINEMATIC MOODY ───────────────────────────────────
+  neon_city_night: {
+    prompt: 'cinematic night photography, close-up of a hand with manicured nails holding an iPhone with blank white screen, neon city lights reflecting on phone glass, rain-slicked pavement in background with purple and pink reflections, Blade Runner moody aesthetic, cinema 4K',
+    phone:{x:.28,y:.16,w:.42,h:.68}
+  },
+  golden_hour_hands: {
+    prompt: 'cinematic editorial close-up, elegant hands with gold rings holding an iPhone horizontally with blank white screen facing camera, golden hour backlight creating a halo glow around phone, lens flare, warm amber and orange bokeh, fashion editorial photography 8K',
+    phone:{x:.18,y:.24,w:.64,h:.54}
+  },
+  shadow_play: {
+    prompt: 'artistic editorial photograph, iPhone standing against a white wall, blank white screen visible, dramatic side window light casting beautiful geometric shadow patterns across the wall and phone, strong contrast, minimal composition, fine art photography 8K',
+    phone:{x:.34,y:.12,w:.28,h:.62}
+  },
+ 
+  // ── LUXURY TRAVEL & DESTINATION ───────────────────────
+  amalfi_coast: {
+    prompt: 'luxury travel editorial photograph, iPhone propped on a sun-drenched terrace railing, blank white screen clearly visible, dramatic view of Amalfi coast cliffs and turquoise Mediterranean sea behind it, terracotta tiles and bougainvillea flowers, golden midday light, professional travel photography 8K',
+    phone:{x:.30,y:.12,w:.30,h:.60}
+  },
+  hotel_pool: {
+    prompt: 'aspirational luxury hotel editorial, iPhone placed on white marble edge of an infinity pool, blank white screen face-up reflecting blue sky, clear turquoise water with sunlight patterns, rolled white towel beside it, tropical palm fronds in upper corner, overhead angle, resort photography 8K',
+    phone:{x:.36,y:.32,w:.36,h:.42}
+  },
+  private_jet: {
+    prompt: 'aspirational luxury editorial, iPhone with blank white screen placed on cream leather private jet seat, porthole window with blue sky and clouds visible, cashmere throw blanket, champagne flute, subtle luxury branding, aspirational lifestyle commercial photography 8K',
+    phone:{x:.34,y:.20,w:.32,h:.58}
+  },
+ 
+  // ── EDITORIAL STORY — WOMAN DIFFERENT ANGLES ──────────
+  mirror_reflection: {
+    prompt: 'artistic editorial fashion photograph, stylish woman photographing herself in a large ornate gold-framed mirror, you see her reflection holding the phone, blank white screen visible in reflection, luxury hotel lobby or dressing room, warm chandelier light, fashion editorial photography 8K',
+    phone:{x:.36,y:.22,w:.28,h:.52}
+  },
+  from_above_cafe: {
+    prompt: 'editorial overhead bird-eye view photograph, woman in chic outfit sitting at a cafe table photographed from directly above, iPhone on table beside her coffee with blank white screen facing up, her hands on keyboard of laptop, flowers, notebook, aerial lifestyle editorial photography 8K',
+    phone:{x:.52,y:.38,w:.28,h:.38}
+  },
+  walking_candid: {
+    prompt: 'candid editorial street photography, stylish woman in motion walking in a European cobblestone street, she glances down at phone she holds loosely at her side with screen visible, golden hour side light, motion blur background, decisive moment editorial photography 8K',
+    phone:{x:.40,y:.40,w:.24,h:.44}
+  },
+ 
+  // ── BOLD GRAPHIC COMMERCIAL ────────────────────────────
+  product_closeup: {
+    prompt: 'clean commercial product photograph, extreme close-up of iPhone propped at slight angle showing blank white screen, perfectly lit with soft box lighting creating subtle screen glare, pure white seamless background, luxury product photography for advertising, 8K',
+    phone:{x:.20,y:.10,w:.60,h:.80}
+  },
+  desk_power: {
+    prompt: 'editorial power desk photograph, angle shot from desk level, iPhone propped against a sleek laptop showing blank white screen, behind it out of focus: second monitor, designer desk lamp, architectural plant, the desk of a successful female CEO, professional editorial photography 8K',
+    phone:{x:.28,y:.14,w:.38,h:.62}
+  },
 };
  
 const FORMATS = {
@@ -176,25 +244,47 @@ app.post('/api/mockup', async (req,res)=>{
     const pw=Math.round(phonePos.w*W), ph=Math.round(phonePos.h*H);
     drawPhone(ctx, designImg, px, py, pw, ph, isLaptop);
  
-    // 4. Text overlay
+    // 4. Text overlay — larger, centered, high impact
     if(headline||subtext||cta){
-      const bandH=Math.round(H*.26);
+      const bandH=Math.round(H*.32);
       const band=ctx.createLinearGradient(0,H-bandH,0,H);
-      band.addColorStop(0,'rgba(0,0,0,0)'); band.addColorStop(.35,'rgba(0,0,0,.72)'); band.addColorStop(1,'rgba(0,0,0,.9)');
+      band.addColorStop(0,'rgba(0,0,0,0)'); band.addColorStop(.25,'rgba(0,0,0,.78)'); band.addColorStop(1,'rgba(0,0,0,0.94)');
       ctx.fillStyle=band; ctx.fillRect(0,H-bandH,W,bandH);
-      const pad=Math.round(W*.07); let ty=H-bandH+Math.round(bandH*.2);
+ 
+      const pad=Math.round(W*.06);
+      const maxW=W-pad*2;
+      ctx.textAlign='center';
+      const cx2=W/2;
+      let ty=H-bandH+Math.round(bandH*.18);
+ 
       if(headline){
-        const fs=Math.round(W*.06);
+        const fs=Math.round(W*.072);
         ctx.font=`bold ${fs}px Inter, Arial, sans-serif`;
-        ctx.fillStyle='#fff'; ctx.shadowColor='rgba(0,0,0,.5)'; ctx.shadowBlur=10;
-        const words=headline.split(' '),maxW=W-pad*2; let line='',lines=[];
+        ctx.fillStyle='#ffffff';
+        ctx.shadowColor='rgba(0,0,0,0.7)'; ctx.shadowBlur=14;
+        const words=headline.split(' '); let line='',lines=[];
         words.forEach(w=>{ const t=line?line+' '+w:w; if(ctx.measureText(t).width>maxW&&line){lines.push(line);line=w;}else line=t; });
         if(line) lines.push(line);
-        lines.forEach(l=>{ ctx.fillText(l,pad,ty); ty+=Math.round(fs*1.28); });
-        ctx.shadowBlur=0; ty+=Math.round(W*.01);
+        lines.forEach(l=>{ ctx.fillText(l,cx2,ty); ty+=Math.round(fs*1.22); });
+        ctx.shadowBlur=0; ty+=Math.round(W*.015);
       }
-      if(subtext){ const fs=Math.round(W*.035); ctx.font=`${fs}px Inter, Arial, sans-serif`; ctx.fillStyle='rgba(255,255,255,.78)'; ctx.fillText(subtext,pad,ty); ty+=Math.round(fs*1.6); }
-      if(cta){ const fs=Math.round(W*.032); ctx.font=`bold ${fs}px Inter, Arial, sans-serif`; ctx.fillStyle='#E8B84B'; ctx.fillText('→ '+cta,pad,ty); }
+      if(subtext){
+        const fs=Math.round(W*.042);
+        ctx.font=`${fs}px Inter, Arial, sans-serif`;
+        ctx.fillStyle='rgba(255,255,255,0.85)';
+        ctx.shadowColor='rgba(0,0,0,0.5)'; ctx.shadowBlur=8;
+        ctx.fillText(subtext,cx2,ty);
+        ctx.shadowBlur=0; ty+=Math.round(fs*1.7);
+      }
+      if(cta){
+        const fs=Math.round(W*.038);
+        ctx.font=`bold ${fs}px Inter, Arial, sans-serif`;
+        ctx.fillStyle='#E8B84B';
+        ctx.shadowColor='rgba(0,0,0,0.4)'; ctx.shadowBlur=6;
+        ctx.fillText('→  '+cta+'  ←',cx2,ty);
+        ctx.shadowBlur=0;
+      }
+      ctx.textAlign='left';
     }
  
     // 5. Save
