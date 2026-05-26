@@ -188,19 +188,54 @@ html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'D
         <div class="ph"><div class="pt">Lifestyle Scene</div></div>
         <div class="pb">
           <div class="scene-grid">
-            <div class="sb on" data-s="car" onclick="ps(this)"><div class="sb-ico">🚗</div><div class="sb-lbl">Woman + Car</div></div>
-            <div class="sb" data-s="flatlay_bag" onclick="ps(this)"><div class="sb-ico">👜</div><div class="sb-lbl">Bag + Flowers</div></div>
-            <div class="sb" data-s="cafe_table" onclick="ps(this)"><div class="sb-ico">☕</div><div class="sb-lbl">Café Table</div></div>
-            <div class="sb" data-s="desk_flatlay" onclick="ps(this)"><div class="sb-ico">💼</div><div class="sb-lbl">Desk Flat Lay</div></div>
-            <div class="sb" data-s="woman_window" onclick="ps(this)"><div class="sb-ico">🪟</div><div class="sb-lbl">Woman + Window</div></div>
-            <div class="sb" data-s="story_model" onclick="ps(this)"><div class="sb-ico">📱</div><div class="sb-lbl">Story Model</div></div>
-            <div class="sb" data-s="story_lifestyle" onclick="ps(this)"><div class="sb-ico">🛍</div><div class="sb-lbl">Story Street</div></div>
-            <div class="sb" data-s="laptop_cafe" onclick="ps(this)"><div class="sb-ico">💻</div><div class="sb-lbl">Laptop Scene</div></div>
-            <div class="sb" data-s="rooftop" onclick="ps(this)"><div class="sb-ico">🌆</div><div class="sb-lbl">Rooftop</div></div>
-            <div class="sb" data-s="minimal_studio" onclick="ps(this)"><div class="sb-ico">✨</div><div class="sb-lbl">Studio White</div></div>
-            <div class="sb" data-s="pool_villa" onclick="ps(this)"><div class="sb-ico">🏖</div><div class="sb-lbl">Pool Villa</div></div>
-            <div class="sb" data-s="flowers_flatlay" onclick="ps(this)"><div class="sb-ico">🌸</div><div class="sb-lbl">Flowers Flat Lay</div></div>
-          </div>
+  <div class="sb" style="grid-column:1/-1;background:rgba(232,184,75,.04);border-color:rgba(232,184,75,.15);padding:6px 10px;cursor:default">
+    <div style="font-size:8px;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:6px">🖼 Flat Lay — No Person</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px">
+      <div class="sb on" data-s="flatlay_marble" onclick="ps(this)"><div class="sb-ico">🤍</div><div class="sb-lbl">Marble & Florals</div></div>
+      <div class="sb" data-s="flatlay_linen" onclick="ps(this)"><div class="sb-ico">🌾</div><div class="sb-lbl">Linen Editorial</div></div>
+      <div class="sb" data-s="flatlay_neon" onclick="ps(this)"><div class="sb-ico">💜</div><div class="sb-lbl">Neon Bold</div></div>
+    </div>
+  </div>
+  <div class="sb" style="grid-column:1/-1;background:rgba(155,107,242,.04);border-color:rgba(155,107,242,.15);padding:6px 10px;cursor:default">
+    <div style="font-size:8px;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:var(--purple);margin-bottom:6px">☕ Lifestyle — No Person</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px">
+      <div class="sb" data-s="coffee_aesthetic" onclick="ps(this)"><div class="sb-ico">☕</div><div class="sb-lbl">Coffee Morning</div></div>
+      <div class="sb" data-s="bed_morning" onclick="ps(this)"><div class="sb-ico">🛏</div><div class="sb-lbl">Bed & Sunlight</div></div>
+      <div class="sb" data-s="botanicals" onclick="ps(this)"><div class="sb-ico">🌿</div><div class="sb-lbl">Botanical</div></div>
+    </div>
+  </div>
+  <div class="sb" style="grid-column:1/-1;background:rgba(240,107,205,.04);border-color:rgba(240,107,205,.15);padding:6px 10px;cursor:default">
+    <div style="font-size:8px;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:var(--pink);margin-bottom:6px">🎬 Cinematic Moody</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px">
+      <div class="sb" data-s="neon_city_night" onclick="ps(this)"><div class="sb-ico">🌆</div><div class="sb-lbl">Neon Night</div></div>
+      <div class="sb" data-s="golden_hour_hands" onclick="ps(this)"><div class="sb-ico">✨</div><div class="sb-lbl">Golden Hands</div></div>
+      <div class="sb" data-s="shadow_play" onclick="ps(this)"><div class="sb-ico">🖤</div><div class="sb-lbl">Shadow & Light</div></div>
+    </div>
+  </div>
+  <div class="sb" style="grid-column:1/-1;background:rgba(34,197,94,.04);border-color:rgba(34,197,94,.15);padding:6px 10px;cursor:default">
+    <div style="font-size:8px;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:var(--green);margin-bottom:6px">✈️ Luxury Travel</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px">
+      <div class="sb" data-s="amalfi_coast" onclick="ps(this)"><div class="sb-ico">🌊</div><div class="sb-lbl">Amalfi Coast</div></div>
+      <div class="sb" data-s="hotel_pool" onclick="ps(this)"><div class="sb-ico">🏊</div><div class="sb-lbl">Infinity Pool</div></div>
+      <div class="sb" data-s="private_jet" onclick="ps(this)"><div class="sb-ico">✈️</div><div class="sb-lbl">Private Jet</div></div>
+    </div>
+  </div>
+  <div class="sb" style="grid-column:1/-1;background:rgba(232,184,75,.04);border-color:rgba(232,184,75,.15);padding:6px 10px;cursor:default">
+    <div style="font-size:8px;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:6px">👗 Editorial — Woman Different Angles</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px">
+      <div class="sb" data-s="mirror_reflection" onclick="ps(this)"><div class="sb-ico">🪞</div><div class="sb-lbl">Mirror Selfie</div></div>
+      <div class="sb" data-s="from_above_cafe" onclick="ps(this)"><div class="sb-ico">🦅</div><div class="sb-lbl">Bird's Eye</div></div>
+      <div class="sb" data-s="walking_candid" onclick="ps(this)"><div class="sb-ico">🚶‍♀️</div><div class="sb-lbl">Candid Walk</div></div>
+    </div>
+  </div>
+  <div class="sb" style="grid-column:1/-1;background:rgba(155,107,242,.04);border-color:rgba(155,107,242,.15);padding:6px 10px;cursor:default">
+    <div style="font-size:8px;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:var(--purple);margin-bottom:6px">🎯 Bold Commercial</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
+      <div class="sb" data-s="product_closeup" onclick="ps(this)"><div class="sb-ico">🔍</div><div class="sb-lbl">Screen Close-Up</div></div>
+      <div class="sb" data-s="desk_power" onclick="ps(this)"><div class="sb-ico">💼</div><div class="sb-lbl">CEO Desk Power</div></div>
+    </div>
+  </div>
+</div>
         </div>
       </div>
  
@@ -258,7 +293,7 @@ html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'D
  
 <script>
 const S=window.location.origin;
-var uploadedUrl=null, scene='car', fmt='square', generating=false, resultUrl=null, edData=null;
+var uploadedUrl=null, scene='flatlay_marble', fmt='square', generating=false, resultUrl=null, edData=null;
  
 function enter(){
   var g=document.getElementById('gate'); g.classList.add('out');
@@ -603,14 +638,16 @@ function edText(){
   var cta=document.getElementById('ed-tc').value.trim();
   var fs=+document.getElementById('ed-fs').value||32;
   if(!head&&!sub&&!cta) return;
-  var bh=Math.round(H*.26);
+  var bh=Math.round(H*.32);
   var band=ctx.createLinearGradient(0,H-bh,0,H);
   band.addColorStop(0,'rgba(0,0,0,0)'); band.addColorStop(.35,'rgba(0,0,0,.72)'); band.addColorStop(1,'rgba(0,0,0,.9)');
   ctx.fillStyle=band; ctx.fillRect(0,H-bh,W,bh);
   var pad=Math.round(W*.07), ty=H-bh+Math.round(bh*.2);
-  if(head){ ctx.font='bold '+fs+'px Arial,sans-serif'; ctx.fillStyle='#fff'; ctx.shadowColor='rgba(0,0,0,.5)'; ctx.shadowBlur=10; var words=head.split(' '),maxW=W-pad*2,line='',lines=[]; words.forEach(function(w){ var t=line?line+' '+w:w; if(ctx.measureText(t).width>maxW&&line){lines.push(line);line=w;}else line=t; }); if(line)lines.push(line); lines.forEach(function(l){ ctx.fillText(l,pad,ty); ty+=Math.round(fs*1.28); }); ctx.shadowBlur=0; ty+=Math.round(W*.01); }
-  if(sub){ var fs2=Math.round(fs*.55); ctx.font=fs2+'px Arial,sans-serif'; ctx.fillStyle='rgba(255,255,255,.78)'; ctx.fillText(sub,pad,ty); ty+=Math.round(fs2*1.6); }
-  if(cta){ var fs3=Math.round(fs*.5); ctx.font='bold '+fs3+'px Arial,sans-serif'; ctx.fillStyle='#E8B84B'; ctx.fillText('→ '+cta,pad,ty); }
+  ctx.textAlign='center'; var cx3=W/2;
+  if(head){ ctx.font='bold '+fs+'px Arial,sans-serif'; ctx.fillStyle='#fff'; ctx.shadowColor='rgba(0,0,0,.6)'; ctx.shadowBlur=14; var words=head.split(' '),maxW=W-pad*2,line='',lines=[]; words.forEach(function(w){ var t=line?line+' '+w:w; if(ctx.measureText(t).width>maxW&&line){lines.push(line);line=w;}else line=t; }); if(line)lines.push(line); lines.forEach(function(l){ ctx.fillText(l,cx3,ty); ty+=Math.round(fs*1.22); }); ctx.shadowBlur=0; ty+=Math.round(W*.015); }
+  if(sub){ var fs2=Math.round(fs*.58); ctx.font=fs2+'px Arial,sans-serif'; ctx.fillStyle='rgba(255,255,255,.85)'; ctx.shadowBlur=8; ctx.fillText(sub,cx3,ty); ctx.shadowBlur=0; ty+=Math.round(fs2*1.7); }
+  if(cta){ var fs3=Math.round(fs*.52); ctx.font='bold '+fs3+'px Arial,sans-serif'; ctx.fillStyle='#E8B84B'; ctx.fillText('→  '+cta+'  ←',cx3,ty); }
+  ctx.textAlign='left';
 }
  
 // Drag
@@ -694,3 +731,4 @@ function prr(ctx,x,y,w,h,r){
 </script>
 </body>
 </html>
+ 
