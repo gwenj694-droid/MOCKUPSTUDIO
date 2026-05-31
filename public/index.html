@@ -8,9 +8,7 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#08080f;--s1:#0f0f18;--s2:#151520;--card:#1a1a28;--border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.13);--gold:#E8B84B;--gold2:#F5D07A;--pink:#F06BCD;--purple:#9B6BF2;--text:rgba(255,255,255,.92);--text2:rgba(255,255,255,.5);--text3:rgba(255,255,255,.22);--green:#22c55e;--red:#ef4444}
-html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px}
- 
-/* GATE */
+html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:"DM Sans",sans-serif;font-size:13px}
 #gate{position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;background:var(--bg);overflow:hidden;cursor:pointer}
 #gate.out{animation:gOut 1.1s cubic-bezier(.76,0,.24,1) forwards;pointer-events:none}
 @keyframes gOut{to{opacity:0;transform:scale(1.06);filter:blur(4px)}}
@@ -24,43 +22,35 @@ html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'D
 .g-scan:nth-child(3){top:28%}.g-scan:nth-child(4){top:58%;animation-delay:2s}.g-scan:nth-child(5){top:82%;animation-delay:4s}
 @keyframes gsc{0%,100%{opacity:0;transform:scaleX(0)}40%,60%{opacity:1;transform:scaleX(1)}}
 .g-corner{position:absolute;width:22px;height:22px}
-.g-corner::before,.g-corner::after{content:'';position:absolute;background:var(--gold);border-radius:1px}
+.g-corner::before,.g-corner::after{content:"";position:absolute;background:var(--gold);border-radius:1px}
 .g-corner::before{width:2px;height:100%}.g-corner::after{height:2px;width:100%}
-.g-corner.tl{top:32px;left:32px}.g-corner.tl::before{top:0;left:0}.g-corner.tl::after{top:0;left:0}
+.g-corner.tl{top:32px;left:32px}.g-corner.tl::before,.g-corner.tl::after{top:0;left:0}
 .g-corner.tr{top:32px;right:32px}.g-corner.tr::before{top:0;right:0}.g-corner.tr::after{top:0;right:0}
 .g-corner.bl{bottom:32px;left:32px}.g-corner.bl::before{bottom:0;left:0}.g-corner.bl::after{bottom:0;left:0}
 .g-corner.br{bottom:32px;right:32px}.g-corner.br::before{bottom:0;right:0}.g-corner.br::after{bottom:0;right:0}
 .gc{position:relative;z-index:1;text-align:center;max-width:640px;padding:0 24px}
 .gc-by{font-size:9px;letter-spacing:.7em;text-transform:uppercase;color:rgba(232,184,75,.45);margin-bottom:24px;animation:fU .7s .3s ease both}
-.gc-title{font-family:'Syne';font-weight:800;font-size:clamp(60px,10vw,108px);line-height:.92;letter-spacing:-.02em;color:rgba(255,255,255,.92);margin-bottom:8px;animation:fU .9s .45s ease both}
+.gc-title{font-family:"Syne";font-weight:800;font-size:clamp(60px,10vw,108px);line-height:.92;letter-spacing:-.02em;color:rgba(255,255,255,.92);margin-bottom:8px;animation:fU .9s .45s ease both}
 .gc-title strong{background:linear-gradient(135deg,var(--gold2),var(--gold),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .gc-rule{width:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:22px auto;animation:rg .9s .8s ease both}
 @keyframes rg{to{width:300px}}
 .gc-sub{font-size:13px;font-weight:300;color:rgba(255,255,255,.4);letter-spacing:.1em;margin-bottom:48px;animation:fU .7s .7s ease both}
-.gc-btn{display:inline-flex;align-items:center;gap:14px;font-family:'DM Sans';font-size:10px;font-weight:500;letter-spacing:.6em;text-transform:uppercase;color:var(--gold2);background:none;border:none;cursor:pointer;animation:fU .7s .9s ease both;transition:gap .3s}
-.gc-btn:hover{gap:22px}.gc-btn::after{content:'';width:52px;height:1px;background:var(--gold);display:block;transition:width .3s}.gc-btn:hover::after{width:72px}
+.gc-btn{display:inline-flex;align-items:center;gap:14px;font-family:"DM Sans";font-size:10px;font-weight:500;letter-spacing:.6em;text-transform:uppercase;color:var(--gold2);background:none;border:none;cursor:pointer;animation:fU .7s .9s ease both;transition:gap .3s}
+.gc-btn:hover{gap:22px}.gc-btn::after{content:"";width:52px;height:1px;background:var(--gold);display:block;transition:width .3s}.gc-btn:hover::after{width:72px}
 .gc-hint{position:absolute;bottom:28px;left:50%;transform:translateX(-50%);font-size:8.5px;letter-spacing:.45em;text-transform:uppercase;color:rgba(255,255,255,.2);animation:bl 2s 2s ease infinite both}
 @keyframes bl{0%,100%{opacity:.3}50%{opacity:.9}}
 @keyframes fU{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
- 
-/* APP */
 #app{display:none;min-height:100vh}
 .hd{height:52px;background:rgba(8,8,15,.95);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:12px;position:sticky;top:0;z-index:50;backdrop-filter:blur(12px)}
-.hd-logo{font-family:'Syne';font-size:17px;font-weight:800;background:linear-gradient(90deg,var(--gold),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hd-logo{font-family:"Syne";font-size:17px;font-weight:800;background:linear-gradient(90deg,var(--gold),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .hd-sp{flex:1}
- 
-/* LAYOUT */
 .wrap{max-width:1160px;margin:0 auto;padding:28px 22px 80px;display:grid;grid-template-columns:340px 1fr;gap:24px;align-items:start}
 @media(max-width:900px){.wrap{grid-template-columns:1fr}}
- 
-/* PANELS */
 .panel{background:var(--s1);border:1px solid var(--border);margin-bottom:12px}
 .ph{padding:11px 16px 9px;border-bottom:1px solid var(--border)}
 .pt{font-size:9px;font-weight:600;letter-spacing:.26em;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:6px}
-.pt::before{content:'';width:3px;height:11px;background:var(--gold);flex-shrink:0}
+.pt::before{content:"";width:3px;height:11px;background:var(--gold);flex-shrink:0}
 .pb{padding:14px}
- 
-/* Upload */
 .uz{border:2px dashed rgba(232,184,75,.22);padding:22px 14px;text-align:center;cursor:pointer;transition:all .2s;background:rgba(232,184,75,.02);position:relative}
 .uz:hover,.uz.drag{border-color:rgba(232,184,75,.5);background:rgba(232,184,75,.07)}
 .uz input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
@@ -68,63 +58,42 @@ html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'D
 .uz.filled img{width:100%;max-height:130px;object-fit:contain;display:block;background:#000}
 .uz-ico{font-size:26px;opacity:.28;margin-bottom:6px}
 .uz-txt{font-size:10px;color:var(--text3);line-height:1.6}
- 
-/* Scenes */
+.img-pair{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .scene-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
 .sb{background:var(--card);border:1px solid var(--border);padding:9px 5px;cursor:pointer;text-align:center;transition:all .14s;border-radius:3px}
-.sb:hover{border-color:var(--border2)}
-.sb.on{border-color:var(--gold);background:rgba(232,184,75,.1)}
-.sb-ico{font-size:17px;margin-bottom:3px}
-.sb-lbl{font-size:9px;font-weight:500;color:var(--text2);line-height:1.2}
-.sb.on .sb-lbl{color:var(--gold)}
- 
-/* Fields */
+.sb:hover{border-color:var(--border2)}.sb.on{border-color:var(--gold);background:rgba(232,184,75,.1)}
+.sb-ico{font-size:17px;margin-bottom:3px}.sb-lbl{font-size:9px;font-weight:500;color:var(--text2);line-height:1.2}.sb.on .sb-lbl{color:var(--gold)}
 .field{margin-bottom:10px}
 .field label{display:block;font-size:8px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--text3);margin-bottom:4px}
-.inp{width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);font-family:'DM Sans';font-size:12px;padding:8px 10px;outline:none;transition:border-color .15s}
-.inp:focus{border-color:rgba(232,184,75,.45)}
-.inp::placeholder{color:var(--text3)}
- 
-/* Format */
+.inp{width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);font-family:"DM Sans";font-size:12px;padding:8px 10px;outline:none;transition:border-color .15s}
+.inp:focus{border-color:rgba(232,184,75,.45)}.inp::placeholder{color:var(--text3)}
 .fmt-row{display:flex;gap:5px}
-.fb{flex:1;padding:7px 4px;font-size:9.5px;font-weight:600;letter-spacing:.06em;border:1px solid var(--border);color:var(--text2);background:transparent;cursor:pointer;text-align:center;transition:all .14s;font-family:'DM Sans'}
+.fb{flex:1;padding:7px 4px;font-size:9.5px;font-weight:600;letter-spacing:.06em;border:1px solid var(--border);color:var(--text2);background:transparent;cursor:pointer;text-align:center;transition:all .14s;font-family:"DM Sans"}
 .fb.on{border-color:var(--gold);color:var(--gold);background:rgba(232,184,75,.08)}
- 
-/* AI btn */
-.ai-btn{width:100%;padding:12px;font-family:'DM Sans';font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;border:none;cursor:pointer;background:linear-gradient(135deg,#5b21b6,var(--purple));color:#fff;box-shadow:0 2px 14px rgba(155,107,242,.35);transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:14px}
+.ai-btn{width:100%;padding:12px;font-family:"DM Sans";font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;border:none;cursor:pointer;background:linear-gradient(135deg,#5b21b6,var(--purple));color:#fff;box-shadow:0 2px 14px rgba(155,107,242,.35);transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:14px}
 .ai-btn:disabled{opacity:.4;cursor:not-allowed}
- 
-/* Generate btn */
-.gen-btn{width:100%;padding:15px;font-family:'Syne';font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border:none;cursor:pointer;background:linear-gradient(135deg,#8B6100,var(--gold),var(--gold2));color:#0a0800;box-shadow:0 3px 18px rgba(232,184,75,.28);transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.gen-btn{width:100%;padding:15px;font-family:"Syne";font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border:none;cursor:pointer;background:linear-gradient(135deg,#8B6100,var(--gold),var(--gold2));color:#0a0800;box-shadow:0 3px 18px rgba(232,184,75,.28);transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
 .gen-btn:hover{box-shadow:0 6px 28px rgba(232,184,75,.48);transform:translateY(-1px)}
 .gen-btn:disabled{opacity:.35;cursor:not-allowed;transform:none!important}
 .spin{width:16px;height:16px;border:2.5px solid rgba(0,0,0,.2);border-top-color:#000;border-radius:50%;animation:sp .6s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
- 
-/* RIGHT */
 .right{position:sticky;top:68px}
 .out-lbl{font-size:9px;font-weight:600;letter-spacing:.3em;text-transform:uppercase;color:var(--text3);margin-bottom:12px;display:flex;align-items:center;gap:10px}
-.out-lbl::before,.out-lbl::after{content:'';flex:1;height:1px;background:var(--border2)}
+.out-lbl::before,.out-lbl::after{content:"";flex:1;height:1px;background:var(--border2)}
 .out-empty{background:var(--s1);border:1px solid var(--border);min-height:500px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
-.oe-ico{font-size:52px;opacity:.1}
-.oe-txt{font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);text-align:center;line-height:1.9}
+.oe-ico{font-size:52px;opacity:.1}.oe-txt{font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);text-align:center;line-height:1.9}
 .loading{display:none;background:var(--s1);border:1px solid var(--border);min-height:500px;flex-direction:column;align-items:center;justify-content:center;gap:18px}
 .loading.show{display:flex}
 .ring{width:48px;height:48px;border:3px solid rgba(232,184,75,.15);border-top-color:var(--gold);border-radius:50%;animation:sp .8s linear infinite}
 .step{font-size:10px;letter-spacing:.12em;color:var(--text3);display:flex;align-items:center;gap:8px;transition:color .3s}
 .step.act{color:var(--gold)}.step.done{color:var(--green)}
-.step::before{content:'○'}.step.act::before{content:'◉';color:var(--gold)}.step.done::before{content:'✓';color:var(--green)}
-.out-result{display:none}
-.out-result img{width:100%;display:block;border:1px solid var(--border)}
+.step::before{content:"○"}.step.act::before{content:"◉";color:var(--gold)}.step.done::before{content:"✓";color:var(--green)}
+.out-result{display:none}.out-result img{width:100%;display:block;border:1px solid var(--border)}
 .act-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
-.act{padding:12px;font-family:'DM Sans';font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;border:none;cursor:pointer;transition:all .18s;display:flex;align-items:center;justify-content:center;gap:6px}
-.act.dl{background:var(--gold);color:#0a0800}
-.act.dl:hover{background:var(--gold2);transform:translateY(-1px)}
-.act.re{background:transparent;border:1px solid var(--border2);color:var(--text2)}
-.act.re:hover{border-color:var(--border);color:var(--text)}
+.act{padding:12px;font-family:"DM Sans";font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;border:none;cursor:pointer;transition:all .18s;display:flex;align-items:center;justify-content:center;gap:6px}
+.act.dl{background:var(--gold);color:#0a0800}.act.dl:hover{background:var(--gold2);transform:translateY(-1px)}
+.act.re{background:transparent;border:1px solid var(--border2);color:var(--text2)}.act.re:hover{border-color:var(--border);color:var(--text)}
 .out-meta{font-size:9.5px;color:var(--text3);text-align:center;margin-top:8px}
- 
-/* Toast */
 #toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%) translateY(50px);z-index:999;background:var(--s1);border:1px solid var(--border2);border-top:2px solid var(--gold);padding:9px 18px;font-size:11px;font-weight:500;opacity:0;transition:all .25s;white-space:nowrap;border-radius:5px}
 #toast.show{transform:translateX(-50%) translateY(0);opacity:1}
 #toast.g{border-top-color:var(--green)}#toast.e{border-top-color:var(--red)}
@@ -133,8 +102,7 @@ html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'D
 <body>
  
 <div id="gate" onclick="enter()">
-  <div class="g-grid"></div>
-  <div class="g-orb a"></div><div class="g-orb b"></div>
+  <div class="g-grid"></div><div class="g-orb a"></div><div class="g-orb b"></div>
   <div class="g-scan"></div><div class="g-scan"></div><div class="g-scan"></div>
   <div class="g-corner tl"></div><div class="g-corner tr"></div>
   <div class="g-corner bl"></div><div class="g-corner br"></div>
@@ -154,17 +122,28 @@ html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'D
     <div class="hd-sp"></div>
     <span style="font-size:9px;letter-spacing:.3em;text-transform:uppercase;color:var(--text3)">NG Intel Studio</span>
   </div>
- 
   <div class="wrap">
     <div class="left">
- 
       <div class="panel">
-        <div class="ph"><div class="pt">Your Image</div></div>
+        <div class="ph"><div class="pt">Your Images</div></div>
         <div class="pb">
-          <div class="uz" id="dz" ondragover="dzO(event)" ondragleave="dzL(event)" ondrop="dzD(event)">
-            <input type="file" accept="image/*" onchange="handleUpload(this)">
-            <div id="dz-inner"><div class="uz-ico">📸</div><div class="uz-txt">Upload your photo, poster or product image</div></div>
-            <img id="dz-prev" style="display:none">
+          <div class="img-pair">
+            <div>
+              <div style="font-size:8px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-bottom:5px">Image 1 (main)</div>
+              <div class="uz" id="dz" ondragover="dzO(event)" ondragleave="dzL(event)" ondrop="dzD(event,1)">
+                <input type="file" accept="image/*" onchange="handleUpload(this,1)">
+                <div id="dz-inner"><div class="uz-ico">📸</div><div class="uz-txt">Upload your image</div></div>
+                <img id="dz-prev" style="display:none">
+              </div>
+            </div>
+            <div>
+              <div style="font-size:8px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-bottom:5px">Image 2 (optional)</div>
+              <div class="uz" id="dz2" ondragover="dzO2(event)" ondragleave="dzL2(event)" ondrop="dzD(event,2)">
+                <input type="file" accept="image/*" onchange="handleUpload(this,2)">
+                <div id="dz2-inner"><div class="uz-ico" style="font-size:20px">📱</div><div class="uz-txt" style="font-size:9px">2nd screen (dual mockup)</div></div>
+                <img id="dz2-prev" style="display:none">
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -173,7 +152,7 @@ html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'D
         <div class="ph"><div class="pt">✦ AI Copy (Claude)</div></div>
         <div class="pb">
           <div class="field"><label>Product Name</label><input class="inp" type="text" id="prod-name" placeholder="e.g. UGC Twin Engine"></div>
-          <div class="field"><label>What it does / who it's for</label><textarea class="inp" id="prod-desc" rows="2" style="resize:none" placeholder="e.g. Helps female entrepreneurs create viral content with AI"></textarea></div>
+          <div class="field"><label>What it does / who its for</label><textarea class="inp" id="prod-desc" rows="2" style="resize:none" placeholder="e.g. Helps female entrepreneurs create viral content with AI"></textarea></div>
           <div class="field"><label>Price (optional)</label><input class="inp" type="text" id="prod-price" placeholder="e.g. £10/month, Free"></div>
           <button class="ai-btn" id="ai-btn" onclick="genText()"><span id="ai-txt">✦ Write Copy with Claude</span></button>
           <div style="border-top:1px solid var(--border);padding-top:12px">
@@ -188,54 +167,54 @@ html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'D
         <div class="ph"><div class="pt">Lifestyle Scene</div></div>
         <div class="pb">
           <div class="scene-grid">
-  <div class="sb" style="grid-column:1/-1;background:rgba(232,184,75,.04);border-color:rgba(232,184,75,.15);padding:6px 10px;cursor:default">
-    <div style="font-size:8px;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:6px">🖼 Flat Lay — No Person</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px">
-      <div class="sb on" data-s="flatlay_marble" onclick="ps(this)"><div class="sb-ico">🤍</div><div class="sb-lbl">Marble & Florals</div></div>
-      <div class="sb" data-s="flatlay_linen" onclick="ps(this)"><div class="sb-ico">🌾</div><div class="sb-lbl">Linen Editorial</div></div>
-      <div class="sb" data-s="flatlay_neon" onclick="ps(this)"><div class="sb-ico">💜</div><div class="sb-lbl">Neon Bold</div></div>
-    </div>
-  </div>
-  <div class="sb" style="grid-column:1/-1;background:rgba(155,107,242,.04);border-color:rgba(155,107,242,.15);padding:6px 10px;cursor:default">
-    <div style="font-size:8px;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:var(--purple);margin-bottom:6px">☕ Lifestyle — No Person</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px">
-      <div class="sb" data-s="coffee_aesthetic" onclick="ps(this)"><div class="sb-ico">☕</div><div class="sb-lbl">Coffee Morning</div></div>
-      <div class="sb" data-s="bed_morning" onclick="ps(this)"><div class="sb-ico">🛏</div><div class="sb-lbl">Bed & Sunlight</div></div>
-      <div class="sb" data-s="botanicals" onclick="ps(this)"><div class="sb-ico">🌿</div><div class="sb-lbl">Botanical</div></div>
-    </div>
-  </div>
-  <div class="sb" style="grid-column:1/-1;background:rgba(240,107,205,.04);border-color:rgba(240,107,205,.15);padding:6px 10px;cursor:default">
-    <div style="font-size:8px;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:var(--pink);margin-bottom:6px">🎬 Cinematic Moody</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px">
-      <div class="sb" data-s="neon_city_night" onclick="ps(this)"><div class="sb-ico">🌆</div><div class="sb-lbl">Neon Night</div></div>
-      <div class="sb" data-s="golden_hour_hands" onclick="ps(this)"><div class="sb-ico">✨</div><div class="sb-lbl">Golden Hands</div></div>
-      <div class="sb" data-s="shadow_play" onclick="ps(this)"><div class="sb-ico">🖤</div><div class="sb-lbl">Shadow & Light</div></div>
-    </div>
-  </div>
-  <div class="sb" style="grid-column:1/-1;background:rgba(34,197,94,.04);border-color:rgba(34,197,94,.15);padding:6px 10px;cursor:default">
-    <div style="font-size:8px;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:var(--green);margin-bottom:6px">✈️ Luxury Travel</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px">
-      <div class="sb" data-s="amalfi_coast" onclick="ps(this)"><div class="sb-ico">🌊</div><div class="sb-lbl">Amalfi Coast</div></div>
-      <div class="sb" data-s="hotel_pool" onclick="ps(this)"><div class="sb-ico">🏊</div><div class="sb-lbl">Infinity Pool</div></div>
-      <div class="sb" data-s="private_jet" onclick="ps(this)"><div class="sb-ico">✈️</div><div class="sb-lbl">Private Jet</div></div>
-    </div>
-  </div>
-  <div class="sb" style="grid-column:1/-1;background:rgba(232,184,75,.04);border-color:rgba(232,184,75,.15);padding:6px 10px;cursor:default">
-    <div style="font-size:8px;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:6px">👗 Editorial — Woman Different Angles</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px">
-      <div class="sb" data-s="mirror_reflection" onclick="ps(this)"><div class="sb-ico">🪞</div><div class="sb-lbl">Mirror Selfie</div></div>
-      <div class="sb" data-s="from_above_cafe" onclick="ps(this)"><div class="sb-ico">🦅</div><div class="sb-lbl">Bird's Eye</div></div>
-      <div class="sb" data-s="walking_candid" onclick="ps(this)"><div class="sb-ico">🚶‍♀️</div><div class="sb-lbl">Candid Walk</div></div>
-    </div>
-  </div>
-  <div class="sb" style="grid-column:1/-1;background:rgba(155,107,242,.04);border-color:rgba(155,107,242,.15);padding:6px 10px;cursor:default">
-    <div style="font-size:8px;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:var(--purple);margin-bottom:6px">🎯 Bold Commercial</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
-      <div class="sb" data-s="product_closeup" onclick="ps(this)"><div class="sb-ico">🔍</div><div class="sb-lbl">Screen Close-Up</div></div>
-      <div class="sb" data-s="desk_power" onclick="ps(this)"><div class="sb-ico">💼</div><div class="sb-lbl">CEO Desk Power</div></div>
-    </div>
-  </div>
-</div>
+            <div class="sb" style="grid-column:1/-1;background:rgba(232,184,75,.04);border-color:rgba(232,184,75,.15);padding:6px 10px;cursor:default">
+              <div style="font-size:8px;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:6px">Flat Lay</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px">
+                <div class="sb on" data-s="flatlay_marble" onclick="ps(this)"><div class="sb-ico">🤍</div><div class="sb-lbl">Marble</div></div>
+                <div class="sb" data-s="flatlay_linen" onclick="ps(this)"><div class="sb-ico">🌾</div><div class="sb-lbl">Linen</div></div>
+                <div class="sb" data-s="flatlay_neon" onclick="ps(this)"><div class="sb-ico">💜</div><div class="sb-lbl">Neon Bold</div></div>
+              </div>
+            </div>
+            <div class="sb" style="grid-column:1/-1;background:rgba(155,107,242,.04);border-color:rgba(155,107,242,.15);padding:6px 10px;cursor:default">
+              <div style="font-size:8px;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:var(--purple);margin-bottom:6px">Lifestyle</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px">
+                <div class="sb" data-s="coffee_aesthetic" onclick="ps(this)"><div class="sb-ico">☕</div><div class="sb-lbl">Coffee</div></div>
+                <div class="sb" data-s="bed_morning" onclick="ps(this)"><div class="sb-ico">🛏</div><div class="sb-lbl">Morning</div></div>
+                <div class="sb" data-s="botanicals" onclick="ps(this)"><div class="sb-ico">🌿</div><div class="sb-lbl">Botanical</div></div>
+              </div>
+            </div>
+            <div class="sb" style="grid-column:1/-1;background:rgba(240,107,205,.04);border-color:rgba(240,107,205,.15);padding:6px 10px;cursor:default">
+              <div style="font-size:8px;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:var(--pink);margin-bottom:6px">Cinematic</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px">
+                <div class="sb" data-s="neon_city_night" onclick="ps(this)"><div class="sb-ico">🌆</div><div class="sb-lbl">Neon Night</div></div>
+                <div class="sb" data-s="golden_hour_hands" onclick="ps(this)"><div class="sb-ico">✨</div><div class="sb-lbl">Golden Hour</div></div>
+                <div class="sb" data-s="shadow_play" onclick="ps(this)"><div class="sb-ico">🖤</div><div class="sb-lbl">Shadow</div></div>
+              </div>
+            </div>
+            <div class="sb" style="grid-column:1/-1;background:rgba(34,197,94,.04);border-color:rgba(34,197,94,.15);padding:6px 10px;cursor:default">
+              <div style="font-size:8px;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:var(--green);margin-bottom:6px">Luxury Travel</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px">
+                <div class="sb" data-s="amalfi_coast" onclick="ps(this)"><div class="sb-ico">🌊</div><div class="sb-lbl">Amalfi</div></div>
+                <div class="sb" data-s="hotel_pool" onclick="ps(this)"><div class="sb-ico">🏊</div><div class="sb-lbl">Pool</div></div>
+                <div class="sb" data-s="private_jet" onclick="ps(this)"><div class="sb-ico">✈️</div><div class="sb-lbl">Jet</div></div>
+              </div>
+            </div>
+            <div class="sb" style="grid-column:1/-1;background:rgba(232,184,75,.04);border-color:rgba(232,184,75,.15);padding:6px 10px;cursor:default">
+              <div style="font-size:8px;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:6px">Editorial</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px">
+                <div class="sb" data-s="mirror_reflection" onclick="ps(this)"><div class="sb-ico">🪞</div><div class="sb-lbl">Mirror</div></div>
+                <div class="sb" data-s="from_above_cafe" onclick="ps(this)"><div class="sb-ico">🦅</div><div class="sb-lbl">Birds Eye</div></div>
+                <div class="sb" data-s="walking_candid" onclick="ps(this)"><div class="sb-ico">🚶‍♀️</div><div class="sb-lbl">Candid</div></div>
+              </div>
+            </div>
+            <div class="sb" style="grid-column:1/-1;background:rgba(155,107,242,.04);border-color:rgba(155,107,242,.15);padding:6px 10px;cursor:default">
+              <div style="font-size:8px;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:var(--purple);margin-bottom:6px">Commercial</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
+                <div class="sb" data-s="product_closeup" onclick="ps(this)"><div class="sb-ico">🔍</div><div class="sb-lbl">Close-Up</div></div>
+                <div class="sb" data-s="desk_power" onclick="ps(this)"><div class="sb-ico">💼</div><div class="sb-lbl">CEO Desk</div></div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
  
@@ -253,7 +232,7 @@ html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'D
       <div class="panel">
         <div class="ph"><div class="pt">Custom Scene (optional)</div></div>
         <div class="pb">
-          <textarea class="inp" id="custom-prompt" rows="3" placeholder="Describe a custom scene… e.g. rooftop at sunset, neon city, luxury spa"></textarea>
+          <textarea class="inp" id="custom-prompt" rows="3" placeholder="Describe a custom scene e.g. rooftop at sunset, neon city, luxury spa"></textarea>
         </div>
       </div>
  
@@ -279,219 +258,166 @@ html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'D
       <div class="out-result" id="out-result">
         <img id="result-img" alt="Promo result">
         <div class="act-row">
-          <button class="act dl" onclick="dl()">↓ Download</button>
-          <button class="act re" onclick="generate()">↺ Regenerate</button>
+          <button class="act dl" onclick="dl()">Download</button>
+          <button class="act re" onclick="generate()">Regenerate</button>
         </div>
-        <button onclick="openEd()" style="width:100%;margin-top:8px;padding:11px;font-family:DM Sans,sans-serif;font-size:10px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;border:1px solid rgba(232,184,75,.4);color:var(--gold);background:rgba(232,184,75,.06);cursor:pointer;transition:all .18s" onmouseover="this.style.background='rgba(232,184,75,.14)'" onmouseout="this.style.background='rgba(232,184,75,.06)'">⤢ Adjust Phone Position & Text</button>
+        <button onclick="openEd()" style="width:100%;margin-top:8px;padding:11px;font-family:DM Sans,sans-serif;font-size:10px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;border:1px solid rgba(232,184,75,.4);color:var(--gold);background:rgba(232,184,75,.06);cursor:pointer;transition:all .18s" onmouseover="this.style.background='rgba(232,184,75,.14)'" onmouseout="this.style.background='rgba(232,184,75,.06)'">Adjust Position + Text</button>
         <div class="out-meta" id="out-meta"></div>
       </div>
     </div>
   </div>
 </div>
- 
 <div id="toast"></div>
  
 <script>
 const S=window.location.origin;
-var uploadedUrl=null, scene='flatlay_marble', fmt='square', generating=false, resultUrl=null, edData=null;
+var uploadedUrl=null, uploadedUrl2=null, scene="flatlay_marble", fmt="square", generating=false, resultUrl=null, edData=null;
  
-function enter(){
-  var g=document.getElementById('gate'); g.classList.add('out');
-  setTimeout(function(){ g.style.display='none'; document.getElementById('app').style.display='block'; },1000);
-}
+function enter(){var g=document.getElementById("gate");g.classList.add("out");setTimeout(function(){g.style.display="none";document.getElementById("app").style.display="block";},1000);}
  
-// Upload + auto-crop black borders
 function autoCrop(file){
   return new Promise(function(res){
     var r=new FileReader();
     r.onload=function(e){
       var img=new Image();
       img.onload=function(){
-        var W=img.width,H=img.height,c=document.createElement('canvas');
-        c.width=W; c.height=H;
-        var ctx=c.getContext('2d'); ctx.drawImage(img,0,0);
+        var W=img.width,H=img.height,c=document.createElement("canvas");
+        c.width=W;c.height=H;
+        var ctx=c.getContext("2d");ctx.drawImage(img,0,0);
         var d=ctx.getImageData(0,0,W,H).data,t=H,b=0,l=W,rr=0;
-        for(var y=0;y<H;y++) for(var x=0;x<W;x++){
-          var i=(y*W+x)*4;
-          if(d[i+3]>20&&(d[i]>18||d[i+1]>18||d[i+2]>18)){
-            if(y<t)t=y;if(y>b)b=y;if(x<l)l=x;if(x>rr)rr=x;
-          }
-        }
-        var p=4,cw=rr-l+1+p*2,ch=b-t+1+p*2;
-        l=Math.max(0,l-p); t=Math.max(0,t-p);
-        if(cw>10&&ch>10&&(cw<W*.97||ch<H*.97)){
-          var o=document.createElement('canvas'); o.width=cw; o.height=ch;
-          o.getContext('2d').drawImage(c,l,t,cw,ch,0,0,cw,ch);
-          o.toBlob(function(blob){ res(blob?new File([blob],file.name,{type:'image/png'}):file); },'image/png',0.98);
-        } else res(file);
+        for(var y=0;y<H;y++) for(var x=0;x<W;x++){var i=(y*W+x)*4;if(d[i+3]>20&&(d[i]>18||d[i+1]>18||d[i+2]>18)){if(y<t)t=y;if(y>b)b=y;if(x<l)l=x;if(x>rr)rr=x;}}
+        var p=4,cw=rr-l+1+p*2,ch=b-t+1+p*2;l=Math.max(0,l-p);t=Math.max(0,t-p);
+        if(cw>10&&ch>10&&(cw<W*.97||ch<H*.97)){var o=document.createElement("canvas");o.width=cw;o.height=ch;o.getContext("2d").drawImage(c,l,t,cw,ch,0,0,cw,ch);o.toBlob(function(blob){res(blob?new File([blob],file.name,{type:"image/png"}):file);},"image/png",0.98);}
+        else res(file);
       };
-      img.onerror=function(){ res(file); };
-      img.src=e.target.result;
+      img.onerror=function(){res(file);};img.src=e.target.result;
     };
-    r.onerror=function(){ res(file); };
-    r.readAsDataURL(file);
+    r.onerror=function(){res(file);};r.readAsDataURL(file);
   });
 }
  
-async function handleUpload(input){
-  var file=input.files[0]; if(!file) return;
-  var zone=document.getElementById('dz');
-  zone.querySelector('#dz-inner').style.display='none';
-  toast('Processing…');
+async function handleUpload(input,slot){
+  var file=input.files[0];if(!file)return;
+  var zoneId=slot===2?"dz2":"dz";
+  var prevId=slot===2?"dz2-prev":"dz-prev";
+  var innerId=slot===2?"dz2-inner":"dz-inner";
+  var zone=document.getElementById(zoneId);
+  document.getElementById(innerId).style.display="none";
+  toast("Processing...");
   try{
     var clean=await autoCrop(file);
-    var fd=new FormData(); fd.append('file',clean);
-    var r=await fetch(S+'/api/upload',{method:'POST',body:fd});
+    var fd=new FormData();fd.append("file",clean);
+    var r=await fetch(S+"/api/upload",{method:"POST",body:fd});
     var d=await r.json();
     if(d.error) throw new Error(d.error);
-    uploadedUrl=d.url;
-    var p=document.getElementById('dz-prev');
-    p.src=uploadedUrl; p.style.display='block';
-    zone.classList.add('filled');
-    document.getElementById('gen-btn').disabled=false;
-    toast('Image ready ✓','g');
-  } catch(e){ toast(e.message,'e'); zone.querySelector('#dz-inner').style.display=''; }
+    if(slot===2) uploadedUrl2=d.url; else uploadedUrl=d.url;
+    var p=document.getElementById(prevId);
+    p.src=d.url;p.style.display="block";
+    zone.classList.add("filled");
+    document.getElementById("gen-btn").disabled=!uploadedUrl;
+    toast("Image "+(slot||1)+" ready","g");
+  }catch(e){toast(e.message,"e");document.getElementById(innerId).style.display="";}
 }
-function dzO(e){e.preventDefault();document.getElementById('dz').classList.add('drag')}
-function dzL(){ document.getElementById('dz').classList.remove('drag') }
-function dzD(e){e.preventDefault();dzL();handleUpload({files:e.dataTransfer.files})}
+function dzO(e){e.preventDefault();document.getElementById("dz").classList.add("drag")}
+function dzL(){document.getElementById("dz").classList.remove("drag")}
+function dzO2(e){e.preventDefault();document.getElementById("dz2").classList.add("drag")}
+function dzL2(){document.getElementById("dz2").classList.remove("drag")}
+function dzD(e,slot){e.preventDefault();slot===2?dzL2():dzL();handleUpload({files:e.dataTransfer.files},slot);}
  
-function ps(el){ document.querySelectorAll('.sb').forEach(function(b){b.classList.remove('on')}); el.classList.add('on'); scene=el.dataset.s; }
-function pf(el){ document.querySelectorAll('.fb').forEach(function(b){b.classList.remove('on')}); el.classList.add('on'); fmt=el.dataset.f; }
- 
-// Step indicators
-function sa(n){ document.getElementById('s'+n).className='step act'; }
-function sd(n){ document.getElementById('s'+n).className='step done'; }
-function sr(){ [1,2,3,4].forEach(function(n){ document.getElementById('s'+n).className='step'; }); }
+function ps(el){document.querySelectorAll(".sb").forEach(function(b){b.classList.remove("on")});el.classList.add("on");scene=el.dataset.s;}
+function pf(el){document.querySelectorAll(".fb").forEach(function(b){b.classList.remove("on")});el.classList.add("on");fmt=el.dataset.f;}
+function sa(n){document.getElementById("s"+n).className="step act";}
+function sd(n){document.getElementById("s"+n).className="step done";}
+function sr(){[1,2,3,4].forEach(function(n){document.getElementById("s"+n).className="step";});}
  
 async function generate(){
-  if(!uploadedUrl){ toast('Upload your image first','e'); return; }
-  if(generating) return;
+  if(!uploadedUrl){toast("Upload your image first","e");return;}
+  if(generating)return;
   generating=true;
-  var btn=document.getElementById('gen-btn');
-  btn.innerHTML='<div class="spin"></div> Generating…'; btn.disabled=true;
-  document.getElementById('out-empty').style.display='none';
-  document.getElementById('out-result').style.display='none';
-  document.getElementById('loading').classList.add('show');
-  sr(); sa(1);
- 
-  var t1=setTimeout(function(){ sd(1);sa(2); },8000);
-  var t2=setTimeout(function(){ sd(2);sa(3); },18000);
-  var t3=setTimeout(function(){ sd(3);sa(4); },24000);
- 
+  var btn=document.getElementById("gen-btn");
+  btn.innerHTML="<div class='spin'></div> Generating...";btn.disabled=true;
+  document.getElementById("out-empty").style.display="none";
+  document.getElementById("out-result").style.display="none";
+  document.getElementById("loading").classList.add("show");
+  sr();sa(1);
+  var t1=setTimeout(function(){sd(1);sa(2);},8000);
+  var t2=setTimeout(function(){sd(2);sa(3);},18000);
+  var t3=setTimeout(function(){sd(3);sa(4);},24000);
   try{
-    var r=await fetch(S+'/api/mockup',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        imageUrl:uploadedUrl, scene:scene, format:fmt,
-        headline:document.getElementById('txt-h').value.trim(),
-        subtext:document.getElementById('txt-s').value.trim(),
-        cta:document.getElementById('txt-c').value.trim(),
-        customPrompt:document.getElementById('custom-prompt').value.trim()||null
-      })
-    });
+    var body={imageUrl:uploadedUrl,scene:scene,format:fmt,headline:document.getElementById("txt-h").value.trim(),subtext:document.getElementById("txt-s").value.trim(),cta:document.getElementById("txt-c").value.trim(),customPrompt:document.getElementById("custom-prompt").value.trim()||null};
+    if(uploadedUrl2) body.imageUrl2=uploadedUrl2;
+    var r=await fetch(S+"/api/mockup",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
     var d=await r.json();
-    clearTimeout(t1); clearTimeout(t2); clearTimeout(t3);
+    clearTimeout(t1);clearTimeout(t2);clearTimeout(t3);
     if(d.error) throw new Error(d.error);
-    sd(1); sd(2); sd(3); sd(4);
- 
-    resultUrl=d.url; edData=d;
-    var img=document.getElementById('result-img');
-    img.onload=function(){
-      document.getElementById('loading').classList.remove('show');
-      document.getElementById('out-result').style.display='block';
-      document.getElementById('out-meta').textContent='Scene: '+scene+' · '+fmt+' · FAL AI';
-      toast('Promo ready! ✓','g');
-    };
-    img.onerror=function(){
-      document.getElementById('loading').classList.remove('show');
-      document.getElementById('out-result').style.display='block';
-      toast('Done — download below','g');
-    };
-    setTimeout(function(){
-      document.getElementById('loading').classList.remove('show');
-      document.getElementById('out-result').style.display='block';
-    },5000);
-    img.src=d.url+'?t='+Date.now();
- 
-  } catch(e){
-    clearTimeout(t1); clearTimeout(t2); clearTimeout(t3);
-    document.getElementById('loading').classList.remove('show');
-    document.getElementById('out-empty').style.display='flex';
-    toast(e.message,'e');
+    sd(1);sd(2);sd(3);sd(4);
+    resultUrl=d.url;edData=d;
+    var img=document.getElementById("result-img");
+    img.onload=function(){document.getElementById("loading").classList.remove("show");document.getElementById("out-result").style.display="block";document.getElementById("out-meta").textContent="Scene: "+scene+" · "+fmt+" · FAL AI";toast("Promo ready!","g");};
+    img.onerror=function(){document.getElementById("loading").classList.remove("show");document.getElementById("out-result").style.display="block";toast("Done","g");};
+    setTimeout(function(){document.getElementById("loading").classList.remove("show");document.getElementById("out-result").style.display="block";},5000);
+    img.src=d.url+"?t="+Date.now();
+  }catch(e){
+    clearTimeout(t1);clearTimeout(t2);clearTimeout(t3);
+    document.getElementById("loading").classList.remove("show");
+    document.getElementById("out-empty").style.display="flex";
+    toast(e.message,"e");
   }
-  generating=false;
-  btn.innerHTML='✦ Generate Promo'; btn.disabled=false;
+  generating=false;btn.innerHTML="✦ Generate Promo";btn.disabled=false;
 }
  
 async function genText(){
-  var name=document.getElementById('prod-name').value.trim();
-  if(!name){ toast('Enter product name first','e'); return; }
-  var btn=document.getElementById('ai-btn'); btn.disabled=true;
-  document.getElementById('ai-txt').textContent='⏳ Claude writing…';
+  var name=document.getElementById("prod-name").value.trim();
+  if(!name){toast("Enter product name first","e");return;}
+  var btn=document.getElementById("ai-btn");btn.disabled=true;
+  document.getElementById("ai-txt").textContent="Claude writing...";
   try{
-    var r=await fetch(S+'/api/generate-text',{
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({ productName:name, productDesc:document.getElementById('prod-desc').value.trim(), price:document.getElementById('prod-price').value.trim() })
-    });
+    var r=await fetch(S+"/api/generate-text",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({productName:name,productDesc:document.getElementById("prod-desc").value.trim(),price:document.getElementById("prod-price").value.trim()})});
     var d=await r.json();
     if(d.error) throw new Error(d.error);
-    document.getElementById('txt-h').value=d.headline||'';
-    document.getElementById('txt-s').value=d.subtext||'';
-    document.getElementById('txt-c').value=d.cta||'';
-    toast('Copy written ✓','g');
-  } catch(e){ toast('Claude: '+e.message,'e'); }
-  btn.disabled=false;
-  document.getElementById('ai-txt').textContent='✦ Write Copy with Claude';
+    document.getElementById("txt-h").value=d.headline||"";
+    document.getElementById("txt-s").value=d.subtext||"";
+    document.getElementById("txt-c").value=d.cta||"";
+    toast("Copy written","g");
+  }catch(e){toast("Claude: "+e.message,"e");}
+  btn.disabled=false;document.getElementById("ai-txt").textContent="✦ Write Copy with Claude";
 }
  
 async function dl(){
-  if(!resultUrl){ toast('Generate first','e'); return; }
-  try{
-    var r=await fetch(resultUrl); var blob=await r.blob();
-    var a=document.createElement('a'); a.href=URL.createObjectURL(blob);
-    a.download='promo-'+scene+'-'+Date.now()+'.jpg'; a.click();
-    toast('Downloaded ✓','g');
-  } catch(e){ window.open(resultUrl,'_blank'); toast('Opened in new tab','g'); }
+  if(!resultUrl){toast("Generate first","e");return;}
+  try{var r=await fetch(resultUrl);var blob=await r.blob();var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="promo-"+scene+"-"+Date.now()+".jpg";a.click();toast("Downloaded","g");}
+  catch(e){window.open(resultUrl,"_blank");toast("Opened in new tab","g");}
 }
  
-function toast(msg,tp){
-  var t=document.getElementById('toast');
-  t.textContent=(tp==='g'?'✓ ':tp==='e'?'✕ ':'')+msg;
-  t.className='show'+(tp?' '+tp:'');
-  clearTimeout(t._t); t._t=setTimeout(function(){ t.className=''; },3000);
-}
+function toast(msg,tp){var t=document.getElementById("toast");t.textContent=(tp==="g"?"✓ ":tp==="e"?"✕ ":"")+msg;t.className="show"+(tp?" "+tp:"");clearTimeout(t._t);t._t=setTimeout(function(){t.className="";},3000);}
 </script>
  
-<!-- ═══════════ POSITION EDITOR ═══════════ -->
-<div id="ed-modal" style="display:none;position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.92);backdrop-filter:blur(8px);flex-direction:column;align-items:center;padding:14px;overflow-y:auto">
+<!-- POSITION EDITOR -->
+<div id="ed-modal" style="display:none;position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.93);backdrop-filter:blur(8px);flex-direction:column;align-items:center;padding:14px;overflow-y:auto">
   <div style="width:100%;max-width:1160px">
-    <!-- Header -->
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-      <div style="font-family:Syne,sans-serif;font-size:15px;font-weight:800;background:linear-gradient(90deg,#E8B84B,#F06BCD);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">⤢ Position Editor</div>
-      <div style="font-size:9.5px;color:rgba(255,255,255,.35);letter-spacing:.1em">Drag the phone · resize from gold dot · then Export</div>
+      <div style="font-family:Syne,sans-serif;font-size:15px;font-weight:800;background:linear-gradient(90deg,#E8B84B,#F06BCD);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Position Editor</div>
+      <div style="font-size:9.5px;color:rgba(255,255,255,.35);letter-spacing:.1em">Drag phone · resize gold dot · drag T to move text anywhere</div>
       <div style="flex:1"></div>
-      <button onclick="closeEd()" style="padding:8px 16px;font-family:DM Sans,sans-serif;font-size:9px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.5);background:transparent;cursor:pointer;font-family:DM Sans">✕ Close</button>
+      <button onclick="closeEd()" style="padding:8px 16px;font-family:DM Sans,sans-serif;font-size:9px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.5);background:transparent;cursor:pointer">✕ Close</button>
       <button onclick="exportEd()" style="padding:8px 20px;font-family:DM Sans,sans-serif;font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;border:none;background:#E8B84B;color:#0a0800;cursor:pointer">↓ Export PNG</button>
     </div>
-    <!-- Grid -->
-    <div style="display:grid;grid-template-columns:200px 1fr;gap:12px">
+    <div style="display:grid;grid-template-columns:210px 1fr;gap:12px">
       <!-- Controls -->
-      <div style="background:#0f0f18;border:1px solid rgba(255,255,255,.07);padding:14px;display:flex;flex-direction:column;gap:10px">
+      <div style="background:#0f0f18;border:1px solid rgba(255,255,255,.07);padding:14px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;max-height:80vh">
         <div style="font-size:8px;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:#E8B84B">Phone Size</div>
         <div>
-          <div style="font-size:8px;color:rgba(255,255,255,.35);margin-bottom:3px;letter-spacing:.12em;text-transform:uppercase">Width</div>
+          <div style="font-size:8px;color:rgba(255,255,255,.35);margin-bottom:3px;letter-spacing:.1em;text-transform:uppercase">Width</div>
           <input type="range" id="ed-w" min="60" max="700" value="240" oninput="edApply()" style="width:100%;accent-color:#E8B84B">
           <span id="ed-wv" style="font-size:9px;color:rgba(255,255,255,.4)">240px</span>
         </div>
         <div>
-          <div style="font-size:8px;color:rgba(255,255,255,.35);margin-bottom:3px;letter-spacing:.12em;text-transform:uppercase">Height</div>
+          <div style="font-size:8px;color:rgba(255,255,255,.35);margin-bottom:3px;letter-spacing:.1em;text-transform:uppercase">Height</div>
           <input type="range" id="ed-h" min="60" max="1100" value="480" oninput="edApply()" style="width:100%;accent-color:#E8B84B">
           <span id="ed-hv" style="font-size:9px;color:rgba(255,255,255,.4)">480px</span>
         </div>
         <div>
-          <div style="font-size:8px;color:rgba(255,255,255,.35);margin-bottom:3px;letter-spacing:.12em;text-transform:uppercase">Rotation</div>
+          <div style="font-size:8px;color:rgba(255,255,255,.35);margin-bottom:3px;letter-spacing:.1em;text-transform:uppercase">Tilt / Rotation</div>
           <input type="range" id="ed-r" min="-25" max="25" value="0" oninput="edApply()" style="width:100%;accent-color:#E8B84B">
           <span id="ed-rv" style="font-size:9px;color:rgba(255,255,255,.4)">0°</span>
         </div>
@@ -500,29 +426,48 @@ function toast(msg,tp){
           <input id="ed-th" type="text" placeholder="Headline" oninput="edText()" style="width:100%;background:#1a1a28;border:1px solid rgba(255,255,255,.1);color:#fff;font-family:DM Sans,sans-serif;font-size:11px;padding:6px 8px;outline:none;margin-bottom:5px">
           <input id="ed-ts" type="text" placeholder="Subtext" oninput="edText()" style="width:100%;background:#1a1a28;border:1px solid rgba(255,255,255,.1);color:#fff;font-family:DM Sans,sans-serif;font-size:11px;padding:6px 8px;outline:none;margin-bottom:5px">
           <input id="ed-tc" type="text" placeholder="Call to action" oninput="edText()" style="width:100%;background:#1a1a28;border:1px solid rgba(255,255,255,.1);color:#fff;font-family:DM Sans,sans-serif;font-size:11px;padding:6px 8px;outline:none;margin-bottom:8px">
-          <div style="font-size:8px;color:rgba(255,255,255,.35);margin-bottom:3px;letter-spacing:.1em;text-transform:uppercase">Text size</div>
+          <div style="font-size:8px;color:rgba(255,255,255,.35);margin-bottom:3px;letter-spacing:.1em;text-transform:uppercase">Text Size</div>
           <input type="range" id="ed-fs" min="12" max="80" value="32" oninput="edText()" style="width:100%;accent-color:#E8B84B">
+          <div style="margin-top:8px">
+            <div style="font-size:8px;color:rgba(255,255,255,.35);margin-bottom:5px;letter-spacing:.1em;text-transform:uppercase">Text Colour</div>
+            <div style="display:flex;gap:4px;flex-wrap:wrap">
+              <div onclick="setTxtCol(this,'#ffffff')" data-c="#ffffff" style="width:22px;height:22px;background:#ffffff;border-radius:50%;cursor:pointer;border:2px solid #E8B84B"></div>
+              <div onclick="setTxtCol(this,'#E8B84B')" data-c="#E8B84B" style="width:22px;height:22px;background:#E8B84B;border-radius:50%;cursor:pointer;border:2px solid transparent"></div>
+              <div onclick="setTxtCol(this,'#F5D07A')" data-c="#F5D07A" style="width:22px;height:22px;background:#F5D07A;border-radius:50%;cursor:pointer;border:2px solid transparent"></div>
+              <div onclick="setTxtCol(this,'#2DD4BF')" data-c="#2DD4BF" style="width:22px;height:22px;background:#2DD4BF;border-radius:50%;cursor:pointer;border:2px solid transparent"></div>
+              <div onclick="setTxtCol(this,'#F06BCD')" data-c="#F06BCD" style="width:22px;height:22px;background:#F06BCD;border-radius:50%;cursor:pointer;border:2px solid transparent"></div>
+            </div>
+          </div>
+          <div style="margin-top:8px">
+            <div style="font-size:8px;color:rgba(255,255,255,.35);margin-bottom:5px;letter-spacing:.1em;text-transform:uppercase">Band Style</div>
+            <div style="display:flex;gap:4px">
+              <button onclick="setBand('none')" id="band-none" style="flex:1;padding:5px;font-size:8px;font-weight:600;border:1px solid rgba(232,184,75,.5);background:rgba(232,184,75,.1);color:#E8B84B;cursor:pointer;font-family:DM Sans">None</button>
+              <button onclick="setBand('subtle')" id="band-subtle" style="flex:1;padding:5px;font-size:8px;font-weight:600;border:1px solid rgba(255,255,255,.15);background:transparent;color:rgba(255,255,255,.5);cursor:pointer;font-family:DM Sans">Subtle</button>
+              <button onclick="setBand('solid')" id="band-solid" style="flex:1;padding:5px;font-size:8px;font-weight:600;border:1px solid rgba(255,255,255,.15);background:transparent;color:rgba(255,255,255,.5);cursor:pointer;font-family:DM Sans">Dark</button>
+            </div>
+          </div>
         </div>
         <div style="border-top:1px solid rgba(255,255,255,.07);padding-top:10px">
-          <div style="font-size:8px;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:#E8B84B;margin-bottom:6px">Phone Style</div>
-          <div style="display:flex;gap:5px">
-            <button onclick="edStyle('dark')" id="ps-d" style="flex:1;padding:7px;font-size:9px;font-weight:600;border:1px solid #E8B84B;background:rgba(232,184,75,.12);color:#E8B84B;cursor:pointer;font-family:DM Sans">Dark</button>
-            <button onclick="edStyle('light')" id="ps-l" style="flex:1;padding:7px;font-size:9px;font-weight:600;border:1px solid rgba(255,255,255,.15);background:transparent;color:rgba(255,255,255,.5);cursor:pointer;font-family:DM Sans">Light</button>
+          <div style="font-size:8px;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:#E8B84B;margin-bottom:6px">Phone Frame</div>
+          <div style="display:flex;gap:4px;flex-wrap:wrap">
+            <button onclick="edStyle('dark')" id="ps-d" style="flex:1;padding:6px 3px;font-size:8px;font-weight:600;border:1px solid #E8B84B;background:rgba(232,184,75,.12);color:#E8B84B;cursor:pointer;font-family:DM Sans">Dark</button>
+            <button onclick="edStyle('light')" id="ps-l" style="flex:1;padding:6px 3px;font-size:8px;font-weight:600;border:1px solid rgba(255,255,255,.15);background:transparent;color:rgba(255,255,255,.5);cursor:pointer;font-family:DM Sans">Light</button>
+            <button onclick="edStyle('gold')" id="ps-g" style="flex:1;padding:6px 3px;font-size:8px;font-weight:600;border:1px solid rgba(255,255,255,.15);background:transparent;color:rgba(255,255,255,.5);cursor:pointer;font-family:DM Sans">Gold</button>
           </div>
         </div>
         <button onclick="edReset()" style="width:100%;padding:8px;font-family:DM Sans,sans-serif;font-size:9px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.4);background:transparent;cursor:pointer">↺ Reset</button>
       </div>
+ 
       <!-- Canvas stage -->
-      <div style="background:#000;display:flex;align-items:flex-start;justify-content:center;padding:12px;min-height:500px">
+      <div style="background:#050508;display:flex;align-items:flex-start;justify-content:center;padding:12px;min-height:500px;border:1px solid rgba(232,184,75,.1)">
         <div style="position:relative;display:inline-block" id="ed-stage">
           <canvas id="ed-bg" style="display:block;max-width:100%;max-height:68vh"></canvas>
           <canvas id="ed-tc-canvas" style="position:absolute;top:0;left:0;pointer-events:none"></canvas>
-          <!-- Text position dot — always visible, drag to move text -->
+          <!-- Text drag handle -->
           <div id="ed-txt-handle" style="position:absolute;z-index:50;cursor:grab;user-select:none;touch-action:none;display:none;transform:translate(-50%,-50%)">
-            <div style="width:36px;height:36px;border-radius:50%;background:#E8B84B;border:3px solid #fff;box-shadow:0 2px 12px rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center">
-              <span style="font-size:14px;line-height:1">T</span>
-            </div>
+            <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#E8B84B,#F5D07A);border:2px solid #fff;box-shadow:0 2px 12px rgba(0,0,0,.7),0 0 16px rgba(232,184,75,.5);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#0a0800">T</div>
           </div>
+          <!-- Phone 1 -->
           <div id="ed-phone" style="position:absolute;top:0;left:0;cursor:move;user-select:none;touch-action:none">
             <div id="ed-pbody" style="width:100%;height:100%;position:relative;border-radius:12%;box-shadow:0 12px 50px rgba(0,0,0,.85),inset 0 0 0 1.5px rgba(255,255,255,.12);background:linear-gradient(135deg,#3a3a3a,#1a1a1a)">
               <div id="ed-screen" style="position:absolute;inset:5% 4%;border-radius:10%;overflow:hidden;background:#000">
@@ -530,7 +475,18 @@ function toast(msg,tp){
               </div>
               <div id="ed-notch" style="position:absolute;top:3%;left:50%;transform:translateX(-50%);width:26%;height:5%;background:#111;border-radius:0 0 40% 40%;z-index:5"></div>
               <div style="position:absolute;bottom:2%;left:50%;transform:translateX(-50%);width:28%;height:1.2%;background:rgba(255,255,255,.25);border-radius:999px"></div>
-              <div id="ed-rh" style="position:absolute;bottom:-10px;right:-10px;width:22px;height:22px;background:#E8B84B;border-radius:50%;cursor:se-resize;z-index:20;border:2px solid #000;box-shadow:0 2px 8px rgba(0,0,0,.6)"></div>
+              <div id="ed-rh" style="position:absolute;bottom:-10px;right:-10px;width:22px;height:22px;background:linear-gradient(135deg,#E8B84B,#F5D07A);border-radius:50%;cursor:se-resize;z-index:20;border:2px solid #000;box-shadow:0 2px 8px rgba(0,0,0,.6),0 0 10px rgba(232,184,75,.5)"></div>
+            </div>
+          </div>
+          <!-- Phone 2 (shown only when 2nd image uploaded) -->
+          <div id="ed-phone2" style="position:absolute;top:0;left:0;cursor:move;user-select:none;touch-action:none;display:none">
+            <div id="ed-pbody2" style="width:100%;height:100%;position:relative;border-radius:12%;box-shadow:0 12px 50px rgba(0,0,0,.85),inset 0 0 0 1.5px rgba(255,255,255,.12);background:linear-gradient(135deg,#3a3a3a,#1a1a1a)">
+              <div id="ed-screen2" style="position:absolute;inset:5% 4%;border-radius:10%;overflow:hidden;background:#000">
+                <img id="ed-design2" src="" style="width:100%;height:100%;object-fit:cover;display:block">
+              </div>
+              <div id="ed-notch2" style="position:absolute;top:3%;left:50%;transform:translateX(-50%);width:26%;height:5%;background:#111;border-radius:0 0 40% 40%;z-index:5"></div>
+              <div style="position:absolute;bottom:2%;left:50%;transform:translateX(-50%);width:28%;height:1.2%;background:rgba(255,255,255,.25);border-radius:999px"></div>
+              <div id="ed-rh2" style="position:absolute;bottom:-10px;right:-10px;width:22px;height:22px;background:linear-gradient(135deg,#E8B84B,#F5D07A);border-radius:50%;cursor:se-resize;z-index:20;border:2px solid #000;box-shadow:0 2px 8px rgba(0,0,0,.6)"></div>
             </div>
           </div>
         </div>
@@ -540,305 +496,327 @@ function toast(msg,tp){
 </div>
  
 <script>
-// ═══════════ EDITOR STATE ═══════════
-var edBg=null, edDes=null, edScale=1, edPhoneStyle='dark';
+var edBg=null,edDes=null,edDes2=null,edScale=1,edPhoneStyle="dark",edBandStyle="none",edTxtCol="#ffffff";
 var edP={x:100,y:80,w:240,h:480,rot:0};
-var edTxt={x:0, y:0}; // text block position in canvas pixels
-var edDragging=false, edResizing=false, edTxtDragging=false;
-var edDragStart={}, edResizeStart={}, edTxtStart={};
+var edP2={x:280,y:80,w:240,h:480,rot:0};
+var edTxt={x:0,y:0};
+var edDragging=false,edDragging2=false,edResizing=false,edResizing2=false,edTxtDragging=false;
+var edDragStart={},edDragStart2={},edResizeStart={},edResizeStart2={},edTxtStart={};
+var hasImg2=false;
  
-function proxyUrl(url){
-  // Use proxy endpoint to avoid CORS issues with canvas
-  var fname=url.split('/uploads/').pop().split('?')[0];
-  return window.location.origin+'/api/img/'+fname;
+function proxyUrl(url){var fname=url.split("/uploads/").pop().split("?")[0];return window.location.origin+"/api/img/"+fname;}
+ 
+function setTxtCol(el,col){
+  edTxtCol=col;
+  document.querySelectorAll("[data-c]").forEach(function(d){d.style.borderColor="transparent";});
+  el.style.borderColor="#E8B84B";
+  edText();
+}
+function setBand(style){
+  edBandStyle=style;
+  ["none","subtle","solid"].forEach(function(s){
+    var b=document.getElementById("band-"+s);
+    b.style.borderColor=s===style?"rgba(232,184,75,.5)":"rgba(255,255,255,.15)";
+    b.style.background=s===style?"rgba(232,184,75,.1)":"transparent";
+    b.style.color=s===style?"#E8B84B":"rgba(255,255,255,.5)";
+  });
+  edText();
 }
  
 function openEd(){
-  if(!edData){ toast('Generate first','e'); return; }
-  document.getElementById('ed-modal').style.display='flex';
-  // Pre-fill text
-  document.getElementById('ed-th').value=document.getElementById('txt-h').value||'';
-  document.getElementById('ed-ts').value=document.getElementById('txt-s').value||'';
-  document.getElementById('ed-tc').value=document.getElementById('txt-c').value||'';
+  if(!edData){toast("Generate first","e");return;}
+  document.getElementById("ed-modal").style.display="flex";
+  document.getElementById("ed-th").value=document.getElementById("txt-h").value||"";
+  document.getElementById("ed-ts").value=document.getElementById("txt-s").value||"";
+  document.getElementById("ed-tc").value=document.getElementById("txt-c").value||"";
  
-  var bgC=document.getElementById('ed-bg');
-  var stage=document.getElementById('ed-stage');
+  hasImg2=!!uploadedUrl2;
+  document.getElementById("ed-phone2").style.display=hasImg2?"block":"none";
  
+  var bgC=document.getElementById("ed-bg");
   edBg=new Image();
   edBg.onload=function(){
-    var maxW=window.innerWidth-260, maxH=window.innerHeight*.7;
-    edScale=Math.min(maxW/edBg.width, maxH/edBg.height, 1);
-    bgC.width=edBg.width; bgC.height=edBg.height;
-    bgC.style.width=Math.round(edBg.width*edScale)+'px';
-    bgC.style.height=Math.round(edBg.height*edScale)+'px';
-    bgC.getContext('2d').drawImage(edBg,0,0);
-    var tc=document.getElementById('ed-tc-canvas');
-    tc.width=edBg.width; tc.height=edBg.height;
-    tc.style.width=bgC.style.width; tc.style.height=bgC.style.height;
-    // Set phone from suggested position
-    if(edData.phonePos){
-      var pp=edData.phonePos;
-      edP.x=Math.round(pp.x*edBg.width);
-      edP.y=Math.round(pp.y*edBg.height);
-      edP.w=Math.round(pp.w*edBg.width);
-      edP.h=Math.round(pp.h*edBg.height);
-    }
-    document.getElementById('ed-w').value=edP.w;
-    document.getElementById('ed-h').value=edP.h;
-    // Set default text position to bottom 30% of image
-    edTxt.x = Math.round(edBg.width * 0.5);
-    edTxt.y = Math.round(edBg.height * 0.78);
-    edApply(); edText();
-    makeTxtDrag();
+    var maxW=window.innerWidth-260,maxH=window.innerHeight*.7;
+    edScale=Math.min(maxW/edBg.width,maxH/edBg.height,1);
+    bgC.width=edBg.width;bgC.height=edBg.height;
+    bgC.style.width=Math.round(edBg.width*edScale)+"px";
+    bgC.style.height=Math.round(edBg.height*edScale)+"px";
+    bgC.getContext("2d").drawImage(edBg,0,0);
+    var tc=document.getElementById("ed-tc-canvas");
+    tc.width=edBg.width;tc.height=edBg.height;
+    tc.style.width=bgC.style.width;tc.style.height=bgC.style.height;
+    if(edData.phonePos){var pp=edData.phonePos;edP.x=Math.round(pp.x*edBg.width);edP.y=Math.round(pp.y*edBg.height);edP.w=Math.round(pp.w*edBg.width);edP.h=Math.round(pp.h*edBg.height);}
+    document.getElementById("ed-w").value=edP.w;
+    document.getElementById("ed-h").value=edP.h;
+    if(hasImg2){edP2.x=edP.x+Math.round(edP.w*1.1);edP2.y=edP.y;edP2.w=edP.w;edP2.h=edP.h;}
+    edTxt.x=Math.round(edBg.width*.5);edTxt.y=Math.round(edBg.height*.78);
+    edApply();edText();makeTxtDrag();
   };
-  edBg.onerror=function(){ toast('Could not load background image','e'); };
+  edBg.onerror=function(){toast("Could not load background","e");};
   edBg.src=proxyUrl(edData.bgUrl||edData.url);
- 
   edDes=new Image();
-  edDes.onload=function(){ document.getElementById('ed-design').src=edDes.src; };
+  edDes.onload=function(){document.getElementById("ed-design").src=edDes.src;};
   edDes.src=proxyUrl(edData.designUrl||uploadedUrl);
- 
-  makeDrag(); makeResize();
+  if(hasImg2){
+    edDes2=new Image();
+    edDes2.onload=function(){document.getElementById("ed-design2").src=edDes2.src;};
+    edDes2.src=proxyUrl(uploadedUrl2);
+  }
+  makeDrag();makeResize();
 }
  
-function closeEd(){ document.getElementById('ed-modal').style.display='none'; }
+function closeEd(){document.getElementById("ed-modal").style.display="none";}
  
 function edApply(){
-  edP.w=+document.getElementById('ed-w').value;
-  edP.h=+document.getElementById('ed-h').value;
-  edP.rot=+document.getElementById('ed-r').value;
-  document.getElementById('ed-wv').textContent=edP.w+'px';
-  document.getElementById('ed-hv').textContent=edP.h+'px';
-  document.getElementById('ed-rv').textContent=edP.rot+'°';
+  edP.w=+document.getElementById("ed-w").value;
+  edP.h=+document.getElementById("ed-h").value;
+  edP.rot=+document.getElementById("ed-r").value;
+  document.getElementById("ed-wv").textContent=edP.w+"px";
+  document.getElementById("ed-hv").textContent=edP.h+"px";
+  document.getElementById("ed-rv").textContent=edP.rot+"°";
   posPhone();
 }
  
 function posPhone(){
-  var ph=document.getElementById('ed-phone');
-  ph.style.left=Math.round(edP.x*edScale)+'px';
-  ph.style.top=Math.round(edP.y*edScale)+'px';
-  ph.style.width=Math.round(edP.w*edScale)+'px';
-  ph.style.height=Math.round(edP.h*edScale)+'px';
-  ph.style.transform='rotate('+edP.rot+'deg)';
-  ph.style.transformOrigin='0 0';
+  var ph=document.getElementById("ed-phone");
+  ph.style.left=Math.round(edP.x*edScale)+"px";ph.style.top=Math.round(edP.y*edScale)+"px";
+  ph.style.width=Math.round(edP.w*edScale)+"px";ph.style.height=Math.round(edP.h*edScale)+"px";
+  ph.style.transform="rotate("+edP.rot+"deg)";ph.style.transformOrigin="0 0";
   var r=Math.round(edP.w*edScale*.1);
-  document.getElementById('ed-pbody').style.borderRadius=r+'px';
-  document.getElementById('ed-notch').style.background=edPhoneStyle==='dark'?'#111':'#ddd';
+  document.getElementById("ed-pbody").style.borderRadius=r+"px";
+  document.getElementById("ed-notch").style.background=edPhoneStyle==="light"?"#ddd":"#111";
+  if(hasImg2){
+    var ph2=document.getElementById("ed-phone2");
+    ph2.style.left=Math.round(edP2.x*edScale)+"px";ph2.style.top=Math.round(edP2.y*edScale)+"px";
+    ph2.style.width=Math.round(edP2.w*edScale)+"px";ph2.style.height=Math.round(edP2.h*edScale)+"px";
+    ph2.style.transform="rotate("+edP.rot+"deg)";ph2.style.transformOrigin="0 0";
+    document.getElementById("ed-pbody2").style.borderRadius=r+"px";
+  }
 }
  
 function edStyle(s){
   edPhoneStyle=s;
-  var d=document.getElementById('ps-d'), l=document.getElementById('ps-l');
-  d.style.borderColor=s==='dark'?'#E8B84B':'rgba(255,255,255,.15)'; d.style.color=s==='dark'?'#E8B84B':'rgba(255,255,255,.5)';
-  l.style.borderColor=s==='light'?'#E8B84B':'rgba(255,255,255,.15)'; l.style.color=s==='light'?'#E8B84B':'rgba(255,255,255,.5)';
-  document.getElementById('ed-pbody').style.background=s==='dark'?'linear-gradient(135deg,#3a3a3a,#1a1a1a)':'linear-gradient(135deg,#ffffff,#d0d0d0)';
-  document.getElementById('ed-pbody').style.boxShadow=s==='dark'?'0 12px 50px rgba(0,0,0,.85),inset 0 0 0 1.5px rgba(255,255,255,.12)':'0 12px 50px rgba(0,0,0,.5),inset 0 0 0 1.5px rgba(0,0,0,.1)';
-  document.getElementById('ed-notch').style.background=s==='dark'?'#111':'#ddd';
-  document.getElementById('ed-design').parentElement.style.background=s==='dark'?'#000':'#fff';
+  var styles={
+    dark:{bg:"linear-gradient(135deg,#3a3a3a,#1a1a1a)",shadow:"0 12px 50px rgba(0,0,0,.85),inset 0 0 0 1.5px rgba(255,255,255,.12)",notch:"#111"},
+    light:{bg:"linear-gradient(135deg,#ffffff,#d0d0d0)",shadow:"0 12px 50px rgba(0,0,0,.5),inset 0 0 0 1.5px rgba(0,0,0,.1)",notch:"#ddd"},
+    gold:{bg:"linear-gradient(135deg,#C9A84C,#E8B84B,#8B6100,#E8B84B)",shadow:"0 12px 50px rgba(0,0,0,.7),inset 0 0 0 2px rgba(255,255,255,.3),0 0 20px rgba(232,184,75,.4)",notch:"#4a3200"}
+  };
+  var st=styles[s]||styles.dark;
+  ["d","l","g"].forEach(function(x){
+    var id="ps-"+x,btn=document.getElementById(id);
+    var active=(x==="d"&&s==="dark")||(x==="l"&&s==="light")||(x==="g"&&s==="gold");
+    btn.style.borderColor=active?"rgba(232,184,75,.5)":"rgba(255,255,255,.15)";
+    btn.style.background=active?"rgba(232,184,75,.1)":"transparent";
+    btn.style.color=active?"#E8B84B":"rgba(255,255,255,.5)";
+  });
+  [document.getElementById("ed-pbody"),document.getElementById("ed-pbody2")].forEach(function(pb){if(pb){pb.style.background=st.bg;pb.style.boxShadow=st.shadow;}});
+  [document.getElementById("ed-notch"),document.getElementById("ed-notch2")].forEach(function(n){if(n) n.style.background=st.notch;});
+  [document.getElementById("ed-screen"),document.getElementById("ed-screen2")].forEach(function(sc){if(sc) sc.style.background=s==="light"?"#fff":"#000";});
 }
  
-function edReset(){ edP.rot=0; document.getElementById('ed-r').value=0; document.getElementById('ed-rv').textContent='0°'; posPhone(); }
+function edReset(){edP.rot=0;document.getElementById("ed-r").value=0;document.getElementById("ed-rv").textContent="0°";posPhone();}
  
 function edText(){
-  var tc=document.getElementById('ed-tc-canvas');
+  var tc=document.getElementById("ed-tc-canvas");
   if(!tc.width) return;
-  var ctx=tc.getContext('2d');
+  var ctx=tc.getContext("2d");
   ctx.clearRect(0,0,tc.width,tc.height);
+  var head=document.getElementById("ed-th").value.trim();
+  var sub=document.getElementById("ed-ts").value.trim();
+  var cta=document.getElementById("ed-tc").value.trim();
+  var fs=+document.getElementById("ed-fs").value||32;
+  var handle=document.getElementById("ed-txt-handle");
+  if(!head&&!sub&&!cta){handle.style.display="none";return;}
+  handle.style.display="block";
+  handle.style.left=Math.round(edTxt.x*edScale)+"px";
+  handle.style.top=Math.round(edTxt.y*edScale)+"px";
  
-  var head=document.getElementById('ed-th').value.trim();
-  var sub =document.getElementById('ed-ts').value.trim();
-  var cta =document.getElementById('ed-tc').value.trim();
-  var fs  =+document.getElementById('ed-fs').value||32;
+  var W=tc.width,H=tc.height;
  
-  // Move the gold dot handle to current text position (in screen pixels)
-  var handle=document.getElementById('ed-txt-handle');
-  if(!head&&!sub&&!cta){ handle.style.display='none'; return; }
-  handle.style.display='block';
-  handle.style.left = Math.round(edTxt.x * edScale) + 'px';
-  handle.style.top  = Math.round(edTxt.y * edScale) + 'px';
+  // Band under text (optional)
+  if(edBandStyle!=="none"){
+    var bh=Math.round(H*.28);
+    var bandTop=Math.max(0,edTxt.y-Math.round(bh*.15));
+    var band=ctx.createLinearGradient(0,bandTop,0,bandTop+bh);
+    if(edBandStyle==="subtle"){
+      band.addColorStop(0,"rgba(0,0,0,0)");
+      band.addColorStop(.4,"rgba(0,0,0,0.45)");
+      band.addColorStop(1,"rgba(0,0,0,0.65)");
+    } else {
+      band.addColorStop(0,"rgba(0,0,0,0)");
+      band.addColorStop(.3,"rgba(0,0,0,0.78)");
+      band.addColorStop(1,"rgba(0,0,0,0.94)");
+    }
+    ctx.fillStyle=band;ctx.fillRect(0,bandTop,W,bh);
+  }
  
-  // Draw gradient band centred on edTxt.y
-  var W=tc.width, H=tc.height;
-  var bh=Math.round(H*0.30);
-  var bandTop=Math.max(0, edTxt.y - Math.round(bh*0.18));
-  var band=ctx.createLinearGradient(0,bandTop,0,bandTop+bh);
-  band.addColorStop(0,'rgba(0,0,0,0)');
-  band.addColorStop(0.3,'rgba(0,0,0,0.75)');
-  band.addColorStop(1,'rgba(0,0,0,0.92)');
-  ctx.fillStyle=band;
-  ctx.fillRect(0,bandTop,W,bh);
+  // Gold shimmer accent line above text
+  var lineGrd=ctx.createLinearGradient(edTxt.x-W*.2,0,edTxt.x+W*.2,0);
+  lineGrd.addColorStop(0,"rgba(232,184,75,0)");
+  lineGrd.addColorStop(.5,"rgba(232,184,75,0.6)");
+  lineGrd.addColorStop(1,"rgba(232,184,75,0)");
+  ctx.fillStyle=lineGrd;
+  ctx.fillRect(edTxt.x-W*.2,edTxt.y-Math.round(fs*1.4)-3,W*.4,2);
  
-  // Draw text centred on edTxt.x (horizontal) starting at edTxt.y (vertical)
-  var maxW=W-Math.round(W*0.1);
-  ctx.textAlign='center';
+  var maxW=W*.88;
+  ctx.textAlign="center";
   var ty=edTxt.y;
- 
   if(head){
-    ctx.font='bold '+fs+'px Arial,sans-serif';
-    ctx.fillStyle='#ffffff';
-    ctx.shadowColor='rgba(0,0,0,0.7)'; ctx.shadowBlur=14;
-    var words=head.split(' '), line='', lines=[];
-    words.forEach(function(w){
-      var t=line?line+' '+w:w;
-      if(ctx.measureText(t).width>maxW&&line){ lines.push(line); line=w; } else line=t;
-    });
+    ctx.font="bold "+fs+"px Arial,sans-serif";
+    ctx.fillStyle=edTxtCol;
+    // Gold glow shadow instead of black
+    ctx.shadowColor="rgba(232,184,75,0.35)";ctx.shadowBlur=18;
+    var words=head.split(" "),line="",lines=[];
+    words.forEach(function(w){var t=line?line+" "+w:w;if(ctx.measureText(t).width>maxW&&line){lines.push(line);line=w;}else line=t;});
     if(line) lines.push(line);
-    lines.forEach(function(l){ ctx.fillText(l,edTxt.x,ty); ty+=Math.round(fs*1.24); });
-    ctx.shadowBlur=0; ty+=Math.round(fs*0.4);
+    lines.forEach(function(l){ctx.fillText(l,edTxt.x,ty);ty+=Math.round(fs*1.24);});
+    ctx.shadowBlur=0;ty+=Math.round(fs*.4);
   }
   if(sub){
-    var fs2=Math.round(fs*0.55);
-    ctx.font=fs2+'px Arial,sans-serif';
-    ctx.fillStyle='rgba(255,255,255,0.85)';
-    ctx.fillText(sub,edTxt.x,ty); ty+=Math.round(fs2*1.7);
+    var fs2=Math.round(fs*.55);
+    ctx.font=fs2+"px Arial,sans-serif";
+    ctx.fillStyle="rgba(255,255,255,0.88)";
+    ctx.shadowColor="rgba(0,0,0,0.5)";ctx.shadowBlur=6;
+    ctx.fillText(sub,edTxt.x,ty);ctx.shadowBlur=0;ty+=Math.round(fs2*1.7);
   }
   if(cta){
-    var fs3=Math.round(fs*0.50);
-    ctx.font='bold '+fs3+'px Arial,sans-serif';
-    ctx.fillStyle='#E8B84B';
-    ctx.fillText('→  '+cta+'  ←',edTxt.x,ty);
+    var fs3=Math.round(fs*.50);
+    ctx.font="bold "+fs3+"px Arial,sans-serif";
+    ctx.fillStyle="#E8B84B";
+    ctx.shadowColor="rgba(232,184,75,0.5)";ctx.shadowBlur=10;
+    ctx.fillText("→  "+cta+"  ←",edTxt.x,ty);ctx.shadowBlur=0;
   }
-  ctx.textAlign='left';
+  ctx.textAlign="left";
 }
  
 function makeTxtDrag(){
-  var handle=document.getElementById('ed-txt-handle');
-  handle.style.cursor='grab';
- 
-  function startDrag(mx,my){
-    edTxtDragging=true;
-    edTxtStart={mx:mx, my:my, tx:edTxt.x, ty:edTxt.y};
-    handle.style.cursor='grabbing';
-  }
-  function moveDrag(mx,my){
-    if(!edTxtDragging) return;
-    edTxt.x=Math.round(edTxtStart.tx+(mx-edTxtStart.mx)/edScale);
-    edTxt.y=Math.round(edTxtStart.ty+(my-edTxtStart.my)/edScale);
-    edText();
-  }
-  function endDrag(){
-    edTxtDragging=false;
-    handle.style.cursor='grab';
-  }
- 
-  handle.addEventListener('mousedown',function(e){
-    e.preventDefault(); e.stopPropagation();
-    startDrag(e.clientX, e.clientY);
-  });
-  handle.addEventListener('touchstart',function(e){
-    e.stopPropagation();
-    var t=e.touches[0]; startDrag(t.clientX, t.clientY);
-  },{passive:true});
- 
-  // Global move/up listeners (attached once)
-  if(!handle._listenersAdded){
-    handle._listenersAdded=true;
-    document.addEventListener('mousemove',function(e){
-      if(edTxtDragging) moveDrag(e.clientX, e.clientY);
-    });
-    document.addEventListener('mouseup', endDrag);
-    document.addEventListener('touchmove',function(e){
-      if(edTxtDragging){ var t=e.touches[0]; moveDrag(t.clientX,t.clientY); }
-    },{passive:true});
-    document.addEventListener('touchend', endDrag);
+  var handle=document.getElementById("ed-txt-handle");
+  function startD(mx,my){edTxtDragging=true;edTxtStart={mx:mx,my:my,tx:edTxt.x,ty:edTxt.y};handle.style.cursor="grabbing";}
+  function moveD(mx,my){if(!edTxtDragging)return;edTxt.x=Math.round(edTxtStart.tx+(mx-edTxtStart.mx)/edScale);edTxt.y=Math.round(edTxtStart.ty+(my-edTxtStart.my)/edScale);edText();}
+  function endD(){edTxtDragging=false;handle.style.cursor="grab";}
+  handle.addEventListener("mousedown",function(e){e.preventDefault();e.stopPropagation();startD(e.clientX,e.clientY);});
+  handle.addEventListener("touchstart",function(e){e.stopPropagation();var t=e.touches[0];startD(t.clientX,t.clientY);},{passive:true});
+  if(!handle._added){handle._added=true;
+    document.addEventListener("mousemove",function(e){if(edTxtDragging)moveD(e.clientX,e.clientY);});
+    document.addEventListener("mouseup",endD);
+    document.addEventListener("touchmove",function(e){if(edTxtDragging){var t=e.touches[0];moveD(t.clientX,t.clientY);}},{passive:true});
+    document.addEventListener("touchend",endD);
   }
 }
  
-// Drag
 function makeDrag(){
-  var el=document.getElementById('ed-phone');
-  el.onmousedown=function(e){
-    if(e.target.id==='ed-rh') return;
-    e.preventDefault(); edDragging=true;
-    edDragStart={mx:e.clientX,my:e.clientY,px:edP.x,py:edP.y};
-    el.style.cursor='grabbing';
-  };
-  el.ontouchstart=function(e){
-    if(e.target.id==='ed-rh') return;
-    var t=e.touches[0]; edDragging=true;
-    edDragStart={mx:t.clientX,my:t.clientY,px:edP.x,py:edP.y};
-  };
+  function dragSetup(phId,rhId,state,stateStart){
+    var el=document.getElementById(phId);
+    el.onmousedown=function(e){if(e.target.id===rhId||e.target.id===rhId+"2")return;e.preventDefault();state.drag=true;stateStart.mx=e.clientX;stateStart.my=e.clientY;stateStart.px=state.p.x;stateStart.py=state.p.y;el.style.cursor="grabbing";};
+    el.ontouchstart=function(e){if(e.target.id===rhId)return;var t=e.touches[0];state.drag=true;stateStart.mx=t.clientX;stateStart.my=t.clientY;stateStart.px=state.p.x;stateStart.py=state.p.y;};
+  }
+  var state1={drag:false,resize:false,p:edP},st1={};
+  var state2={drag:false,resize:false,p:edP2},st2={};
+  dragSetup("ed-phone","ed-rh",state1,st1);
+  if(hasImg2) dragSetup("ed-phone2","ed-rh2",state2,st2);
+ 
   document.onmousemove=function(e){
-    if(edDragging){ edP.x=Math.round(edDragStart.px+(e.clientX-edDragStart.mx)/edScale); edP.y=Math.round(edDragStart.py+(e.clientY-edDragStart.my)/edScale); posPhone(); }
-    if(edResizing){ edP.w=Math.max(60,Math.round(edResizeStart.pw+(e.clientX-edResizeStart.mx)/edScale)); edP.h=Math.max(100,Math.round(edResizeStart.ph+(e.clientY-edResizeStart.my)/edScale)); document.getElementById('ed-w').value=edP.w; document.getElementById('ed-h').value=edP.h; document.getElementById('ed-wv').textContent=edP.w+'px'; document.getElementById('ed-hv').textContent=edP.h+'px'; posPhone(); }
-    // text drag handled by makeTxtDrag listeners
+    if(state1.drag){edP.x=Math.round(st1.px+(e.clientX-st1.mx)/edScale);edP.y=Math.round(st1.py+(e.clientY-st1.my)/edScale);posPhone();}
+    if(state1.resize){edP.w=Math.max(60,Math.round(st1.pw+(e.clientX-st1.mx)/edScale));edP.h=Math.max(100,Math.round(st1.ph+(e.clientY-st1.my)/edScale));document.getElementById("ed-w").value=edP.w;document.getElementById("ed-h").value=edP.h;document.getElementById("ed-wv").textContent=edP.w+"px";document.getElementById("ed-hv").textContent=edP.h+"px";posPhone();}
+    if(state2.drag){edP2.x=Math.round(st2.px+(e.clientX-st2.mx)/edScale);edP2.y=Math.round(st2.py+(e.clientY-st2.my)/edScale);posPhone();}
+    if(state2.resize){edP2.w=Math.max(60,Math.round(st2.pw+(e.clientX-st2.mx)/edScale));edP2.h=Math.max(100,Math.round(st2.ph+(e.clientY-st2.my)/edScale));posPhone();}
   };
   document.ontouchmove=function(e){
     var t=e.touches[0];
-    if(edDragging){ edP.x=Math.round(edDragStart.px+(t.clientX-edDragStart.mx)/edScale); edP.y=Math.round(edDragStart.py+(t.clientY-edDragStart.my)/edScale); posPhone(); }
-    if(edResizing){ edP.w=Math.max(60,Math.round(edResizeStart.pw+(t.clientX-edResizeStart.mx)/edScale)); edP.h=Math.max(100,Math.round(edResizeStart.ph+(t.clientY-edResizeStart.my)/edScale)); posPhone(); }
-    // text drag handled by makeTxtDrag listeners
+    if(state1.drag){edP.x=Math.round(st1.px+(t.clientX-st1.mx)/edScale);edP.y=Math.round(st1.py+(t.clientY-st1.my)/edScale);posPhone();}
+    if(state2.drag){edP2.x=Math.round(st2.px+(t.clientX-st2.mx)/edScale);edP2.y=Math.round(st2.py+(t.clientY-st2.my)/edScale);posPhone();}
   };
-  document.onmouseup=function(){ edDragging=false; edResizing=false; edTxtDragging=false; document.getElementById('ed-phone').style.cursor='move'; };
-  document.ontouchend=function(){ edDragging=false; edResizing=false; edTxtDragging=false; };
+  document.onmouseup=function(){state1.drag=false;state1.resize=false;state2.drag=false;state2.resize=false;[document.getElementById("ed-phone"),document.getElementById("ed-phone2")].forEach(function(p){if(p) p.style.cursor="move";});};
+  document.ontouchend=function(){state1.drag=false;state1.resize=false;state2.drag=false;state2.resize=false;};
+ 
+  // Resize handles
+  var rh=document.getElementById("ed-rh");
+  rh.onmousedown=function(e){e.preventDefault();e.stopPropagation();state1.resize=true;st1.mx=e.clientX;st1.my=e.clientY;st1.pw=edP.w;st1.ph=edP.h;};
+  rh.ontouchstart=function(e){var t=e.touches[0];state1.resize=true;st1.mx=t.clientX;st1.my=t.clientY;st1.pw=edP.w;st1.ph=edP.h;};
+  if(hasImg2){
+    var rh2=document.getElementById("ed-rh2");
+    rh2.onmousedown=function(e){e.preventDefault();e.stopPropagation();state2.resize=true;st2.mx=e.clientX;st2.my=e.clientY;st2.pw=edP2.w;st2.ph=edP2.h;};
+    rh2.ontouchstart=function(e){var t=e.touches[0];state2.resize=true;st2.mx=t.clientX;st2.my=t.clientY;st2.pw=edP2.w;st2.ph=edP2.h;};
+  }
 }
  
-function makeResize(){
-  var rh=document.getElementById('ed-rh');
-  rh.onmousedown=function(e){ e.preventDefault(); e.stopPropagation(); edResizing=true; edResizeStart={mx:e.clientX,my:e.clientY,pw:edP.w,ph:edP.h}; };
-  rh.ontouchstart=function(e){ var t=e.touches[0]; edResizing=true; edResizeStart={mx:t.clientX,my:t.clientY,pw:edP.w,ph:edP.h}; };
-}
+function makeResize(){}// handled in makeDrag
  
-// Export
 function exportEd(){
-  if(!edBg){ toast('Editor not ready','e'); return; }
-  var W=edBg.width, H=edBg.height;
-  var out=document.createElement('canvas'); out.width=W; out.height=H;
-  var ctx=out.getContext('2d');
+  if(!edBg){toast("Editor not ready","e");return;}
+  var W=edBg.width,H=edBg.height;
+  var out=document.createElement("canvas");out.width=W;out.height=H;
+  var ctx=out.getContext("2d");
   ctx.drawImage(edBg,0,0,W,H);
  
-  // Draw phone
-  var px=edP.x,py=edP.y,pw=edP.w,ph=edP.h,rot=edP.rot;
-  ctx.save(); ctx.translate(px+pw/2,py+ph/2); ctx.rotate(rot*Math.PI/180);
-  var r=Math.round(pw*.1);
-  ctx.shadowColor='rgba(0,0,0,0.72)'; ctx.shadowBlur=36; ctx.shadowOffsetY=12;
-  var bg=ctx.createLinearGradient(-pw/2,-ph/2,pw/2,ph/2);
-  if(edPhoneStyle==='dark'){ bg.addColorStop(0,'#3a3a3a'); bg.addColorStop(.5,'#242424'); bg.addColorStop(1,'#1a1a1a'); }
-  else { bg.addColorStop(0,'#fff'); bg.addColorStop(.5,'#e0e0e0'); bg.addColorStop(1,'#c0c0c0'); }
-  ctx.fillStyle=bg; prr(ctx,-pw/2,-ph/2,pw,ph,r); ctx.fill();
-  ctx.shadowBlur=0; ctx.shadowOffsetY=0; ctx.shadowColor='transparent';
-  ctx.strokeStyle=edPhoneStyle==='dark'?'rgba(255,255,255,.14)':'rgba(0,0,0,.1)'; ctx.lineWidth=1.5; prr(ctx,-pw/2,-ph/2,pw,ph,r); ctx.stroke();
-  var sx=-pw/2+pw*.04,sy=-ph/2+ph*.05,sw=pw*.92,sh=ph*.9,sr=r*.7;
-  ctx.fillStyle='#000'; prr(ctx,sx,sy,sw,sh,sr); ctx.fill();
-  if(edDes && edDes.complete && edDes.naturalWidth){
-    ctx.save(); prr(ctx,sx,sy,sw,sh,sr); ctx.clip(); ctx.drawImage(edDes,sx,sy,sw,sh);
-    var gl=ctx.createLinearGradient(sx,sy,sx+sw*.55,sy+sh*.45);
-    gl.addColorStop(0,'rgba(255,255,255,.08)'); gl.addColorStop(1,'rgba(255,255,255,0)');
-    ctx.fillStyle=gl; ctx.fillRect(sx,sy,sw,sh); ctx.restore();
+  function drawPhoneOnCanvas(p,des){
+    var px=p.x,py=p.y,pw=p.w,ph=p.h,rot=p.rot;
+    ctx.save();ctx.translate(px+pw/2,py+ph/2);ctx.rotate(rot*Math.PI/180);
+    var r=Math.round(pw*.1);
+    ctx.shadowColor="rgba(0,0,0,0.7)";ctx.shadowBlur=32;ctx.shadowOffsetY=12;
+    var bg=ctx.createLinearGradient(-pw/2,-ph/2,pw/2,ph/2);
+    if(edPhoneStyle==="gold"){
+      bg.addColorStop(0,"#C9A84C");bg.addColorStop(.3,"#E8B84B");bg.addColorStop(.6,"#8B6100");bg.addColorStop(1,"#E8B84B");
+    } else if(edPhoneStyle==="light"){
+      bg.addColorStop(0,"#fff");bg.addColorStop(.5,"#e0e0e0");bg.addColorStop(1,"#c0c0c0");
+    } else {
+      bg.addColorStop(0,"#3a3a3a");bg.addColorStop(.4,"#242424");bg.addColorStop(1,"#1a1a1a");
+    }
+    ctx.fillStyle=bg;prr(ctx,-pw/2,-ph/2,pw,ph,r);ctx.fill();
+    ctx.shadowBlur=0;ctx.shadowOffsetY=0;ctx.shadowColor="transparent";
+    // Gold lining glow for gold style
+    if(edPhoneStyle==="gold"){
+      ctx.strokeStyle="rgba(255,230,150,0.7)";ctx.lineWidth=2;prr(ctx,-pw/2,-ph/2,pw,ph,r);ctx.stroke();
+      ctx.save();ctx.shadowColor="rgba(232,184,75,0.8)";ctx.shadowBlur=15;ctx.strokeStyle="rgba(232,184,75,0.5)";ctx.lineWidth=1;prr(ctx,-pw/2,-ph/2,pw,ph,r);ctx.stroke();ctx.restore();
+    } else {
+      ctx.strokeStyle=edPhoneStyle==="light"?"rgba(0,0,0,.1)":"rgba(255,255,255,.14)";ctx.lineWidth=1.5;prr(ctx,-pw/2,-ph/2,pw,ph,r);ctx.stroke();
+    }
+    var sx=-pw/2+pw*.04,sy=-ph/2+ph*.05,sw=pw*.92,sh=ph*.90,sr=r*.7;
+    ctx.fillStyle=edPhoneStyle==="light"?"#fff":"#020209";prr(ctx,sx,sy,sw,sh,sr);ctx.fill();
+    if(des&&des.complete&&des.naturalWidth){
+      ctx.save();prr(ctx,sx,sy,sw,sh,sr);ctx.clip();ctx.drawImage(des,sx,sy,sw,sh);
+      var gl=ctx.createLinearGradient(sx,sy,sx+sw*.55,sy+sh*.45);
+      gl.addColorStop(0,"rgba(255,255,255,.08)");gl.addColorStop(1,"rgba(255,255,255,0)");
+      ctx.fillStyle=gl;ctx.fillRect(sx,sy,sw,sh);ctx.restore();
+    }
+    var notchCol=edPhoneStyle==="light"?"#ddd":edPhoneStyle==="gold"?"#4a3200":"#111";
+    ctx.fillStyle=notchCol;prr(ctx,-pw*.14,-ph/2+ph*.015,pw*.28,ph*.042,ph*.018);ctx.fill();
+    ctx.fillStyle=edPhoneStyle==="light"?"rgba(0,0,0,.18)":"rgba(255,255,255,.22)";prr(ctx,-pw*.15,ph/2-ph*.036,pw*.30,ph*.016,ph*.008);ctx.fill();
+    ctx.restore();
   }
-  ctx.fillStyle=edPhoneStyle==='dark'?'#111':'#ddd'; prr(ctx,-pw*.14,-ph/2+ph*.015,pw*.28,ph*.042,ph*.018); ctx.fill();
-  ctx.fillStyle=edPhoneStyle==='dark'?'rgba(255,255,255,.22)':'rgba(0,0,0,.18)'; prr(ctx,-pw*.15,ph/2-ph*.036,pw*.30,ph*.016,ph*.008); ctx.fill();
-  ctx.restore();
  
-  // Text overlay — redraw at full resolution using edTxt coords
-  var head2=document.getElementById('ed-th').value.trim();
-  var sub2=document.getElementById('ed-ts').value.trim();
-  var cta2=document.getElementById('ed-tc').value.trim();
-  var fs2=+document.getElementById('ed-fs').value||32;
+  drawPhoneOnCanvas(edP,edDes);
+  if(hasImg2&&edDes2) drawPhoneOnCanvas(edP2,edDes2);
+ 
+  // Text overlay
+  var head2=document.getElementById("ed-th").value.trim();
+  var sub2=document.getElementById("ed-ts").value.trim();
+  var cta2=document.getElementById("ed-tc").value.trim();
+  var fs2=+document.getElementById("ed-fs").value||32;
   if(head2||sub2||cta2){
-    var bh2=Math.round(H*.28);
-    var bandY2=Math.max(0,edTxt.y-bh2*.15);
-    var band2=ctx.createLinearGradient(0,bandY2,0,bandY2+bh2);
-    band2.addColorStop(0,'rgba(0,0,0,0)'); band2.addColorStop(.3,'rgba(0,0,0,.75)'); band2.addColorStop(1,'rgba(0,0,0,.92)');
-    ctx.fillStyle=band2; ctx.fillRect(0,bandY2,W,bh2);
-    var pad2=Math.round(W*.06), maxW2=W-pad2*2;
-    ctx.textAlign='center'; var ty2=edTxt.y;
-    if(head2){ ctx.font='bold '+fs2+'px Arial,sans-serif'; ctx.fillStyle='#fff'; ctx.shadowColor='rgba(0,0,0,.65)'; ctx.shadowBlur=14; var words2=head2.split(' '),line2='',lines2=[]; words2.forEach(function(w){ var t=line2?line2+' '+w:w; if(ctx.measureText(t).width>maxW2&&line2){lines2.push(line2);line2=w;}else line2=t; }); if(line2)lines2.push(line2); lines2.forEach(function(l){ ctx.fillText(l,W/2,ty2); ty2+=Math.round(fs2*1.22); }); ctx.shadowBlur=0; ty2+=Math.round(W*.01); }
-    if(sub2){ var fsb=Math.round(fs2*.55); ctx.font=fsb+'px Arial,sans-serif'; ctx.fillStyle='rgba(255,255,255,.85)'; ctx.shadowBlur=8; ctx.fillText(sub2,W/2,ty2); ctx.shadowBlur=0; ty2+=Math.round(fsb*1.7); }
-    if(cta2){ var fsc=Math.round(fs2*.50); ctx.font='bold '+fsc+'px Arial,sans-serif'; ctx.fillStyle='#E8B84B'; ctx.fillText('→  '+cta2+'  ←',W/2,ty2); }
-    ctx.textAlign='left';
+    if(edBandStyle!=="none"){
+      var bh2=Math.round(H*.28);var bandY2=Math.max(0,edTxt.y-bh2*.15);
+      var band2=ctx.createLinearGradient(0,bandY2,0,bandY2+bh2);
+      if(edBandStyle==="subtle"){band2.addColorStop(0,"rgba(0,0,0,0)");band2.addColorStop(.4,"rgba(0,0,0,.45)");band2.addColorStop(1,"rgba(0,0,0,.65)");}
+      else{band2.addColorStop(0,"rgba(0,0,0,0)");band2.addColorStop(.3,"rgba(0,0,0,.78)");band2.addColorStop(1,"rgba(0,0,0,.94)");}
+      ctx.fillStyle=band2;ctx.fillRect(0,bandY2,W,bh2);
+    }
+    // Gold shimmer line
+    var lg=ctx.createLinearGradient(edTxt.x-W*.2,0,edTxt.x+W*.2,0);
+    lg.addColorStop(0,"rgba(232,184,75,0)");lg.addColorStop(.5,"rgba(232,184,75,0.6)");lg.addColorStop(1,"rgba(232,184,75,0)");
+    ctx.fillStyle=lg;ctx.fillRect(edTxt.x-W*.2,edTxt.y-Math.round(fs2*1.4)-3,W*.4,2);
+ 
+    var maxW2=W*.88;ctx.textAlign="center";var ty2=edTxt.y;
+    if(head2){ctx.font="bold "+fs2+"px Arial,sans-serif";ctx.fillStyle=edTxtCol;ctx.shadowColor="rgba(232,184,75,0.4)";ctx.shadowBlur=18;var words2=head2.split(" "),line2="",lines2=[];words2.forEach(function(w){var t=line2?line2+" "+w:w;if(ctx.measureText(t).width>maxW2&&line2){lines2.push(line2);line2=w;}else line2=t;});if(line2)lines2.push(line2);lines2.forEach(function(l){ctx.fillText(l,edTxt.x,ty2);ty2+=Math.round(fs2*1.22);});ctx.shadowBlur=0;ty2+=Math.round(W*.01);}
+    if(sub2){var fsb=Math.round(fs2*.55);ctx.font=fsb+"px Arial,sans-serif";ctx.fillStyle="rgba(255,255,255,.88)";ctx.shadowBlur=6;ctx.fillText(sub2,edTxt.x,ty2);ctx.shadowBlur=0;ty2+=Math.round(fsb*1.7);}
+    if(cta2){var fsc=Math.round(fs2*.50);ctx.font="bold "+fsc+"px Arial,sans-serif";ctx.fillStyle="#E8B84B";ctx.shadowColor="rgba(232,184,75,0.5)";ctx.shadowBlur=10;ctx.fillText("→  "+cta2+"  ←",edTxt.x,ty2);ctx.shadowBlur=0;}
+    ctx.textAlign="left";
   }
- 
-  var a=document.createElement('a'); a.href=out.toDataURL('image/png',1); a.download='promo-edited-'+Date.now()+'.png'; a.click();
-  toast('Exported ✓','g');
+  var a=document.createElement("a");a.href=out.toDataURL("image/png",1);a.download="promo-edited-"+Date.now()+".png";a.click();
+  toast("Exported","g");
 }
  
-function prr(ctx,x,y,w,h,r){
-  ctx.beginPath(); ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.arcTo(x+w,y,x+w,y+r,r);
-  ctx.lineTo(x+w,y+h-r); ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
-  ctx.lineTo(x+r,y+h); ctx.arcTo(x,y+h,x,y+h-r,r);
-  ctx.lineTo(x,y+r); ctx.arcTo(x,y,x+r,y,r); ctx.closePath();
-}
+function prr(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.arcTo(x+w,y,x+w,y+r,r);ctx.lineTo(x+w,y+h-r);ctx.arcTo(x+w,y+h,x+w-r,y+h,r);ctx.lineTo(x+r,y+h);ctx.arcTo(x,y+h,x,y+h-r,r);ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);ctx.closePath();}
 </script>
 </body>
 </html>
